@@ -1,3 +1,4 @@
+import { RollerCoaster } from "lucide-react";
 import * as z from "zod"
 
 export const signupSchema = z.object({
@@ -27,6 +28,19 @@ export const loginSchema = z.object({
   rememberMe: z.boolean().default(false).optional(),
 })
 
+export const aboutSchema = z.object({
+  role: z.string().email('Please enter a valid role'),
+  school: z.string().min(8, 'Please enter school'),
+  department: z.string(),
+  interests: z.string()
+})
+
+export interface AboutFormValues {
+  role: string;
+  school: string;
+  department: string;
+  interests: string;
+}
 
 export interface SignupFormValues {
   fullName: string;

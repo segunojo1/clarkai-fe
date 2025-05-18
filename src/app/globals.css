@@ -121,6 +121,19 @@
     @apply bg-background text-foreground;
   }
 }
+@keyframes caret-blink {
+  0%, 70%, 100% { opacity: 1; }
+  20%, 50% { opacity: 0; }
+}
+
+@theme {
+  .animation-caret-blink {
+    animation-name: caret-blink;
+    animation-duration: 1.25s;
+    animation-timing-function: ease-out;
+    animation-iteration-count: infinite;
+  }
+}
 
 .satoshi{
   font-family: 'Satoshi', sans-serif;

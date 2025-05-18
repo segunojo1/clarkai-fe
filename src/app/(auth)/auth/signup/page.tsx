@@ -7,14 +7,15 @@ import { signupSchema } from "@/models/validations/auth.validation"
 import SignUpForm from "@/components/auth/signup-form";
 import VerifyEmail from "@/components/auth/verify-email";
 import Verified from '@/components/auth/verified';
+import AboutYou from '@/components/auth/about-you';
 
 type SignupState = {
-  step: 'signup' | 'verify-email' | 'verified';
+  step: 'signup' | 'verify-email' | 'verified' | 'about-you';
   email?: string;
 };
 
 const SignUpPage = () => {
-  const [state, setState] = useState<SignupState>({ step: 'verified' });
+  const [state, setState] = useState<SignupState>({ step: 'signup' });
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -42,9 +43,11 @@ const SignUpPage = () => {
           />
         );
       case 'verify-email':
-        return <VerifyEmail email={state.email || ''} />;
+        return <VerifyEmail email={state.email || ''} onSuccess={() => setState({ step: 'verified' })}/>;
       case 'verified':
-        return <Verified />
+        return <Verified onSuccess={() => setState({ step: 'about-you'})} />;
+    case 'about-you':
+  return <AboutYou onSuccess={() => setState({ step: 'about-you'})} />
       default:
         return null;
     }
