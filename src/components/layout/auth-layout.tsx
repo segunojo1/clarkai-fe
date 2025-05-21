@@ -8,11 +8,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from '../ui/button';
+import Image from 'next/image';
 
-export default function AuthClientLayout({ children }: {
+export interface AuthClientLayoutProps {
   children: React.ReactNode;
-}) {
-  const { setTheme } = useTheme();
+  showSidebar?: boolean;
+  currentStep?: 'signup' | 'verify-email' | 'verified' | 'about-you' | 'study-vibe' | 'add-profile';
+}
+
+export default function AuthClientLayout({
+  children,
+  showSidebar = true,
+  currentStep = 'signup'
+}: AuthClientLayoutProps) {
+  const { theme, setTheme } = useTheme();
 
   return (
     <div className='flex flex-col w-full min-h-screen'>
@@ -57,20 +66,38 @@ export default function AuthClientLayout({ children }: {
         </div>
       </div>
 
-      <div className='flex w-full min-h-screen p-10 px-32 pt-24'>
-  <aside className='fixed  w-1/3 h-screen flex items-start '>
-    <h1 className='text-[85px]  font-semibold max-w-[350px]'>
-      Think It.
-      Learn It.
-    </h1>
-  </aside>
-  
-  <main className='w-1/3 ml-[33.333%] flex justify-center'>
-    {children}
-  </main>
-  
-  <div className='w-1/3'></div>
-</div>
+      <div className={`flex w-full min-h-screen p-10 px-32 pt-24 ${!showSidebar ? 'justify-center' : ''}`}>
+        {showSidebar && (
+          <aside className='fixed w-1/3 h-screen flex items-start'>
+            <h1 className='text-[85px] font-semibold max-w-[350px]'>
+              {currentStep === 'add-profile' ? (
+                <>
+                  <Image 
+                    src={theme === 'dark' ? '/assets/add-your-look-dark.png' : '/assets/add-your-look.png'} 
+                    alt='add your look' 
+                    width={300} 
+                    height={300}
+                  />
+                </>
+              ) : currentStep === 'verified' ? (
+                'Lets get started'
+              ) : (
+                <>
+                  Think It.
+                  <br />
+                  Learn It.
+                </>
+              )}
+            </h1>
+          </aside>
+        )}
+
+        <main className={`${showSidebar ? 'w-1/3 ml-[33.333%]' : 'w-full max-w-2xl'} flex pt-[53px] justify-center`}>
+          {children}
+        </main>
+
+        {showSidebar && <div className='w-1/3'></div>}
+      </div>
     </div>
   )
 }

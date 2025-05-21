@@ -10,45 +10,47 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
     SidebarSeparator,
+    SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { File, Home, LogOut, SeparatorVertical, Settings, Users } from "lucide-react"
+import {
+    Card,
+    CardContent,
+} from "@/components/ui/card"
+
+import { File, Globe, Home, Inbox, LogOut, Search, SeparatorVertical, Settings, Users } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { Button } from "./ui/button"
 
-export function AppSidebar() {
-    const items = [
-        {
-            title: "Home",
-            url: "/home",
-            icon: Home
-        },
-        {
-            title: "Canvas",
-            url: "/home",
-            icon: Home
-        },
-        {
-            title: "Whiteboard",
-            url: "/home",
-            icon: Users
-        },
-        {
-            title: "Groups",
-            url: "/home",
-            icon: Home
-        },
-        {
-            title: "Materials",
-            url: "/home",
-            icon: File
-        },
-    ]
+export const LatestChat = () => {
     return (
-        <Sidebar>
-            <SidebarHeader />
-            <SidebarContent>
-                <SidebarGroup>
-                    <SidebarGroupLabel>Items</SidebarGroupLabel>
+        <Card className="text-[#525252] dark:text-[#D4D4D4] bg-[#F0F0EF] dark:bg-[#404040] rounded-[10px] !p-[10px] h-[132px] w-[214px] shadow-none mx-auto">
+            <CardContent className=" flex flex-col items-center justify-between px-0 h-full">
+                <Globe width={20} height={20}/>
+                <p className=" text-[12px]/[22px] font-medium satoshi text-center">Your latest chats will show up once you start talking to Clark.</p>
+            <Button className="min-w-full  bg-[#F8F8F7] dark:bg-[#2C2C2C] text-[#525252] text-3 font-semibold">Start a Chat</Button>
+            </CardContent>
+        </Card>
+
+    )
+}
+
+export const LatestWorkspace = () => {
+    return (
+        <Card className="text-[#525252] dark:text-[#D4D4D4] bg-[#F0F0EF] dark:bg-[#404040] rounded-[10px] !p-[10px] h-[132px] w-[214px] shadow-none mx-auto">
+            <CardContent className=" flex flex-col items-center justify-between px-0 h-full">
+                <Globe width={20} height={20}/>
+                <p className=" text-[12px]/[22px] font-medium satoshi text-center">Your workspaces will appear here once you create one.</p>
+            <Button className="min-w-full  bg-[#F8F8F7] dark:bg-[#2C2C2C] text-[#525252] text-3 font-semibold">Start a workspace</Button>
+            </CardContent>
+        </Card>
+    )
+}
+
+const SidebarGroupCustom = ({items, label}: any) => {
+    return (
+        <SidebarGroup>
+            <SidebarGroupLabel>{label}</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu className="text-[11px]/[22px] font-medium">
                             {items.map(item => (
@@ -64,9 +66,49 @@ export function AppSidebar() {
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
-                <SidebarGroup />
+    )
+}
+
+export function AppSidebar() {
+    const items = [
+        {title: "Search", url: "/search", icon: Search},
+        {title: "Home", url: "/home", icon: Home },
+        {title: "Inbox", url: "/home", icon: Inbox},
+        {title: "Chat", url: "/home", icon: Inbox}
+    ]
+    const workspaceItems = [
+        {title: "Canvas", url: "/home", icon: Search},
+        {title: "Whiteboard", url: "/home", icon: Home },
+        {title: "Materials", url: "/home", icon: Inbox},
+        {title: "Study Groups", url: "/home", icon: Inbox}
+    ]
+    return (
+        <Sidebar className="max-w-[235px] sidebar">
+            <SidebarHeader>
+                <SidebarGroup>
+                    <SidebarGroupContent className="flex items-center justify-between">
+                        <div className="flex items-center gap-[10px]">
+                        <Image src="/assets/orange.png" alt="" width={24} height={24} />
+                        <p className="text-[14px] font-bold">Segun</p>
+                        </div>
+                        <SidebarTrigger />
+                    </SidebarGroupContent>
+                </SidebarGroup>
+            </SidebarHeader>
+            <SidebarContent>
+                <SidebarGroupCustom items={items} />
+
+                <SidebarGroup className="mx-auto">
+                    <LatestChat />
+                </SidebarGroup>
+                <SidebarGroup className="mx-auto">
+                    <LatestWorkspace />
+                </SidebarGroup>
+                <SidebarGroupCustom items={workspaceItems} label="Workspace Hub" />
+
             </SidebarContent>
-            <SidebarFooter>
+
+            {/* <SidebarFooter>
                 <SidebarGroup>
                     <SidebarGroupContent className="">
                         <SidebarMenu className="space-y-[9px]">
@@ -96,7 +138,7 @@ export function AppSidebar() {
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
-            </SidebarFooter>
+            </SidebarFooter> */}
         </Sidebar>
     )
 }

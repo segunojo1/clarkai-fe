@@ -1,5 +1,7 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import Cookies from 'js-cookie';
+import { toast } from 'sonner';
+
 interface RegisterPayload {
   fullName: string;
   email: string;
@@ -8,18 +10,41 @@ interface RegisterPayload {
   confirmPassword: string;
 }
 
-
 export interface User {
   id: string;
   fullName: string;
   email: string;
   nickName: string;
+  role?: string;
+  school?: string;
+  department?: string;
+  interests?: string[];
+  studyVibes?: string[];
+  userImage?: string;
   dateCreated: string | null;
   dateModified: string | null;
 }
 
+export interface SignupPayload {
+  name: string;
+  email: string;
+  nickname: string;
+  password: string;
+  role: string;
+  school: string;
+  department: string;
+  interests: string[];
+  study_vibe: string[];
+  user_image?: File | string;
+}
+
+export interface OtpResponse {
+  message: string;
+  success: boolean;
+}
+
 class AuthService {
-    private api: AxiosInstance;
+  private api: AxiosInstance;
   private static instance: AuthService;
   private readonly COOKIE_OPTIONS = {
     secure: process.env.NODE_ENV === 'production',
@@ -80,21 +105,61 @@ class AuthService {
     }
   }
 
-
-  public async register(data: RegisterPayload): Promise<AuthResponse> {
+  public async sendOtp(email: string, name: string): Promise<OtpResponse> {
     try {
-      // The backend will handle the inviteToken if present in the data object
-      const response = await this.api.post<AuthResponse>('api/v1/signup', { ...data });
+      const response = await this.api.post<OtpResponse>('/otp', { email, name });
       return response.data;
-    } catch (error: Error | { response?: { data?: { message: string } }, message?: string } | unknown) {
-      const errorMessage = 
-        error instanceof Error && error.message ? error.message : 
-        typeof error === 'object' && error !== null && 'response' in error && 
-        (error as { response: { data?: { message: string } } }).response?.data?.message ? 
-        (error as { response: { data: { message: string } } }).response.data.message : 
-        'Registration failed';
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to send OTP';
+      console.error('OTP send failed:', errorMessage);
+      throw new Error(errorMessage);
+    }
+  }
+
+  public async verifyOtp(email: string, otp: string): Promise<OtpResponse> {
+    try {
+      const response = await this.api.post<OtpResponse>('/verifyOTP', { email, otp });
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'OTP verification failed';
+      console.error('OTP verification failed:', errorMessage);
+      throw new Error(errorMessage);
+    }
+  }
+
+  public async register(data: SignupPayload): Promise<{ user: User; token: string }> {
+    try {
+      const formData = new FormData();
       
-      console.error('Registration failed:', errorMessage);
+      // Append all fields to formData
+      Object.entries(data).forEach(([key, value]) => {
+        if (key === 'user_image' && value instanceof File) {
+          formData.append('user_image', value);
+        } else if (Array.isArray(value)) {
+          // Handle array fields (interests, study_vibe)
+          value.forEach(item => formData.append(key, item));
+        } else if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
+      });
+
+      const response = await this.api.post<{ user: User; token: string }>('/signup', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      // Set auth token and user data in cookies
+      if (response.data.token) {
+        Cookies.set('token', response.data.token, this.COOKIE_OPTIONS);
+        Cookies.set('user', JSON.stringify(response.data.user), this.COOKIE_OPTIONS);
+        this.api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      }
+
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || error.message || 'Registration failed';
+      toast(errorMessage);
       throw new Error(errorMessage);
     }
   }

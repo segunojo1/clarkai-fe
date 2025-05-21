@@ -1,14 +1,14 @@
-import { RollerCoaster } from "lucide-react";
+
 import * as z from "zod"
 
 export const signupSchema = z.object({
-  fullName: z.string().min(2, {
+  name: z.string().min(2, {
     message: "Full name must be at least 2 characters.",
   }),
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
-  nickName: z.string().min(2, {
+  nickname: z.string().min(2, {
     message: "Nickname must be at least 2 characters."
   }),
   password: z.string().min(8, {
@@ -29,10 +29,25 @@ export const loginSchema = z.object({
 })
 
 export const aboutSchema = z.object({
-  role: z.string().email('Please enter a valid role'),
-  school: z.string().min(8, 'Please enter school'),
+  role: z.string().min(2, 'Please select role'),
+  school: z.string().min(2, 'Please enter school'),
   department: z.string(),
   interests: z.string()
+})
+
+export const studyVibeOptions = [
+  'Ace my next exam',
+  'Stay organized',
+  'Learn new topics faster',
+  'Collaborate with classmates',
+  'Master a difficult subject',
+  'Build better study habits'
+] as const;
+
+export type StudyVibeOption = typeof studyVibeOptions[number];
+
+export const studyVibeSchema = z.object({
+  study_vibe: z.array(z.string()).min(1, 'Please select at least one option')
 })
 
 export interface AboutFormValues {
@@ -43,9 +58,9 @@ export interface AboutFormValues {
 }
 
 export interface SignupFormValues {
-  fullName: string;
+  name: string;
   email: string;
-  nickName: string;
+  nickname: string;
   password: string;
   confirmPassword: string;
 }

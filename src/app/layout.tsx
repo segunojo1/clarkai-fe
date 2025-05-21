@@ -5,6 +5,7 @@ import ClientLayout from "@/components/layout/client-layout";
 import NextTopLoader from "nextjs-toploader";
 import { sfProRounded } from "./fonts";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,6 +41,7 @@ export default function RootLayout({
       >
           {children}
           <NextTopLoader color="#F14E07"/>
+          <Toaster />
       </ThemeProvider>
       </body>
     </html>

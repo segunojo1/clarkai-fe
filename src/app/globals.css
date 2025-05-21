@@ -126,14 +126,12 @@
   20%, 50% { opacity: 0; }
 }
 
-@theme {
   .animation-caret-blink {
     animation-name: caret-blink;
     animation-duration: 1.25s;
     animation-timing-function: ease-out;
     animation-iteration-count: infinite;
   }
-}
 
 .satoshi{
   font-family: 'Satoshi', sans-serif;

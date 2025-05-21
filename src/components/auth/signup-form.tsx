@@ -3,22 +3,45 @@
 import { Button } from "@/components/ui/button"
 import { Form } from "@/components/ui/form"
 import { PrimaryInput } from "@/components/auth-input"
-import Link from "next/link"
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
 import { UseFormReturn } from "react-hook-form"
 import { signupSchema } from "@/models/validations/auth.validation"
 import { z } from "zod"
+import { toast } from "sonner"
+import authService from "@/services/auth.service"
+import { useState } from "react"
+import useAuthStore from "@/store/auth.store"
+import Link from "next/link"
 
 interface SignUpFormProps {
   form: UseFormReturn<z.infer<typeof signupSchema>>
   onSubmit: (values: z.infer<typeof signupSchema>) => void
-  onSuccess: (email: string) => void
+  onSuccess?: (email: string) => void
 }
 
-const SignUpForm = ({ form, onSubmit, onSuccess }: SignUpFormProps) => {
-  const handleSubmit = (values: z.infer<typeof signupSchema>) => {
-    onSubmit(values)
-    onSuccess(values.email)
+const SignUpForm = ({ form, onSubmit }: SignUpFormProps) => {
+  const [isLoading, setIsLoading] = useState(false)
+  const updateSignupData = useAuthStore((state: any) => state.updateSignupData)
+
+  const handleSubmit = async (values: z.infer<typeof signupSchema>) => {
+    try {
+      setIsLoading(true)
+      // Save initial signup data to store
+      updateSignupData({
+        ...values,
+        emailVerified: false
+      })
+      await authService.sendOtp(values.email, values.name)
+      updateSignupData({
+        ...values,
+        currentStep: 1,
+      })
+      onSubmit(values)
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send OTP')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -41,7 +64,7 @@ const SignUpForm = ({ form, onSubmit, onSuccess }: SignUpFormProps) => {
           />
           <FormField
             control={form.control}
-            name="fullName"
+            name="name"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="font-medium">Enter your full name.</FormLabel>
@@ -54,7 +77,7 @@ const SignUpForm = ({ form, onSubmit, onSuccess }: SignUpFormProps) => {
           />
           <FormField
             control={form.control}
-            name="nickName"
+            name="nickname"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="font-medium">What should we call you?</FormLabel>
@@ -110,8 +133,12 @@ const SignUpForm = ({ form, onSubmit, onSuccess }: SignUpFormProps) => {
           <Link href="/auth/login" className="text-[#FF3D00] text-base justify-self-end self-end mb-4">
             Already have an account? Log in
           </Link>
-          <Button type="submit" className="bg-[#FF3D00] w-full py-[13px] h-full">
-            Create Account
+          <Button 
+            type="submit" 
+            className="bg-[#FF3D00] w-full py-[13px] h-full"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Sending OTP...' : 'Continue'}
           </Button>
         </form>
       </Form>

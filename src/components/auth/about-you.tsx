@@ -16,7 +16,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { PrimaryInput } from '../auth-input'
 
 interface AboutYouProps {
-    onSuccess: () => void
+    onSuccess: (data: z.infer<typeof aboutSchema>) => void
 }
 const AboutYou = ({ onSuccess }: AboutYouProps) => {
 
@@ -33,7 +33,7 @@ const AboutYou = ({ onSuccess }: AboutYouProps) => {
     function onSubmit(values: z.infer<typeof aboutSchema>) {
 
         console.log(values)
-        onSuccess()
+        onSuccess(values)
     }
 
     return (
@@ -54,7 +54,7 @@ const AboutYou = ({ onSuccess }: AboutYouProps) => {
                                         defaultValue={field.value}
                                         className="flex flex-col space-y-1"
                                     >
-                                        <FormItem className={`h-full flex items-center justify-between border ${field.value === 'student' ? 'border-orange-500 text-orange-500' : 'border-[#D4D4D4]'} py-[11px] px-4 rounded-[5px] space-y-0`}>
+                                        <FormItem className={`h-full flex items-center justify-between border transition-all  ${field.value === 'student' ? 'border-orange-500 text-orange-500' : 'border-[#D4D4D4]'} py-[11px] px-4 rounded-[5px] space-y-0`}>
                                             <FormLabel className="font-normal">
                                                 Student
                                             </FormLabel>
@@ -62,7 +62,7 @@ const AboutYou = ({ onSuccess }: AboutYouProps) => {
                                                 <RadioGroupItem value="student" className="text-orange-500 !data-[state=checked]:text-orange-500" />
                                             </FormControl>
                                         </FormItem>
-                                        <FormItem className={`flex items-center justify-between border ${field.value === 'teacher' ? 'text-orange-500 border-orange-500' : 'border-[#D4D4D4]'} py-[11px] px-4 rounded-[5px] space-y-0`}>
+                                        <FormItem className={`flex items-center justify-between border transition-all ${field.value === 'teacher' ? 'text-orange-500 border-orange-500' : 'border-[#D4D4D4]'} py-[11px] px-4 rounded-[5px] space-y-0`}>
                                             <FormLabel className="font-normal">
                                                 Teacher
                                             </FormLabel>
@@ -70,7 +70,7 @@ const AboutYou = ({ onSuccess }: AboutYouProps) => {
                                                 <RadioGroupItem value="teacher" className="text-orange-500 data-[state=checked]:text-orange-500" />
                                             </FormControl>
                                         </FormItem>
-                                        <FormItem className={`flex items-center justify-between border ${field.value === 'other' ? 'text-orange-500 border-orange-500' : 'border-[#D4D4D4]'} py-[11px] px-4 rounded-[5px] space-y-0`}>
+                                        <FormItem className={`flex items-center justify-between border transition-all ${field.value === 'other' ? 'text-orange-500 border-orange-500' : 'border-[#D4D4D4]'} py-[11px] px-4 rounded-[5px] space-y-0`}>
                                             <FormLabel className="font-normal">Other</FormLabel>
                                             <FormControl>
                                                 <RadioGroupItem value="other" className="text-orange-500 data-[state=checked]:text-orange-500" />
@@ -124,7 +124,7 @@ const AboutYou = ({ onSuccess }: AboutYouProps) => {
                             </FormItem>
                         )}
                     />
-                    <Button type="submit" className="bg-[#FF3D00] w-full py-[13px] h-full">Submit</Button>
+                    <Button type="submit" className="bg-[#FF3D00] w-full py-[13px] h-full">Continue</Button>
                 </form>
             </Form>
         </section>
