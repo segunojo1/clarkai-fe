@@ -1,4 +1,5 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import { useUserStore } from '@/store/user.store';
+import axios, { AxiosInstance } from 'axios';
 import Cookies from 'js-cookie';
 import { toast } from 'sonner';
 
@@ -98,8 +99,8 @@ class AuthService {
         }
       } else {
         console.error('No user data found in cookies');
-        clearAllPersistedState()
-
+        // Clear the persisted state from localStorage
+        localStorage.removeItem('user-storage');
         this.logout();
       }
     }
@@ -162,6 +163,19 @@ class AuthService {
       toast(errorMessage);
       throw new Error(errorMessage);
     }
+  }
+
+  public logout(): void {
+    // Remove auth token and user data from cookies
+    Cookies.remove('token');
+    Cookies.remove('user');
+    
+    // Clear authorization header
+    delete this.api.defaults.headers.common['Authorization'];
+    
+    // Update user store
+    const userStore = useUserStore.getState();
+    userStore.setUser(null);
   }
 }
 

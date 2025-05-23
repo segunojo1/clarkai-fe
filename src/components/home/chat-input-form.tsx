@@ -14,7 +14,13 @@ import Image from "next/image"
 
 
 
-const ChatInputForm = () => {
+const ChatInputForm = ({ 
+  onSend, 
+  disabled 
+}: { 
+  onSend: (message: string) => void, 
+  disabled?: boolean 
+}) => {
   const form = useForm<z.infer<typeof chatSchema>>({
     resolver: zodResolver(chatSchema),
     defaultValues: {
@@ -23,9 +29,9 @@ const ChatInputForm = () => {
   })
 
   function handleSubmit(values: z.infer<typeof chatSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
     console.log(values)
+      onSend(values.chat)
+    
   }
 
   const [mode, setMode] = useState("ask")
@@ -52,7 +58,7 @@ const ChatInputForm = () => {
                       {...field}
                       className="min-h-[100px] max-h-[180px] text-[16px] max-w-[750px] font-medium p-3 w-full  border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none resize-none"
                     />
-                    <div className="flex items-center gap-2 p-2 border-t border-[#D4D4D4] ">
+                    <div className="flex items-center gap-2 p-2  border-[#D4D4D4] ">
                       <Tabs
                         value={mode}
                         onValueChange={(value) => setMode(value as string)}

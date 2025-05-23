@@ -19,9 +19,9 @@ const SignUp = () => {
     const form = useForm<z.infer<typeof signupSchema>>({
         resolver: zodResolver(signupSchema),
         defaultValues: {
-            fullName: "",
+            name: "",
             email: "",
-            nickName: "",
+            nickname: "",
             password: "",
             confirmPassword: ""
         },
@@ -51,7 +51,7 @@ const SignUp = () => {
                     />
                     <FormField
                         control={form.control}
-                        name="fullName"
+                        name="name"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel className="font-medium ">Enter your full name.</FormLabel>
@@ -64,7 +64,7 @@ const SignUp = () => {
                     />
                     <FormField
                         control={form.control}
-                        name="nickName"
+                        name="nickname"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel className="font-medium">What should we call you?</FormLabel>

@@ -1,7 +1,6 @@
 import {
     Sidebar,
     SidebarContent,
-    SidebarFooter,
     SidebarGroup,
     SidebarGroupContent,
     SidebarGroupLabel,
@@ -9,7 +8,6 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-    SidebarSeparator,
     SidebarTrigger,
 } from "@/components/ui/sidebar"
 import {
@@ -17,9 +15,10 @@ import {
     CardContent,
 } from "@/components/ui/card"
 
-import { File, Globe, Home, Inbox, LogOut, Search, SeparatorVertical, Settings, Users } from "lucide-react"
+import {Globe, Home, Inbox, Search } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Button } from "./ui/button"
 
 export const LatestChat = () => {
@@ -48,17 +47,40 @@ export const LatestWorkspace = () => {
 }
 
 const SidebarGroupCustom = ({items, label}: any) => {
+    const pathname = usePathname()
+
     return (
         <SidebarGroup>
             <SidebarGroupLabel>{label}</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu className="text-[11px]/[22px] font-medium">
                             {items.map(item => (
-                                <SidebarMenuItem key={item.title}>
+                                <SidebarMenuItem key={item.title} className={`transition-all duration-200 ${
+                                    pathname === item.url ? 'bg-[#F0F0EF] dark:bg-[#404040]' : ''
+                                }`}>
                                     <SidebarMenuButton asChild>
-                                        <Link href={item.url} className="pl-5">
-                                            <item.icon />
-                                            <span>{item.title}</span>
+                                        <Link 
+                                            href={item.url} 
+                                            className={`pl-5 transition-colors duration-200 ${
+                                                pathname === item.url 
+                                                    ? 'bg-[#F0F0EF] dark:bg-[#404040]' 
+                                                    : 'hover:bg-[#F0F0EF] dark:hover:bg-[#404040]'
+                                            }`}>
+                                            <item.icon 
+                                                className={`transition-colors duration-200 ${
+                                                    pathname === item.url 
+                                                        ? 'text-orange-500 dark:text-orange-400' 
+                                                        : 'text-[#525252] dark:text-[#D4D4D4]'
+                                                }`} 
+                                            />
+                                            <span 
+                                                className={`transition-colors duration-200 ${
+                                                    pathname === item.url 
+                                                        ? 'text-orange-500 dark:text-orange-400' 
+                                                        : 'text-[#525252] dark:text-[#D4D4D4]'
+                                                }`}>
+                                                {item.title}
+                                            </span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
@@ -74,7 +96,7 @@ export function AppSidebar() {
         {title: "Search", url: "/search", icon: Search},
         {title: "Home", url: "/home", icon: Home },
         {title: "Inbox", url: "/home", icon: Inbox},
-        {title: "Chat", url: "/home", icon: Inbox}
+        {title: "Chat", url: "/chat", icon: Inbox}
     ]
     const workspaceItems = [
         {title: "Canvas", url: "/home", icon: Search},
