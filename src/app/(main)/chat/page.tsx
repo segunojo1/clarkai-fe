@@ -35,12 +35,9 @@ const Chat = () => {
         className='mx-auto mb-14' 
         priority
       />
-      <div className='flex flex-col h-full max-w-[750px] pb-10'>
-        {messages.length > 0 ? (
-          <ChatMessageList messages={messages} isLoading={isLoading} />
-        ) : (
+      <div className='flex flex-col justify-between h-full max-w-[750px] pb-10'>
+        
           <WelcomeScreen onSend={handleSend} />
-        )}
         <ChatInputForm onSend={handleSend} disabled={isLoading} />
       </div>
       <HelpCircle className='absolute bottom-5 right-5 text-gray-400 hover:text-gray-600 cursor-pointer' />

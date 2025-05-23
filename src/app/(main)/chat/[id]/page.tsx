@@ -35,14 +35,12 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex flex-col w-full max-w-[750px] mx-auto h-full">
-      <div className="flex-1 overflow-y-auto">
+    <div className="flex flex-col w-full justify-between max-w-[750px] pb-10 mx-auto h-full">
         {!chatId && messages.length === 0 ? (
           <WelcomeScreen onSend={handleSend} />
         ) : (
           <ChatMessageList messages={messages} isLoading={isLoading} />
         )}
-      </div>
       <ChatInputForm onSend={handleSend} disabled={isLoading} />
     </div>
   )

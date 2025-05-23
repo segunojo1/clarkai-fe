@@ -17,20 +17,20 @@ export function ChatMessageList({
       {messages.map((message, index) => (
         <div 
           key={index} 
-          className={`flex ${
+          className={`flex flex-wrap text-[15px] satoshi font-normal ${
             message.role === 'user' 
               ? 'justify-end' 
               : 'justify-start'
           }`}
         >
           <div 
-            className={`max-w-[80%] rounded-lg p-3 ${
+            className={`max-w-[80%] h-full rounded-[69px] p-[10px] ${
               message.role === 'user' 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-gray-100 dark:bg-gray-700'
+                ? 'bg-[#F0F0EF] text-black' 
+                : 'bg-transparent'
             }`}
           >
-            {message.content}
+            <p>{message.content}</p>
           </div>
         </div>
       ))}
