@@ -8,8 +8,8 @@ import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-// Initialize pdf worker with a CDN that supports CORS
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// Initialize pdf worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 import type { FileAttachment } from '@/lib/types';
 
@@ -28,61 +28,25 @@ export function PDFViewer({ file, onClose }: PDFViewerProps) {
   const fileRef = useRef<PDFFile>(null);
   const [fileKey, setFileKey] = useState(0);
 
-  // Helper function to get a usable URL from different file types
-  const getFileUrl = useCallback(async (file: PDFFile): Promise<string | null> => {
-    if (!file) return null;
-
+  // Helper function to convert FileAttachment to Blob
+  const fileToBlob = useCallback(async (file: File | FileAttachment): Promise<Blob> => {
     try {
-      // If it's already a URL string, use it directly
-      if (typeof file === 'string') {
-        console.log('string');
-        
+      if (file instanceof Blob) {
         return file;
+      } else if ('url' in file && file.url) {
+        const response = await fetch(file.url);
+        return await response.blob();
       }
-      
-      // If it's a File or Blob, create an object URL
-      if (file instanceof File || file instanceof Blob) {
-        console.log('fil or blob');
-        
-        return URL.createObjectURL(file);
-      }
-      
-      // If it's a FileAttachment with a URL
-      if ('url' in file && file.url) {
-        console.log(' url');
-
-        return file.url;
-      }
-      
-      // If it's a FileAttachment with data
-      if ('type' in file) {
-        console.log('type');
-
-        const blob = new Blob([], { type: file.type });
-        return URL.createObjectURL(blob);
-      }
-      
-      return null;
+      return new Blob([], { type: file.type });
     } catch (error) {
-      console.error('Error getting file URL:', error);
-      return null;
+      console.error('Error creating blob from file:', error);
+      throw error;
     }
   }, []);
 
-  // Store the created object URL for cleanup
-  const objectUrlRef = useRef<string | null>(null);
-  
   useEffect(() => {
-    // Only process if file has changed
     if (file === fileRef.current) return;
-    
     fileRef.current = file;
-    
-    // Clean up previous object URL if it exists
-    if (objectUrlRef.current) {
-      URL.revokeObjectURL(objectUrlRef.current);
-      objectUrlRef.current = null;
-    }
     
     if (!file) {
       setPdfUrl('');
@@ -90,34 +54,47 @@ export function PDFViewer({ file, onClose }: PDFViewerProps) {
       return;
     }
 
+    let objectUrl: string | null = null;
     let isMounted = true;
 
     const processFile = async () => {
       try {
         setIsLoading(true);
         
-        // Get the URL for the file
-        const url = URL.createObjectURL(file);
-        
-        if (!isMounted) return;
-        
-        if (url) {
-          // If we created an object URL, store it for cleanup
-          if (url.startsWith('blob:')) {
-            objectUrlRef.current = url;
+        if (typeof file === 'string') {
+          if (isMounted) {
+            setPdfUrl(file);
+            setFileKey(prev => prev + 1);
           }
-          setPdfUrl(url);
-          setFileKey(prev => prev + 1);
+        } else if (file instanceof Blob) {
+          objectUrl = URL.createObjectURL(file);
+          if (isMounted) {
+            setPdfUrl(objectUrl);
+            setFileKey(prev => prev + 1);
+          }
+        } else if ('url' in file && file.url) {
+          if (isMounted) {
+            setPdfUrl(file.url);
+            setFileKey(prev => prev + 1);
+          }
+        } else if ('type' in file) {
+          try {
+            const blob = await fileToBlob(file);
+            objectUrl = URL.createObjectURL(blob);
+            if (isMounted) {
+              setPdfUrl(objectUrl);
+              setFileKey(prev => prev + 1);
+            }
+          } catch (error) {
+            console.error('Error converting file to blob:', error);
+            if (isMounted) setPdfUrl('');
+          }
         } else {
-          console.warn('Could not create URL for file:', file);
-          setPdfUrl('');
+          console.warn('Unsupported file type:', file);
         }
       } catch (error) {
         console.error('Error processing PDF:', error);
-        if (isMounted) {
-          setPdfUrl('');
-          setFileKey(prev => prev + 1);
-        }
+        if (isMounted) setPdfUrl('');
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -127,21 +104,11 @@ export function PDFViewer({ file, onClose }: PDFViewerProps) {
 
     return () => {
       isMounted = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [file, getFileUrl]);
-  
-  // Clean up object URL on unmount
-  useEffect(() => {
-    return () => {
-      if (objectUrlRef.current) {
-        URL.revokeObjectURL(objectUrlRef.current);
-      }
-    };
-  }, []);
+  }, [file, fileToBlob]);
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    console.log(numPages);
-    
     setNumPages(numPages);
     setPageNumber(1);
   };
@@ -241,7 +208,7 @@ export function PDFViewer({ file, onClose }: PDFViewerProps) {
         <div className="flex-1 p-4 overflow-auto">
           <Document
             key={`pdf-doc-${fileKey}`}
-            file={URL.createObjectURL(file)}
+            file={pdfUrl}
             onLoadSuccess={onDocumentLoadSuccess}
             className="flex justify-center"
             loading={

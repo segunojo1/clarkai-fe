@@ -67,6 +67,8 @@ const ChatInputForm = ({
     }
 
     setSelectedFile(file)
+    console.log(selectedFile);
+    
     setPreviewUrl(URL.createObjectURL(file))
   }
 
@@ -103,7 +105,7 @@ const ChatInputForm = ({
                         className="text-xs text-blue-500 hover:underline flex items-center gap-1"
                         onClick={() => {
                           if (selectedFile) {
-                            window.open(URL.createObjectURL(selectedFile), '_blank')
+                            window.open(previewUrl, '_blank')
                           }
                         }}
                       >

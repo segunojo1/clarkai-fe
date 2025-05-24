@@ -1,72 +1,114 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ChatMessage } from "@/lib/types";
 
-interface FileAttachment {
-  name: string;
-  size?: number;
+// Import the FileAttachment type from types
+import type { FileAttachment as FileAttachmentType } from '@/lib/types';
+
+// Extend the File type to include our custom properties
+type ExtendedFile = File & {
   url?: string;
-  file?: File | string;
-}
+};
+
+// Helper function to check if an object is a File
+const isFile = (obj: any): obj is File => {
+  return obj instanceof File || 
+         (obj && typeof obj === 'object' && 
+          'name' in obj && 
+          'size' in obj && 
+          'type' in obj);
+};
+
+// Helper function to convert FileAttachment to File-like object
+const toFile = (attachment: FileAttachmentType): File => {
+  return new File(
+    [], 
+    attachment.name, 
+    { 
+      type: attachment.type,
+      lastModified: Date.now()
+    }
+  );
+};
 import { FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PDFViewer } from './pdf-viewer';
 
-const FileAttachmentPreview = ({ file }: { file: FileAttachment }) => {
+const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) => {
   const [showPdfViewer, setShowPdfViewer] = useState(false);
-  const [fileUrl, setFileUrl] = useState<string | File>('');
+  const [objectUrl, setObjectUrl] = useState<string>('');
   
-  // Get the file URL or create one from the file object
+  console.log(file);
+  
+  // Create and clean up object URL for the file
+  const fileUrlRef = useRef<string>('');
+  
   useEffect(() => {
-    let objectUrl: string | null = null;
-    let isMounted = true;
+    const createObjectUrl = async () => {
+      // Clean up previous URL if it exists
+      if (fileUrlRef.current) {
+        URL.revokeObjectURL(fileUrlRef.current);
+        fileUrlRef.current = '';
+      }
 
-    const processFile = async () => {
+      if (!file) {
+        setObjectUrl('');
+        return;
+      }
+
       try {
-        if (file.url) {
-          if (isMounted) setFileUrl(file.url);
-        } else if (file.file) {
-          if (isMounted) setFileUrl(file.file);
+        let newUrl = '';
+        
+        // If it's a File object
+        if (file instanceof File) {
+          newUrl = URL.createObjectURL(file);
+          fileUrlRef.current = newUrl;
         }
+        // If it's a FileAttachment with a URL
+        else if ('url' in file && file.url) {
+          newUrl = file.url;
+        }
+        // If it's a FileAttachment with data
+        else if ('type' in file) {
+          const blob = new Blob([], { type: file.type });
+          newUrl = URL.createObjectURL(blob);
+          fileUrlRef.current = newUrl;
+        }
+        
+        setObjectUrl(newUrl);
       } catch (error) {
-        console.error('Error processing file:', error);
+        console.error('Error creating file URL:', error);
+        setObjectUrl('');
       }
     };
 
-    processFile();
-
+    createObjectUrl();
+    
+    // Cleanup function to revoke the object URL
     return () => {
-      isMounted = false;
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
+      if (fileUrlRef.current) {
+        URL.revokeObjectURL(fileUrlRef.current);
+        fileUrlRef.current = '';
       }
     };
   }, [file]);
-  
-  // Create a URL for the file if it's a File object
-  const fileObjectUrl = useMemo(() => {
-    if (!file.file || typeof file.file === 'string') return '';
-    try {
-      return URL.createObjectURL(file.file);
-    } catch (error) {
-      console.error('Error creating object URL:', error);
-      return '';
-    }
-  }, [file.file]);
-  
-  // Clean up object URL on unmount
-  useEffect(() => {
-    return () => {
-      if (fileObjectUrl) {
-        URL.revokeObjectURL(fileObjectUrl);
-      }
-    };
-  }, [fileObjectUrl]);
 
   const handleOpenInCanvas = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setShowPdfViewer(true);
+    
+    // Always use the same objectUrl that was created in the effect
+    if (objectUrl) {
+      setShowPdfViewer(true);
+    }
+  };
+  
+  const handleOpenInNewTab = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (objectUrl) {
+      window.open(objectUrl, '_blank');
+    }
   };
 
   if (!file) return null;
@@ -90,16 +132,16 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachment }) => {
               size="sm"
               className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
               onClick={() => {
-              if (fileUrl) {
-                if (typeof fileUrl === 'string') {
-                  window.open(fileUrl, '_blank');
-                } else {
-                  const url = URL.createObjectURL(fileUrl);
+                if (objectUrl) {
+                  window.open(objectUrl, '_blank');
+                } else if (isFile(file)) {
+                  const url = URL.createObjectURL(file);
                   window.open(url, '_blank');
                   // The URL will be revoked when the window is closed
+                } else if ('url' in file && file.url) {
+                  window.open(file.url, '_blank');
                 }
-              }
-            }}
+              }}
             >
               Open
             </Button>
@@ -117,7 +159,7 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachment }) => {
       
       {showPdfViewer && (
         <PDFViewer 
-          file={fileUrl || file.file || file.url} 
+          file={file} 
           onClose={() => setShowPdfViewer(false)} 
         />
       )}

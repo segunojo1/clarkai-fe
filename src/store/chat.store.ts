@@ -44,11 +44,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     const userMessage: ChatMessage = {
       role: 'user',
       content: message,
-      attachments: file ? [{
-        name: file.name,
-        type: file.type,
-        size: file.size
-      }] : []
+      attachments: file ? [file] : []
     }
     addMessage(userMessage)
 
