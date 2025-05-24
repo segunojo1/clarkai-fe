@@ -11,13 +11,21 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "../ui/button";
+import useAuthStore from "@/store/auth.store";
+import authService from "@/services/auth.service";
+import { useRouter } from "next/navigation";
 
 export default function ClientLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    const { theme, setTheme } = useTheme()
+    const { setTheme } = useTheme()
+    const route = useRouter()
+    const logout = () => {
+        authService.logout();
+        route.push("/auth/login")
+    }
     return (
         <SidebarProvider>
             <AppSidebar />
@@ -25,6 +33,13 @@ export default function ClientLayout({
                 <div className="flex items-center gap-3 absolute right-[20px] top-[20px]">
                     <PlusIcon width={20} height={20}/>
                     <File className="mr-[30px]" width={20} height={20} />
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={logout}
+                    >
+                        Logout
+                    </Button>
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>

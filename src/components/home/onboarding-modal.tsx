@@ -107,12 +107,7 @@ const OnboardingModal = ({ onClose }: OnboardingModalProps) => {
           >
             {slide.buttonText}
           </Button>
-          <button 
-            onClick={onClose}
-            className="text-[#A3A3A3] hover:text-[#FF3D00] mt-4 text-sm transition-colors"
-          >
-            Skip for now
-          </button>
+          
 
 
         </div>
@@ -138,7 +133,12 @@ const OnboardingModal = ({ onClose }: OnboardingModalProps) => {
               Next
             </button>
           )}
-
+<button 
+            onClick={onClose}
+            className="text-[#A3A3A3] hover:text-[#FF3D00] mt-4 text-sm transition-colors absolute bottom-[10px] left-[10px]"
+          >
+            Skip for now
+          </button>
           <div className="flex justify-center absolute bottom-[10px] right-[10px] space-x-2">
             {slides.map((_, index) => (
               <p

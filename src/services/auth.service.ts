@@ -13,15 +13,15 @@ interface RegisterPayload {
 
 export interface User {
   id: string;
-  fullName: string;
+  name: string;
   email: string;
-  nickName: string;
+  nickname: string;
   role?: string;
   school?: string;
   department?: string;
-  interests?: string[];
-  studyVibes?: string[];
-  userImage?: string;
+  interests?: string;
+  study_vibe?: string[];
+  image_url?: string;
   dateCreated: string | null;
   dateModified: string | null;
 }
@@ -160,6 +160,23 @@ class AuthService {
       return response.data;
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || error.message || 'Registration failed';
+      toast(errorMessage);
+      throw new Error(errorMessage);
+    }
+  }
+  public async login(email: string, password: string): Promise<{ user: User; token: string}> {
+    try {
+      const response = await this.api.post<{ user: User; token: string }>('/login', { email, password });
+
+      if (response.data.token) {
+        Cookies.set('token', response.data.token, this.COOKIE_OPTIONS);
+        Cookies.set('user', JSON.stringify(response.data.user), this.COOKIE_OPTIONS);
+        this.api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      }
+      
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || error.message || 'Login failed';
       toast(errorMessage);
       throw new Error(errorMessage);
     }

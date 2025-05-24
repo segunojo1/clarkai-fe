@@ -7,11 +7,24 @@ import Workspaces from '@/components/home/workspaces';
 import { Clock } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
-import React, { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import { hasCompletedOnboarding, setOnboardingCompleted } from '@/lib/cookies';
+import { useUserStore } from '@/store/user.store';
 
 const HomePage = () => {
-  const [showOnboarding, setShowOnboarding] = useState(true);
-  const { theme } = useTheme()
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const searchParams = useSearchParams();
+  const skipOnboarding = searchParams.get('skipOnboarding') === 'true';
+
+  useEffect(() => {
+    // Only check for first visit if not explicitly skipping
+    if (!skipOnboarding && !hasCompletedOnboarding()) {
+      setShowOnboarding(true);
+    }
+  }, [skipOnboarding]);
+  const { theme } = useTheme();
+  const { user } = useUserStore()
   return (
     <div className='w-full flex flex-col items-center bg-[#FAFAFA] dark:bg-[#262626]'>
       <Image src='/assets/logo.svg' alt='' width={103} height={90} className='mx-auto mb-[55px]' />
@@ -21,7 +34,7 @@ const HomePage = () => {
           ) : (
             <Image src='/assets/user.svg' alt='' width={45} height={45} className='' />
           )}
-        <h1 className='text-[30px]/[120%] font-bold satoshi'>Good Evening, Segun</h1>
+        <h1 className='text-[30px]/[120%] font-bold satoshi'>Good Evening, {user?.name?.split(' ')[0]}</h1>
       </div>
       <div className='flex flex-col items-start '>
         <ChatInputForm />
@@ -45,7 +58,10 @@ const HomePage = () => {
       </div>
 
       {showOnboarding && (
-        <OnboardingModal onClose={() => setShowOnboarding(false)} />
+        <OnboardingModal onClose={() => {
+          setShowOnboarding(false);
+          setOnboardingCompleted();
+        }} />
       )}
     </div>
   );

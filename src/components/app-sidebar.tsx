@@ -1,3 +1,5 @@
+"use client"
+
 import {
     Sidebar,
     SidebarContent,
@@ -20,6 +22,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "./ui/button"
+import { useUserStore } from "@/store/user.store"
 
 export const LatestChat = () => {
     return (
@@ -104,6 +107,8 @@ export function AppSidebar() {
         {title: "Materials", url: "/home", icon: Inbox},
         {title: "Study Groups", url: "/home", icon: Inbox}
     ]
+    
+    const { user } = useUserStore();
     return (
         <Sidebar className="max-w-[235px] sidebar">
             <SidebarHeader>
@@ -111,7 +116,7 @@ export function AppSidebar() {
                     <SidebarGroupContent className="flex items-center justify-between">
                         <div className="flex items-center gap-[10px]">
                         <Image src="/assets/orange.png" alt="" width={24} height={24} />
-                        <p className="text-[14px] font-bold">Segun</p>
+                        <p className="text-[14px] font-bold">{user?.name || 'User'}</p>
                         </div>
                         <SidebarTrigger />
                     </SidebarGroupContent>
