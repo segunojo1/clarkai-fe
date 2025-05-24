@@ -7,6 +7,7 @@ import { WelcomeScreen } from '@/components/chat/welcome-screen'
 import { ChatMessageList } from '@/components/chat/message-list'
 import { useChatStore } from '@/store/chat.store'
 import Image from 'next/image'
+// import ChatInputForm from '@/components/home/ChatInputForm'
 
 export default function ChatPage() {
   const { messages, isLoading, sendMessage, setCurrentChatId } = useChatStore()
@@ -28,10 +29,10 @@ export default function ChatPage() {
     }
   }, [chatId, sendMessage])
 
-  const handleSend = async (message: string) => {
+  const handleSend = async (message: string, file?: File) => {
     if (!message.trim()) return
 
-    await sendMessage(message)
+    await sendMessage(message, file)
   }
 
   return (

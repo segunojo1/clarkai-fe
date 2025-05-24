@@ -35,32 +35,54 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     set({ currentChatId: chatId })
   },
 
-  sendMessage: async (message: string) => {
-    if (!message.trim()) return
+  sendMessage: async (message: string, file?: File) => {
+    if (!message.trim() && !file) return
 
     const { messages, currentChatId, addMessage, setIsLoading } = get()
 
-    // Add user message
+    // Add user message with optional file attachment
     const userMessage: ChatMessage = {
       role: 'user',
-      content: message
+      content: message,
+      attachments: file ? [{
+        name: file.name,
+        type: file.type,
+        size: file.size
+      }] : []
     }
     addMessage(userMessage)
 
     try {
       setIsLoading(true)
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Simulate API call with file upload if present
+      if (file) {
+        // In a real implementation, you would upload the file here
+        // const formData = new FormData();
+        // formData.append('file', file);
+        // formData.append('message', message);
+        // await api.post('/chat/message', formData);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
 
       // Add assistant message
       const assistantMessage: ChatMessage = {
         role: 'assistant',
-        content: 'This is a simulated response. Please implement the API integration.'
+        content: file 
+          ? `I've received your file: ${file.name}. How can I help you with it?` 
+          : 'This is a simulated response. Please implement the API integration.'
       }
       addMessage(assistantMessage)
     } catch (error) {
       console.error('Error sending message:', error)
+      // Add error message
+      const errorMessage: ChatMessage = {
+        role: 'assistant',
+        content: 'Sorry, there was an error processing your message.'
+      }
+      addMessage(errorMessage)
     } finally {
       setIsLoading(false)
     }
