@@ -49,9 +49,10 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
     try {
       setIsLoading(true);
       
-      const { currentStep, confirmPassword, otp, emailVerified, ...signupDataWithoutStep } = signupData;
-      
+const { currentStep: _, confirmPassword: __, otp: ___, emailVerified: ____, ...signupDataWithoutStep } = signupData;      
       // Ensure all required fields are present
+      console.log(_, __, ___, ____);
+      
       if (!signupDataWithoutStep.name || !signupDataWithoutStep.email || !signupDataWithoutStep.password) {
         throw new Error('Missing required fields');
       }
@@ -65,7 +66,7 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
         role: signupDataWithoutStep.role || 'student',
         school: signupDataWithoutStep.school || '',
         department: signupDataWithoutStep.department || '',
-        interests: signupDataWithoutStep.interests || [],
+        interests: signupDataWithoutStep.interests || '',
         study_vibe: signupDataWithoutStep.study_vibe || [],
         user_image: selectedFile
       };
@@ -76,9 +77,10 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
       router.push('/home');
       toast.success('Account created successfully!');
       onSuccess();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create account'
+      toast.error(errorMessage)
       console.error('Signup failed:', error);
-      toast.error(error.message || 'Failed to create account');
     } finally {
       setIsLoading(false);
     }

@@ -21,7 +21,7 @@ interface SignUpFormProps {
 
 const SignUpForm = ({ form, onSubmit }: SignUpFormProps) => {
   const [isLoading, setIsLoading] = useState(false)
-  const updateSignupData = useAuthStore((state: any) => state.updateSignupData)
+  const updateSignupData = useAuthStore((state) => state.updateSignupData)
 
   const handleSubmit = async (values: z.infer<typeof signupSchema>) => {
     try {
@@ -37,8 +37,9 @@ const SignUpForm = ({ form, onSubmit }: SignUpFormProps) => {
         currentStep: 1,
       })
       onSubmit(values)
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to send OTP')
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send OTP'
+      toast.error(errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -133,8 +134,8 @@ const SignUpForm = ({ form, onSubmit }: SignUpFormProps) => {
           <Link href="/auth/login" className="text-[#FF3D00] text-base justify-self-end self-end mb-4">
             Already have an account? Log in
           </Link>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="bg-[#FF3D00] w-full py-[13px] h-full"
             disabled={isLoading}
           >

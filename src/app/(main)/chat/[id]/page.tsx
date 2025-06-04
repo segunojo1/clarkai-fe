@@ -1,20 +1,19 @@
 'use client'
 
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { useEffect } from 'react'
 import ChatInputForm from '@/components/home/chat-input-form'
 import { WelcomeScreen } from '@/components/chat/welcome-screen'
 import { ChatMessageList } from '@/components/chat/message-list'
 import { useChatStore } from '@/store/chat.store'
-import Image from 'next/image'
 // import ChatInputForm from '@/components/home/ChatInputForm'
 
 export default function ChatPage() {
-  const { messages, setMessages, isLoading, sendMessage, setCurrentChatId, currentChatId, setIsLoading } = useChatStore()
+  const { messages, setMessages, isLoading, sendMessage, setCurrentChatId } = useChatStore()
   const { id } = useParams()
   
   const {getMessages} = useChatStore()
-  const router = useRouter()
+  // const router = useRouter()
 
   // Set chat ID when component mounts
   useEffect(() => {
@@ -28,7 +27,7 @@ export default function ChatPage() {
     if (id) {
       // setIsLoading(true)
       const getAllMessages = async () => {
-        const retrievedMessages = await getMessages(1, id)
+        const retrievedMessages = await getMessages(1, id.toString())
         console.log(retrievedMessages);
         setMessages(retrievedMessages)
       }
@@ -46,8 +45,10 @@ export default function ChatPage() {
 
   const handleSend = async (text: string, files?: File) => {
     if (!text.trim()) return
+if(id) {
 
-    await sendMessage(id, text, messages, false, files)
+  await sendMessage(id.toString(), text, messages, false, files)
+}
   }
 
   return (

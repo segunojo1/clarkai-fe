@@ -1,4 +1,3 @@
-import AuthClientLayout from "@/components/layout/auth-layout";
 import { Metadata } from "next";
 import "../globals.css";
 

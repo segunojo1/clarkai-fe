@@ -10,8 +10,8 @@ interface ChatStore {
   clearMessages: () => void
   setIsLoading: (isLoading: boolean) => void
   setCurrentChatId: (chatId: string | null) => void
-  sendMessage: (chat_id: string, text: string, previous_messages: string[], strict_mode: boolean, files?: File) => Promise<void>
-  getMessages: (page: number, chat_id: string) => Promise<void>
+  sendMessage: (chat_id: string, text: string, previous_messages: ChatMessage[], strict_mode: boolean, files?: File) => Promise<void>
+  getMessages: (page: number, chat_id: string) => Promise<ChatMessage[]>
   setMessages: (messages: ChatMessage[]) => void
 }
 
@@ -42,10 +42,10 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     set({ currentChatId: chatId })
   },
 
-  sendMessage: async (chat_id: string, text: string, previous_messages: string[], strict_mode: boolean, files?: File) => {
+  sendMessage: async (chat_id: string, text: string, previous_messages: ChatMessage[], strict_mode: boolean, files?: File) => {
     if (!text.trim() && !files) return
 
-    const { messages, currentChatId, addMessage, setIsLoading } = get()
+    const { addMessage, setIsLoading } = get()
 
     // Add user message with optional file attachment
     const userMessage: ChatMessage = {

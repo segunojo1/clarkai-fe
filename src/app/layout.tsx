@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 // import "github-markdown.css";
-import ClientLayout from "@/components/layout/client-layout";
 import NextTopLoader from "nextjs-toploader";
 import { sfProRounded } from "./fonts";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -13,10 +12,6 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Clark",

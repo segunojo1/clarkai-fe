@@ -4,26 +4,25 @@ import { Button } from "@/components/ui/button"
 import { Form } from "@/components/ui/form"
 import { PrimaryInput } from "@/components/auth-input"
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
-import { useForm, UseFormReturn } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { loginSchema } from "@/models/validations/auth.validation"
 import { z } from "zod"
 import { toast } from "sonner"
 import authService from "@/services/auth.service"
 import { useState } from "react"
-import useAuthStore from "@/store/auth.store"
 import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
 import AuthClientLayout from "@/components/layout/auth-layout"
 import { useUserStore } from "@/store/user.store"
 import { useRouter } from "next/navigation"
 
-interface LoginFormProps {
-  form: UseFormReturn<z.infer<typeof loginSchema>>
-  onSubmit: (values: z.infer<typeof loginSchema>) => void
-  onSuccess?: (email: string) => void
-}
+// interface LoginFormProps {
+//   form: UseFormReturn<z.infer<typeof loginSchema>>
+//   onSubmit: (values: z.infer<typeof loginSchema>) => void
+//   onSuccess?: (email: string) => void
+// }
 
-const LoginForm = ({ onSubmit }: LoginFormProps) => {
+const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false)
   const route = useRouter();
   //   const updateSignupData = useAuthStore((state: any) => state.updateSignupData)
@@ -38,16 +37,18 @@ const LoginForm = ({ onSubmit }: LoginFormProps) => {
   const handleSubmit = async (values: z.infer<typeof loginSchema>) => {
     try {
       setIsLoading(true)
-      
+
       const { user } = await authService.login(values.email, values.password)
       console.log(user);
-      
+
       // Update user in the store
       const userStore = useUserStore.getState()
       userStore.setUser(user)
       route.push('/home')
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to login')
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+
+      toast.error(errorMessage)
     } finally {
       setIsLoading(false)
     }

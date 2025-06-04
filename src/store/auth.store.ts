@@ -24,40 +24,40 @@ const useAuthStore = create<AuthStore>((set) => ({
   signupData: {
     currentStep: 0,
     emailVerified: false,
-    interests: [],
+    interests: "",
     study_vibe: []
   },
   setUser: (user) => set({ user }),
-  updateSignupData: (data) => 
+  updateSignupData: (data) =>
     set((state) => ({
       signupData: { ...state.signupData, ...data }
     })),
-  nextStep: () => 
+  nextStep: () =>
     set((state) => {
       const currentStep = state.signupData.currentStep || 0;
       return {
-        signupData: { 
-          ...state.signupData, 
-          currentStep: Math.min(currentStep + 1, 5) 
+        signupData: {
+          ...state.signupData,
+          currentStep: Math.min(currentStep + 1, 5)
         }
       };
     }),
-  prevStep: () => 
+  prevStep: () =>
     set((state) => {
       const currentStep = state.signupData.currentStep || 1;
       return {
-        signupData: { 
-          ...state.signupData, 
-          currentStep: Math.max(currentStep - 1, 0) 
+        signupData: {
+          ...state.signupData,
+          currentStep: Math.max(currentStep - 1, 0)
         }
       };
     }),
-  resetSignup: () => 
+  resetSignup: () =>
     set({
       signupData: {
         currentStep: 0,
         emailVerified: false,
-        interests: [],
+        interests: "",
         study_vibe: []
       }
     })

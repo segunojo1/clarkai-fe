@@ -14,7 +14,6 @@ import AboutYou from '@/components/auth/about-you';
 import StudyVibe from '@/components/auth/study-vibe';
 import AddProfile from '@/components/auth/add-profile';
 import useAuthStore from '@/store/auth.store';
-import { User } from '@/services/auth.service';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const variants = {
@@ -59,8 +58,6 @@ const SignUpPage = () => {
     signupData, 
     updateSignupData, 
     nextStep, 
-    prevStep, 
-    setUser,
     resetSignup 
   } = useAuthStore();
 
@@ -75,11 +72,11 @@ const SignUpPage = () => {
     nextStep();
   };
 
-  const handlePrevStep = () => {
-    setDirection(-1);
-    setPrevStep(currentStep);
-    prevStep();
-  };
+  // const handlePrevStep = () => {
+  //   setDirection(-1);
+  //   setPrevStep(currentStep);
+  //   prevStep();
+  // };
 
   // Update direction when step changes
   useEffect(() => {
@@ -122,12 +119,19 @@ const SignUpPage = () => {
     nextStep();
   };
 
-  const handleAboutYouSubmit = (data: any) => {
+  const handleAboutYouSubmit = (data: {
+            role: string,
+            school: string,
+            department: string,
+            interests:string
+        }) => {
     updateSignupData(data);
     nextStep();
   };
 
-  const handleStudyVibeSubmit = (data: any) => {
+  const handleStudyVibeSubmit = (data: {
+            study_vibe: string[]
+        }) => {
     updateSignupData(data);
     nextStep();
   };
@@ -139,10 +143,10 @@ const SignUpPage = () => {
     router.push('/home');
   };
 
-  const handleSkipProfile = () => {
-    // Handle skip profile photo
-    handleProfileComplete();
-  };
+  // const handleSkipProfile = () => {
+  //   // Handle skip profile photo
+  //   handleProfileComplete();
+  // };
 
   const renderStep = () => {
     const stepComponents: Record<string, React.ReactNode> = {

@@ -1,4 +1,7 @@
+
 'use client';
+import { Suspense } from 'react';
+
 import Calendar from '@/components/home/Calendar';
 import ChatInputForm from '@/components/home/chat-input-form';
 import OnboardingModal from '@/components/home/onboarding-modal';
@@ -7,15 +10,19 @@ import Workspaces from '@/components/home/workspaces';
 import { Clock } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { hasCompletedOnboarding, setOnboardingCompleted } from '@/lib/cookies';
 import { useUserStore } from '@/store/user.store';
+import chatService from '@/services/chat.service';
+import { useChatStore } from '@/store/chat.store';
 
-const HomePage = () => {
-  const [showOnboarding, setShowOnboarding] = useState(false);
+const HomePageContent = () => {
+   const [showOnboarding, setShowOnboarding] = useState(false);
   const searchParams = useSearchParams();
   const skipOnboarding = searchParams.get('skipOnboarding') === 'true';
+  const {isLoading, setIsLoading} = useChatStore();
+  const router = useRouter()
 
   useEffect(() => {
     // Only check for first visit if not explicitly skipping
@@ -25,6 +32,15 @@ const HomePage = () => {
   }, [skipOnboarding]);
   const { theme } = useTheme();
   const { user } = useUserStore()
+
+  const handleSend = async (message: string) => {
+      setIsLoading(true)
+      if (!message.trim()) return
+      const {id} = await chatService.createChat();
+      console.log(id);
+      router.push(`/chat/${id}`)
+      // await sendMessage(message)
+    }
   return (
     <div className='w-full flex flex-col items-center bg-[#FAFAFA] dark:bg-[#262626]'>
       <Image src='/assets/logo.svg' alt='' width={103} height={90} className='mx-auto mb-[55px]' />
@@ -37,7 +53,7 @@ const HomePage = () => {
         <h1 className='text-[30px]/[120%] font-bold satoshi'>Good Evening, {user?.name?.split(' ')[0]}</h1>
       </div>
       <div className='flex flex-col items-start '>
-        <ChatInputForm />
+        <ChatInputForm onSend={handleSend} disabled={isLoading} />
         <Workspaces />
         <div className='flex items-center justify-between w-full mt-[50px] mb-[39px]'>
           <div className='text-[#A3A3A3] flex items-center gap-2 mb-3'>
@@ -64,6 +80,14 @@ const HomePage = () => {
         }} />
       )}
     </div>
+  );
+};
+
+const HomePage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <HomePageContent />
+    </Suspense>
   );
 };
 

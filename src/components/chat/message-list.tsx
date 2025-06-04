@@ -1,38 +1,40 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChatMessage } from "@/lib/types";
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
-// Import the FileAttachment type from types
 import type { FileAttachment as FileAttachmentType } from '@/lib/types';
 
-// Extend the File type to include our custom properties
-type ExtendedFile = File & {
-  url?: string;
-};
+// type ExtendedFile = File & {
+//   url?: string;
+// };
 
-// Helper function to check if an object is a File
-const isFile = (obj: any): obj is File => {
-  return obj instanceof File ||
-    (obj && typeof obj === 'object' &&
-      'name' in obj &&
-      'size' in obj &&
-      'type' in obj);
+const isFile = (obj: unknown): obj is File => {
+  if (obj instanceof File) return true;
+  
+  if (typeof obj !== 'object' || obj === null) return false;
+  
+  const fileLike = obj as Record<keyof File, unknown>;
+  return (
+    typeof fileLike.name === 'string' &&
+    typeof fileLike.size === 'number' &&
+    typeof fileLike.type === 'string'
+  );
 };
 
 // Helper function to convert FileAttachment to File-like object
-const toFile = (attachment: FileAttachmentType): File => {
-  return new File(
-    [],
-    attachment.name,
-    {
-      type: attachment.type,
-      lastModified: Date.now()
-    }
-  );
-};
+// const toFile = (attachment: FileAttachmentType): File => {
+//   return new File(
+//     [],
+//     attachment.name,
+//     {
+//       type: attachment.type,
+//       lastModified: Date.now()
+//     }
+//   );
+// };
 import { ChevronRight, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PDFViewer } from './pdf-viewer';
@@ -105,13 +107,13 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
     }
   };
 
-  const handleOpenInNewTab = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  // const handleOpenInNewTab = (e: React.MouseEvent) => {
+  //   e.stopPropagation();
 
-    if (objectUrl) {
-      window.open(objectUrl, '_blank');
-    }
-  };
+  //   if (objectUrl) {
+  //     window.open(objectUrl, '_blank');
+  //   }
+  // };
 
   if (!file) return null;
 

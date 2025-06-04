@@ -1,6 +1,5 @@
 'use client'
 
-import { ChatMessageList } from '@/components/chat/message-list'
 import { WelcomeScreen } from '@/components/chat/welcome-screen'
 import ChatInputForm from '@/components/home/chat-input-form'
 import { HelpCircle } from 'lucide-react'
@@ -11,7 +10,7 @@ import { useEffect } from 'react'
 import chatService from '@/services/chat.service'
 
 const Chat = () => {
-  const { messages, isLoading, sendMessage, setCurrentChatId, setIsLoading } = useChatStore()
+  const { isLoading, setCurrentChatId, setIsLoading } = useChatStore()
   const { chatId } = useParams()
   const router = useRouter()
 
@@ -26,7 +25,7 @@ const Chat = () => {
     const {id} = await chatService.createChat();
     console.log(id);
     router.push(`/chat/${id}`)
-    await sendMessage(message)
+    // await sendMessage(message)
   }
 
   return (

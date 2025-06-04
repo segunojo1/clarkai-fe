@@ -1,15 +1,15 @@
 import { useUserStore } from '@/store/user.store';
 import axios, { AxiosInstance } from 'axios';
 import Cookies from 'js-cookie';
-import { toast } from 'sonner';
+// import { toast } from 'sonner';
 
-interface RegisterPayload {
-  fullName: string;
-  email: string;
-  nickName: string;
-  password: string;
-  confirmPassword: string;
-}
+// interface RegisterPayload {
+//   fullName: string;
+//   email: string;
+//   nickName: string;
+//   password: string;
+//   confirmPassword: string;
+// }
 
 export interface User {
   id: string;
@@ -34,7 +34,7 @@ export interface SignupPayload {
   role: string;
   school: string;
   department: string;
-  interests: string[];
+  interests: string;
   study_vibe: string[];
   user_image?: File | string;
 }
@@ -78,20 +78,20 @@ class AuthService {
 
   private initializeUserState() {
     const token = this.getAuthToken();
-    
+
     if (token) {
       // Set the token in the API headers
       this.api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
+
       // Get user from cookies
       const userStr = Cookies.get('user');
-      
+
       if (userStr) {
         try {
-          const user: User = JSON.parse(userStr); 
-          
+          const user: User = JSON.parse(userStr);
+
           useUserStore.getState().setUser(user);
-          
+
         } catch (error) {
           console.error('Error parsing user data from cookies:', error);
           // If user data is invalid, clear everything
@@ -110,8 +110,18 @@ class AuthService {
     try {
       const response = await this.api.post<OtpResponse>('/otp', { email, name });
       return response.data;
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to send OTP';
+    } catch (error: unknown) {
+      let errorMessage = 'Failed to send OTP';
+
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        errorMessage = axiosError.response?.data?.message || errorMessage;
+      }
+      // Handle standard Error
+      else if (error instanceof Error) {
+        errorMessage = error.message || errorMessage;
+      }
+
       console.error('OTP send failed:', errorMessage);
       throw new Error(errorMessage);
     }
@@ -121,8 +131,18 @@ class AuthService {
     try {
       const response = await this.api.post<OtpResponse>('/verifyOTP', { email, otp });
       return response.data;
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'OTP verification failed';
+    } catch (error: unknown) {
+      let errorMessage = 'OTP Verification failed';
+
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        errorMessage = axiosError.response?.data?.message || errorMessage;
+      }
+      // Handle standard Error
+      else if (error instanceof Error) {
+        errorMessage = error.message || errorMessage;
+      }
+
       console.error('OTP verification failed:', errorMessage);
       throw new Error(errorMessage);
     }
@@ -131,7 +151,7 @@ class AuthService {
   public async register(data: SignupPayload): Promise<{ user: User; token: string }> {
     try {
       const formData = new FormData();
-      
+
       // Append all fields to formData
       Object.entries(data).forEach(([key, value]) => {
         if (key === 'user_image' && value instanceof File) {
@@ -158,13 +178,24 @@ class AuthService {
       }
 
       return response.data;
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error || error.message || 'Registration failed';
-      toast(errorMessage);
+    } catch (error: unknown) {
+      let errorMessage = 'Registraton failed';
+
+      // Handle AxiosError (if using axios)
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        errorMessage = axiosError.response?.data?.message || errorMessage;
+      }
+      // Handle standard Error
+      else if (error instanceof Error) {
+        errorMessage = error.message || errorMessage;
+      }
+
+      console.error('Registartion failed:', errorMessage);
       throw new Error(errorMessage);
     }
   }
-  public async login(email: string, password: string): Promise<{ user: User; token: string}> {
+  public async login(email: string, password: string): Promise<{ user: User; token: string }> {
     try {
       const response = await this.api.post<{ user: User; token: string }>('/login', { email, password });
 
@@ -173,11 +204,20 @@ class AuthService {
         Cookies.set('user', JSON.stringify(response.data.user), this.COOKIE_OPTIONS);
         this.api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
       }
-      
+
       return response.data;
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error || error.message || 'Login failed';
-      toast(errorMessage);
+    } catch (error: unknown) {
+      let errorMessage = 'Login failed';
+
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        errorMessage = axiosError.response?.data?.message || errorMessage;
+      }
+      else if (error instanceof Error) {
+        errorMessage = error.message || errorMessage;
+      }
+
+      console.error('Login failed:', errorMessage);
       throw new Error(errorMessage);
     }
   }
@@ -186,10 +226,10 @@ class AuthService {
     // Remove auth token and user data from cookies
     Cookies.remove('token');
     Cookies.remove('user');
-    
+
     // Clear authorization header
     delete this.api.defaults.headers.common['Authorization'];
-    
+
     // Update user store
     const userStore = useUserStore.getState();
     userStore.setUser(null);

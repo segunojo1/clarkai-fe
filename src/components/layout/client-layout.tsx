@@ -11,7 +11,6 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "../ui/button";
-import useAuthStore from "@/store/auth.store";
 import authService from "@/services/auth.service";
 import { useRouter } from "next/navigation";
 

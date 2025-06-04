@@ -3,7 +3,6 @@ import {
     Card,
     CardContent,
 } from "@/components/ui/card"
-import { Button } from '../ui/button'
 
 const Workspaces = () => {
     return (

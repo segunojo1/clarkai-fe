@@ -97,7 +97,7 @@ export function PDFViewer({ file, onClose }: PDFViewerProps) {
         setIsLoading(true);
         
         // Get the URL for the file
-        const url = URL.createObjectURL(file);
+        const url = URL.createObjectURL(file as Blob);
         
         if (!isMounted) return;
         
@@ -241,7 +241,7 @@ export function PDFViewer({ file, onClose }: PDFViewerProps) {
         <div className="flex-1 p-4 overflow-auto">
           <Document
             key={`pdf-doc-${fileKey}`}
-            file={URL.createObjectURL(file)}
+            file={URL.createObjectURL(file as Blob)}
             onLoadSuccess={onDocumentLoadSuccess}
             className="flex justify-center"
             loading={

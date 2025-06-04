@@ -12,7 +12,7 @@ const SideBar = () => {
             <PlusIcon />
         </div>
         <Image src="/assets/clark-log.png" alt="clark logo" />
-        {SideBarItems.map(items => <SidebarItem {...items}/>)}
+        {SideBarItems.map(items => <SidebarItem key={items.text} {...items}/>)}
     </aside>
   )
 }

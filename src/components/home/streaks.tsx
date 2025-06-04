@@ -1,4 +1,3 @@
-import { Clock } from 'lucide-react'
 import React from 'react'
 
 interface StreakBoxProps {

@@ -49,7 +49,18 @@ export const LatestWorkspace = () => {
     )
 }
 
-const SidebarGroupCustom = ({items, label}: any) => {
+interface SidebarItem {
+  title: string;
+  url: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+interface SidebarGroupCustomProps {
+  items: SidebarItem[];
+  label?: string;
+}
+
+const SidebarGroupCustom = ({items, label}: SidebarGroupCustomProps) => {
     const pathname = usePathname()
 
     return (
