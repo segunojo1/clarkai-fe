@@ -54,17 +54,23 @@ class ChatService {
 
   }
 
-  public async sendChatMessage(chat_id: string, text: string, previous_messages, files, strict_mode) {
+  public async sendChatMessage(formData: FormData) {
     try {
-        const response = this.api.post(`/aichat`)
+        const response = await this.api.post(`/aichat`, formData, {
+          headers: {
+            "Content-Type": "multipart/formdata"
+          }
+        })
+        return response.data
     } catch (error) {
-        
+        console.error("err sending chat");
+        throw error;
     }
   }
 
   public async getChat(page: number, chat_id: string) {
     try {
-        const response = this.api.get(`/aichat`, {
+        const response = await this.api.get(`/aichat`, {
             params: {page, chat_id}
         })
         return response.data

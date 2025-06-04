@@ -10,7 +10,7 @@ import Image from 'next/image'
 // import ChatInputForm from '@/components/home/ChatInputForm'
 
 export default function ChatPage() {
-  const { messages, isLoading, sendMessage, setCurrentChatId } = useChatStore()
+  const { messages, setMessages, isLoading, sendMessage, setCurrentChatId, currentChatId, setIsLoading } = useChatStore()
   const { id } = useParams()
   
   const {getMessages} = useChatStore()
@@ -26,18 +26,28 @@ export default function ChatPage() {
   // Load initial messages when chat ID changes
   useEffect(() => {
     if (id) {
-      // Simulate loading initial messages
-      // getMessages(1, chatId)
-      setTimeout(() => {
-        sendMessage('Welcome back! How can I assist you today?')
-      }, 500)
+      // setIsLoading(true)
+      const getAllMessages = async () => {
+        const retrievedMessages = await getMessages(1, id)
+        console.log(retrievedMessages);
+        setMessages(retrievedMessages)
+      }
+      
+      getAllMessages()
+
+      // setIsLoading(false);
     }
   }, [id, sendMessage])
 
-  const handleSend = async (message: string, file?: File) => {
-    if (!message.trim()) return
+  useEffect(() => {
+    console.log(messages);
+    
+  }, [messages])
 
-    await sendMessage(message, file)
+  const handleSend = async (text: string, files?: File) => {
+    if (!text.trim()) return
+
+    await sendMessage(id, text, messages, false, files)
   }
 
   return (

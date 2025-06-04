@@ -7,9 +7,12 @@ export interface FileAttachment {
 
 export interface ChatMessage {
   role: 'user' | 'assistant'
-  content: string
-  timestamp?: Date
-  attachments?: FileAttachment[]
+  text: string
+  isFile: boolean
+  fromUser: boolean
+  createdAt?: Date
+  attachments?: FileAttachment[];
+  updatedAt?: Date
 }
   
   export interface Chat {

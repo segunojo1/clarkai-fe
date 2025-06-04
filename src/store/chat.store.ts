@@ -10,8 +10,9 @@ interface ChatStore {
   clearMessages: () => void
   setIsLoading: (isLoading: boolean) => void
   setCurrentChatId: (chatId: string | null) => void
-  sendMessage: (message: string) => Promise<void>
+  sendMessage: (chat_id: string, text: string, previous_messages: string[], strict_mode: boolean, files?: File) => Promise<void>
   getMessages: (page: number, chat_id: string) => Promise<void>
+  setMessages: (messages: ChatMessage[]) => void
 }
 
 export const useChatStore = create<ChatStore>((set, get) => ({
@@ -33,44 +34,53 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     set({ isLoading })
   },
 
+  setMessages: (messages: ChatMessage[]) => {
+    set({ messages })
+  },
+
   setCurrentChatId: (chatId: string | null) => {
     set({ currentChatId: chatId })
   },
 
-  sendMessage: async (chat_id: string, message: string, file?: File) => {
-    if (!message.trim() && !file) return
+  sendMessage: async (chat_id: string, text: string, previous_messages: string[], strict_mode: boolean, files?: File) => {
+    if (!text.trim() && !files) return
 
     const { messages, currentChatId, addMessage, setIsLoading } = get()
 
     // Add user message with optional file attachment
     const userMessage: ChatMessage = {
       role: 'user',
-      content: message,
-      attachments: file ? [file] : []
+      text: text,
+      isFile: files ? true : false,
+      fromUser: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      attachments: files ? [files] : []
     }
     addMessage(userMessage)
 
     try {
       setIsLoading(true)
+      const formData = new FormData();
 
-      // Simulate API call with file upload if present
-      if (file) {
-        // In a real implementation, you would upload the file here
-        // const formData = new FormData();
-        // formData.append('file', file);
-        // formData.append('message', message);
-        // await api.post('/chat/message', formData);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } else {
-        await chatService.sendChatMessage()
+      formData.append('chat_id', chat_id);
+      formData.append('text', text);
+      formData.append('previous_messages', JSON.stringify(previous_messages));
+      formData.append('strict_mode', strict_mode.toString())
+      if (files) {
+        formData.append('files', files);
       }
+
+      const aiResponse = await chatService.sendChatMessage(formData)
 
       // Add assistant message
       const assistantMessage: ChatMessage = {
         role: 'assistant',
-        content: file 
-          ? `I've received your file: ${file.name}. How can I help you with it?` 
-          : 'This is a simulated response. Please implement the API integration.'
+        text: aiResponse.answer,
+        isFile: files ? true : false,
+        fromUser: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }
       addMessage(assistantMessage)
     } catch (error) {
@@ -78,7 +88,11 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       // Add error message
       const errorMessage: ChatMessage = {
         role: 'assistant',
-        content: 'Sorry, there was an error processing your message.'
+        isFile: false,
+        fromUser: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        text: 'Sorry, there was an error processing your message.'
       }
       addMessage(errorMessage)
     } finally {
@@ -89,6 +103,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   getMessages: async (page = 1, chat_id) => {
     const messages = await chatService.getChat(page, chat_id)
     console.log(messages);
-    
+    return messages.messages
   }
 }))

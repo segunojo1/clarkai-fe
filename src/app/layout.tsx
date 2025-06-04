@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+// import "github-markdown.css";
 import ClientLayout from "@/components/layout/client-layout";
 import NextTopLoader from "nextjs-toploader";
 import { sfProRounded } from "./fonts";

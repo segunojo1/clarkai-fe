@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ChatMessage } from "@/lib/types";
+import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 // Import the FileAttachment type from types
 import type { FileAttachment as FileAttachmentType } from '@/lib/types';
@@ -13,37 +15,37 @@ type ExtendedFile = File & {
 
 // Helper function to check if an object is a File
 const isFile = (obj: any): obj is File => {
-  return obj instanceof File || 
-         (obj && typeof obj === 'object' && 
-          'name' in obj && 
-          'size' in obj && 
-          'type' in obj);
+  return obj instanceof File ||
+    (obj && typeof obj === 'object' &&
+      'name' in obj &&
+      'size' in obj &&
+      'type' in obj);
 };
 
 // Helper function to convert FileAttachment to File-like object
 const toFile = (attachment: FileAttachmentType): File => {
   return new File(
-    [], 
-    attachment.name, 
-    { 
+    [],
+    attachment.name,
+    {
       type: attachment.type,
       lastModified: Date.now()
     }
   );
 };
-import { FileText } from 'lucide-react';
+import { ChevronRight, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PDFViewer } from './pdf-viewer';
 
 const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) => {
   const [showPdfViewer, setShowPdfViewer] = useState(false);
   const [objectUrl, setObjectUrl] = useState<string>('');
-  
+
   console.log(file);
-  
+
   // Create and clean up object URL for the file
   const fileUrlRef = useRef<string>('');
-  
+
   useEffect(() => {
     const createObjectUrl = async () => {
       // Clean up previous URL if it exists
@@ -59,7 +61,7 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
 
       try {
         let newUrl = '';
-        
+
         // If it's a File object
         if (file instanceof File) {
           newUrl = URL.createObjectURL(file);
@@ -75,7 +77,7 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
           newUrl = URL.createObjectURL(blob);
           fileUrlRef.current = newUrl;
         }
-        
+
         setObjectUrl(newUrl);
       } catch (error) {
         console.error('Error creating file URL:', error);
@@ -84,7 +86,7 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
     };
 
     createObjectUrl();
-    
+
     // Cleanup function to revoke the object URL
     return () => {
       if (fileUrlRef.current) {
@@ -96,16 +98,16 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
 
   const handleOpenInCanvas = (e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     // Always use the same objectUrl that was created in the effect
     if (objectUrl) {
       setShowPdfViewer(true);
     }
   };
-  
+
   const handleOpenInNewTab = (e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     if (objectUrl) {
       window.open(objectUrl, '_blank');
     }
@@ -115,22 +117,33 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
 
   return (
     <>
-      <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-        <div className="flex items-center gap-2">
-          <FileText className="text-[#FF3D00]" size={20} />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-              {file.name}
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {file.size ? `${(file.size / 1024).toFixed(1)} KB` : ''}
-            </p>
-          </div>
-          <div className="flex gap-2">
+      <div className="mt-2 flex flex-col items-start gap-2">
+        <div className="flex gap-2">
             <Button
               variant="ghost"
               size="sm"
-              className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+              className="text-gray-700 dark:text-gray-300 flex items-center gap-2"
+              onClick={handleOpenInCanvas}
+            >
+              View in Canvas
+              <ChevronRight />
+            </Button>
+          </div>
+        <div className="bg-gray-50 p-3 rounded-lg dark:bg-[#404040]  flex flex-col items-center gap-2">
+          <div className="flex-1 flex  gap-2 min-w-0">
+            <FileText className="text-[#FF3D00]" size={20} />
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+              {file.name}
+            </p>
+          </div>
+          <div className='flex items-center gap-2 self-start'>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {file.size ? `${(file.size / 1024).toFixed(1)} KB` : ''}
+            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 px-0"
               onClick={() => {
                 if (objectUrl) {
                   window.open(objectUrl, '_blank');
@@ -145,74 +158,78 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
             >
               Open
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-gray-700 dark:text-gray-300"
-              onClick={handleOpenInCanvas}
-            >
-              View in Canvas
-            </Button>
+
+
           </div>
+          
         </div>
       </div>
-      
+
       {showPdfViewer && (
-        <PDFViewer 
-          file={file} 
-          onClose={() => setShowPdfViewer(false)} 
+        <PDFViewer
+          file={file}
+          onClose={() => setShowPdfViewer(false)}
         />
       )}
     </>
   );
 };
 
-export function ChatMessageList({ 
-  messages, 
-  isLoading 
-}: { 
-  messages: ChatMessage[], 
-  isLoading: boolean 
+export function ChatMessageList({
+  messages,
+  isLoading
+}: {
+  messages: ChatMessage[],
+  isLoading: boolean
 }) {
+  console.log(messages);
+
   return (
     <div className="flex flex-col space-y-4 p-4 overflow-y-auto h-[calc(100vh-200px)]">
       {messages.length > 0 && (
         <div className="h-[140px]"></div>
       )}
       {messages.map((message, index) => (
-        <div 
-          key={index} 
-          className={`flex flex-col items-${
-            message.role === 'user' ? 'end' : 'start'
-          } text-[15px] satoshi font-normal mb-4 w-full`}
+        <div
+          key={index}
+          className={`flex flex-col items-${message.fromUser ? 'end' : 'start'
+            } text-[15px] satoshi font-normal mb-4 w-full`}
         >
           <div className="flex flex-col items-end max-w-[80%] gap-2">
             {/* File attachments */}
             {message.attachments?.map((file, fileIndex) => (
-              <div 
-                key={fileIndex} 
-                className={`w-full rounded-2xl p-4 ${
-                  message.role === 'user' 
-                    ? 'max-w-[227px]' 
+              <div
+                key={fileIndex}
+                className={`w-full rounded-2xl ${message.fromUser === true
+                    ? ''
                     : 'bg-gray-100 dark:bg-gray-800'
-                }`}
+                  }`}
               >
-                <FileAttachmentPreview file={file}  />
+                <FileAttachmentPreview file={file} />
               </div>
             ))}
-            
+
             {/* Message content */}
-            {message.content && (
-              <div 
-                className={`rounded-[69px] p-4 ${
-                  message.role === 'user' 
-                    ? 'bg-[#F0F0EF] text-black' 
+            {message.text && (
+              <div
+                className={`rounded-[69px] p-4 ${message.fromUser
+                    ? 'bg-[#F0F0EF] dark:bg-[#404040] dark:text-white text-black'
                     : 'bg-transparent'
-                }`}
+                  }`}
               >
-                <p>{message.content}</p>
+                {
+                  message.fromUser ? (
+                    <p>{message.text}</p>
+                  ) : (
+                    <Markdown remarkPlugins={[remarkGfm]}>{message.text}</Markdown>
+                  )
+                }
               </div>
             )}
+            {/* <p className='self-start '>
+            {message.createdAt}
+
+            </p> */}
           </div>
         </div>
       ))}
