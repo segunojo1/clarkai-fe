@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { ChatMessage } from '@/lib/types'
+import chatService from '@/services/chat.service'
 
 interface ChatStore {
   messages: ChatMessage[]
@@ -10,6 +11,7 @@ interface ChatStore {
   setIsLoading: (isLoading: boolean) => void
   setCurrentChatId: (chatId: string | null) => void
   sendMessage: (message: string) => Promise<void>
+  getMessages: (page: number, chat_id: string) => Promise<void>
 }
 
 export const useChatStore = create<ChatStore>((set, get) => ({
@@ -35,7 +37,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     set({ currentChatId: chatId })
   },
 
-  sendMessage: async (message: string, file?: File) => {
+  sendMessage: async (chat_id: string, message: string, file?: File) => {
     if (!message.trim() && !file) return
 
     const { messages, currentChatId, addMessage, setIsLoading } = get()
@@ -60,7 +62,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         // await api.post('/chat/message', formData);
         await new Promise(resolve => setTimeout(resolve, 1000));
       } else {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await chatService.sendChatMessage()
       }
 
       // Add assistant message
@@ -82,5 +84,11 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     } finally {
       setIsLoading(false)
     }
+  },
+
+  getMessages: async (page = 1, chat_id) => {
+    const messages = await chatService.getChat(page, chat_id)
+    console.log(messages);
+    
   }
 }))
