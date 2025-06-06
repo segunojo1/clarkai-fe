@@ -18,10 +18,10 @@ import chatService from '@/services/chat.service';
 import { useChatStore } from '@/store/chat.store';
 
 const HomePageContent = () => {
-   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const searchParams = useSearchParams();
   const skipOnboarding = searchParams.get('skipOnboarding') === 'true';
-  const {isLoading, setIsLoading} = useChatStore();
+  const { isLoading, setIsLoading, sendMessage } = useChatStore();
   const router = useRouter()
 
   useEffect(() => {
@@ -33,23 +33,26 @@ const HomePageContent = () => {
   const { theme } = useTheme();
   const { user } = useUserStore()
 
-  const handleSend = async (message: string) => {
-      setIsLoading(true)
-      if (!message.trim()) return
-      const {id} = await chatService.createChat();
-      console.log(id);
-      router.push(`/chat/${id}`)
-      // await sendMessage(message)
+  const handleSend = async (text: string, files?: File) => {
+    setIsLoading(true)
+    if (!text.trim()) return
+    const { id } = await chatService.createChat();
+    console.log(id);
+    router.push(`/chat/${id}`)
+    if (id) {
+      await sendMessage(id, text, [], false, files)
     }
+    // await sendMessage(message)
+  }
   return (
     <div className='w-full flex flex-col items-center bg-[#FAFAFA] dark:bg-[#262626]'>
       <Image src='/assets/logo.svg' alt='' width={103} height={90} className='mx-auto mb-[55px]' />
       <div className='flex items-center gap-5 mb-[51px]'>
         {theme === 'dark' ? (
-            <Image src='/assets/user-dark.svg' alt='' width={45} height={45} className='' />
-          ) : (
-            <Image src='/assets/user.svg' alt='' width={45} height={45} className='' />
-          )}
+          <Image src='/assets/user-dark.svg' alt='' width={45} height={45} className='' />
+        ) : (
+          <Image src='/assets/user.svg' alt='' width={45} height={45} className='' />
+        )}
         <h1 className='text-[30px]/[120%] font-bold satoshi'>Good Evening, {user?.name?.split(' ')[0]}</h1>
       </div>
       <div className='flex flex-col items-start '>

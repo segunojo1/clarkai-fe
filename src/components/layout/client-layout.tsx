@@ -35,11 +35,10 @@ export default function ClientLayout({
                 </div>
                 )}
                 <div className="flex items-center gap-3 absolute right-[20px] top-[20px]">
-                    <PlusIcon width={20} height={20} />
-                    <File className="mr-[30px]" width={20} height={20} />
+                    {/* <PlusIcon width={20} height={20} />
+                    <File className="mr-[30px]" width={20} height={20} /> */}
                     <Button
                         variant="outline"
-                        size="icon"
                         onClick={logout}
                     >
                         Logout

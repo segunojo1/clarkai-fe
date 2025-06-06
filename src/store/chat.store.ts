@@ -1,9 +1,10 @@
 import { create } from 'zustand'
-import { ChatMessage } from '@/lib/types'
+import { ChatMessage, ChatResponse } from '@/lib/types'
 import chatService from '@/services/chat.service'
 
 interface ChatStore {
   messages: ChatMessage[]
+  chatDetails: ChatResponse | null
   isLoading: boolean
   currentChatId: string | null
   addMessage: (message: ChatMessage) => void
@@ -13,13 +14,17 @@ interface ChatStore {
   sendMessage: (chat_id: string, text: string, previous_messages: ChatMessage[], strict_mode: boolean, files?: File) => Promise<void>
   getMessages: (page: number, chat_id: string) => Promise<ChatMessage[]>
   setMessages: (messages: ChatMessage[]) => void
+  setChatDetails: (chatDetails: ChatResponse) => void
 }
 
 export const useChatStore = create<ChatStore>((set, get) => ({
   messages: [],
   isLoading: false,
   currentChatId: null,
-
+  chatDetails: null,
+  setChatDetails: (chatDetails: ChatResponse) => {
+    set({ chatDetails })
+  },
   addMessage: (message: ChatMessage) => {
     set((state) => ({
       messages: [...state.messages, message]

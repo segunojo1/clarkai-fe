@@ -30,7 +30,9 @@ export const LatestChat = () => {
             <CardContent className=" flex flex-col items-center justify-between px-0 h-full">
                 <Globe width={20} height={20} />
                 <p className=" text-[12px]/[22px] font-medium satoshi text-center">Your latest chats will show up once you start talking to Clark.</p>
+                <Link href="/chat" className="w-full cursor-pointer">
                 <Button className="min-w-full  bg-[#F8F8F7] dark:bg-[#2C2C2C] text-[#525252] text-3 font-semibold">Start a Chat</Button>
+                </Link>
             </CardContent>
         </Card>
 
@@ -69,12 +71,12 @@ const SidebarGroupCustom = ({ items, label }: SidebarGroupCustomProps) => {
             <SidebarGroupContent>
                 <SidebarMenu className="text-[11px]/[22px] font-medium">
                     {items.map(item => (
-                        <SidebarMenuItem key={item.title} className={`transition-all duration-200 ${pathname === item.url ? 'bg-[#F0F0EF] dark:bg-[#404040]' : ''
+                        <SidebarMenuItem key={item.title} className={`transition-all duration-200 rounded-[5px] ${pathname === item.url ? 'bg-[#F0F0EF] dark:bg-[#404040]' : ''
                             }`}>
                             <SidebarMenuButton asChild>
                                 <Link
                                     href={item.url}
-                                    className={`pl-5 transition-colors duration-200 ${pathname === item.url
+                                    className={`pl-5 transition-colors duration-200 rounded-[5px] ${pathname === item.url
                                         ? 'bg-[#F0F0EF] dark:bg-[#404040]'
                                         : 'hover:bg-[#F0F0EF] dark:hover:bg-[#404040]'
                                         }`}>
@@ -117,7 +119,7 @@ export function AppSidebar() {
 
     const { user } = useUserStore();
     return (
-        <Sidebar className="max-w-[235px] sidebar z-[99999]">
+        <Sidebar className="max-w-[235px] bg-[#2C2C2C] sidebar z-[99999]">
             <SidebarHeader>
                 <SidebarGroup>
                     <SidebarGroupContent className="flex items-center justify-between">
@@ -134,17 +136,17 @@ export function AppSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarHeader>
-            <SidebarContent>
-                <SidebarGroupCustom items={items} /> 
-                <SidebarGroup className="mx-auto">
-                    <LatestChat />
-                </SidebarGroup>
-                <SidebarGroup className="mx-auto">
-                    <LatestWorkspace />
-                </SidebarGroup>
-                <SidebarGroupCustom items={workspaceItems} label="Workspace Hub" />
 
-            </SidebarContent>
+<SidebarContent className="[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overflow-y-auto">
+  <SidebarGroupCustom items={items} /> 
+  <SidebarGroup className="mx-auto">
+    <LatestChat />
+  </SidebarGroup>
+  <SidebarGroup className="mx-auto">
+    <LatestWorkspace />
+  </SidebarGroup>
+  <SidebarGroupCustom items={workspaceItems} label="Workspace Hub" />
+</SidebarContent>
 
             {/* <SidebarFooter>
                 <SidebarGroup>

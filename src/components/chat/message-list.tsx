@@ -9,11 +9,13 @@ import { ChevronRight, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PDFViewer } from './pdf-viewer';
 import UserAvatar from '../user-avatar';
+import { cn } from '@/lib/utils';
+import { useSidebar } from '../ui/sidebar';
 
 const isFile = (obj: unknown): obj is File => {
   if (obj instanceof File) return true;
   if (typeof obj !== 'object' || obj === null) return false;
-  
+
   const fileLike = obj as Record<keyof File, unknown>;
   return (
     typeof fileLike.name === 'string' &&
@@ -25,6 +27,7 @@ const isFile = (obj: unknown): obj is File => {
 const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) => {
   const [showPdfViewer, setShowPdfViewer] = useState(false);
   const fileUrlRef = useRef<string>('');
+  const {open, setOpen} = useSidebar()
 
   // Create object URL for the file
   useEffect(() => {
@@ -65,6 +68,7 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
   const handleOpenInCanvas = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowPdfViewer(true);
+    setOpen(false)
   };
 
   if (!file) return null;
@@ -131,66 +135,81 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
 
 export function ChatMessageList({
   messages,
-  isLoading
+  isLoading,
+  className
 }: {
   messages: ChatMessage[],
-  isLoading: boolean
+  isLoading: boolean,
+  className?: string
 }) {
-  return (
-    <div className="flex  w-full flex-col space-y-4 p-4 overflow-y-auto h-[calc(100vh-200px)]">
-      <div className='absolute left-5'>
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-      <UserAvatar  />
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]); // Dependency on messages array
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  return (
+    <div className={cn("flex w-full flex-col space-y-4 p-4 overflow-y-auto h-[calc(100vh-200px)]", className)}>
+      <div className='absolute left-5'>
+        <UserAvatar />
       </div>
       {messages.length > 0 && (
         <div className="h-[140px]"></div>
       )}
-      <div className='max-w-[750px] mx-auto'>
+      <div className='max-w-[750px] w-full mx-auto'>
+        {messages.map((message, index) => (
+          <div
+            key={index}
+            className={`flex flex-col items-${message.fromUser ? 'end' : 'start'} text-[15px] satoshi font-normal mb-4 w-full`}
+          >
+            <div className="flex flex-col items-end max-w-[80%] gap-2">
+              {message.attachments?.map((file, fileIndex) => (
+                <div
+                  key={fileIndex}
+                  className={`w-full rounded-2xl ${message.fromUser ? '' : 'bg-gray-100 dark:bg-gray-800'}`}
+                >
+                  <FileAttachmentPreview file={file} />
+                </div>
+              ))}
 
-      {messages.map((message, index) => (
-        <div
-          key={index}
-          className={`flex flex-col items-${message.fromUser ? 'end' : 'start'} text-[15px] satoshi font-normal mb-4 w-full`}
-        >
-          <div className="flex flex-col items-end max-w-[80%] gap-2">
-            {message.attachments?.map((file, fileIndex) => (
-              <div
-                key={fileIndex}
-                className={`w-full rounded-2xl ${message.fromUser ? '' : 'bg-gray-100 dark:bg-gray-800'}`}
-              >
-                <FileAttachmentPreview file={file} />
-              </div>
-            ))}
-
-            {message.text && (
-              <div
-                className={`rounded-[69px] p-4 ${message.fromUser
+              {message.text && (
+                <div
+                  className={`rounded-[69px] p-4 ${message.fromUser
                     ? 'bg-[#F0F0EF] dark:bg-[#404040] dark:text-white text-black'
                     : 'bg-transparent'
-                  }`}
-              >
-                {message.fromUser ? (
-                  <p>{message.text}</p>
-                ) : (
-                  <Markdown remarkPlugins={[remarkGfm]}>{message.text}</Markdown>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      ))}
-      </div>
-      {isLoading && (
-        <div className="flex justify-start">
-          <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 max-w-[80%]">
-            <div className="flex gap-2">
-              <div className="w-4 h-4 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse"></div>
-              <div className="w-4 h-4 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse delay-100"></div>
-              <div className="w-4 h-4 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse delay-200"></div>
+                    }`}
+                >
+                  {message.fromUser ? (
+                    <p>{message.text}</p>
+                  ) : (
+                    <Markdown remarkPlugins={[remarkGfm]}>{message.text}</Markdown>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      )}
+        ))}
+        
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 max-w-[80%]">
+              <div className="flex gap-2">
+                <div className="w-4 h-4 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse"></div>
+                <div className="w-4 h-4 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse delay-100"></div>
+                <div className="w-4 h-4 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse delay-200"></div>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* This empty div will be used for auto-scrolling */}
+        <div ref={messagesEndRef} />
+      </div>
     </div>
-  )
+  );
 }

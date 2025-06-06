@@ -10,7 +10,7 @@ import { toast } from 'sonner'
 // import ChatInputForm from '@/components/home/ChatInputForm'
 
 export default function ChatPage() {
-  const { messages, setMessages, isLoading, sendMessage, setCurrentChatId } = useChatStore()
+  const { messages, setMessages, isLoading, sendMessage, setCurrentChatId, setChatDetails } = useChatStore()
   const { id } = useParams()
 
   const { getMessages } = useChatStore()
@@ -30,7 +30,7 @@ const [chatName, setChatName] = useState();
           
           const retrievedMessages = await getMessages(1, id.toString())
           console.log(retrievedMessages);
-          setChatName(retrievedMessages)
+          setChatDetails(retrievedMessages)
           setMessages(retrievedMessages.messages)
         } catch (error) {
           toast('Error: Cant find chat')

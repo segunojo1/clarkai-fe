@@ -11,6 +11,11 @@ import { motion } from "framer-motion";
 import ThemeSwitcher from '../theme-switcher';
 import { AppSidebar } from '../app-sidebar';
 import UserAvatar from '../user-avatar';
+import { useChatStore } from '@/store/chat.store';
+import { ChatMessageList } from './message-list';
+import ChatInputForm from '../home/chat-input-form';
+import { useParams } from 'next/navigation';
+import ChatInputForm2 from '../home/small-chat-input-form';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -29,6 +34,8 @@ export function PDFViewer({ file, onClose }: PDFViewerProps) {
   const [zoomLevel, setZoomLevel] = useState(100);
   const fileRef = useRef<PDFFile>(null);
   const [fileKey, setFileKey] = useState(0);
+  const { id } = useParams();
+
 
   useEffect(() => {
     if (file === fileRef.current) return;
@@ -74,6 +81,17 @@ export function PDFViewer({ file, onClose }: PDFViewerProps) {
     }
   };
 
+  const { messages, sendMessage, chatDetails } = useChatStore()
+console.log(chatDetails);
+
+  const handleSend = async (text: string, files?: File) => {
+    if (!text.trim()) return
+    if (id) {
+
+      await sendMessage(id.toString(), text, messages, true, files)
+    }
+  }
+
   if (!file) return null;
 
   if (isLoading) {
@@ -104,35 +122,31 @@ export function PDFViewer({ file, onClose }: PDFViewerProps) {
       exit={{ x: 999 }}
       transition={{ duration: 0.3 }}
       className="fixed inset-0 z-50 flex items-center justify-end bg-black/50 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div className='w-[30%] bg-[red] h-full'>
 
-        <div className="sticky top-0 z-10 bg-white dark:bg-[#2C2C2C] p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                      {/* <AppSidebar />
-           */}
-          {/* <div className="flex items-center space-x-2">
-            <Input
-              type="number"
-              min={10}
-              max={200}
-              value={zoomLevel}
-              onChange={handleZoomLevelChange}
-              className="w-16 text-center h-8"
-            />
-            <span className="text-sm text-gray-600 dark:text-gray-300">%</span>
-          </div> */}
+    >
+      <div className='w-[60%] bg-[#F8F8F7] dark:bg-[#262626] h-full'>
+
+        <div className="sticky top-0 z-10 bg-[#F8F8F7] dark:bg-[#2C2C2C] p-4 py-[18px] border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
 
           <UserAvatar />
+          <p className='text-[18px] font-bold'>{chatDetails?.chat.name}</p>
         </div>
 
+        <div className="flex flex-col w-full justify-between  pb-20 mx-auto h-full">
+          {messages.length === 0 ? (
+            <p>chat</p>
+          ) : (
+            <ChatMessageList messages={messages} isLoading={isLoading} className='!h-[calc(100vh-270px)] !w-fit' />
+          )}
+          <ChatInputForm2 onSend={handleSend} disabled={isLoading} />
+        </div>
       </div>
       <div
-        className="h-full w-full max-w-[70%] bg-white dark:bg-[#2C2C2C] overflow-y-auto flex flex-col"
+        className="h-full w-full max-w-[70%] bg-[#F8F8F7] dark:bg-[#2C2C2C] overflow-y-auto flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-white dark:bg-[#2C2C2C] p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+        <div className="sticky top-0 z-10 bg-[#F8F8F7] dark:bg-[#2C2C2C] p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
           <div className='flex gap-2 items-center'>
             <Button
               variant="ghost"
@@ -200,44 +214,44 @@ export function PDFViewer({ file, onClose }: PDFViewerProps) {
         </div>
 
         <div className='p-7'>
-        <div 
-          className="flex-1 p-4 overflow-auto border-[20px] rounded-[10px] border-[#F0F0EF] dark:border-[#404040]" 
-          style={{
-            transform: `scale(${zoomLevel / 100})`,
-            transformOrigin: '0 0'
-          }}
-        >
-          <Document
-            key={`pdf-doc-${fileKey}`}
-            file={file}
-            onLoadSuccess={onDocumentLoadSuccess}
-            onLoadError={onDocumentLoadError}
-            className="flex justify-center"
-            loading={
-              <div className="flex justify-center items-center h-64">
-                <p>Loading PDF...</p>
-              </div>
-            }
-            error={
-              <div className="text-red-500 p-4">
-                Failed to load PDF. Please try again.
-              </div>
-            }
+          <div
+            className="flex-1 p-4 overflow-auto border-[20px] rounded-[10px] border-[#F0F0EF] dark:border-[#404040]"
+            style={{
+              transform: `scale(${zoomLevel / 100})`,
+              transformOrigin: '0 0'
+            }}
           >
-            <Page
-              pageNumber={pageNumber}
-              width={800}
-              renderTextLayer={true}
-              renderAnnotationLayer={true}
-              className="border border-gray-200 dark:border-gray-700"
+            <Document
+              key={`pdf-doc-${fileKey}`}
+              file={file}
+              onLoadSuccess={onDocumentLoadSuccess}
+              onLoadError={onDocumentLoadError}
+              className="flex justify-center"
               loading={
                 <div className="flex justify-center items-center h-64">
-                  <p>Loading page {pageNumber}...</p>
+                  <p>Loading PDF...</p>
                 </div>
               }
-            />
-          </Document>
-        </div>
+              error={
+                <div className="text-red-500 p-4">
+                  Failed to load PDF. Please try again.
+                </div>
+              }
+            >
+              <Page
+                pageNumber={pageNumber}
+                width={800}
+                renderTextLayer={true}
+                renderAnnotationLayer={true}
+                className="border border-gray-200 dark:border-gray-700"
+                loading={
+                  <div className="flex justify-center items-center h-64">
+                    <p>Loading page {pageNumber}...</p>
+                  </div>
+                }
+              />
+            </Document>
+          </div>
         </div>
       </div>
     </motion.div>
