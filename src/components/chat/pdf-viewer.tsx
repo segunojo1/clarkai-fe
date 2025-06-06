@@ -9,11 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { motion } from "framer-motion";
 import ThemeSwitcher from '../theme-switcher';
-import { AppSidebar } from '../app-sidebar';
 import UserAvatar from '../user-avatar';
 import { useChatStore } from '@/store/chat.store';
 import { ChatMessageList } from './message-list';
-import ChatInputForm from '../home/chat-input-form';
 import { useParams } from 'next/navigation';
 import ChatInputForm2 from '../home/small-chat-input-form';
 

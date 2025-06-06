@@ -12,7 +12,7 @@ interface ChatStore {
   setIsLoading: (isLoading: boolean) => void
   setCurrentChatId: (chatId: string | null) => void
   sendMessage: (chat_id: string, text: string, previous_messages: ChatMessage[], strict_mode: boolean, files?: File) => Promise<void>
-  getMessages: (page: number, chat_id: string) => Promise<ChatMessage[]>
+  getMessages: (page: number, chat_id: string) => Promise<ChatResponse>
   setMessages: (messages: ChatMessage[]) => void
   setChatDetails: (chatDetails: ChatResponse) => void
 }

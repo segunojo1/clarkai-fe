@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import ChatInputForm from '@/components/home/chat-input-form'
 import { WelcomeScreen } from '@/components/chat/welcome-screen'
 import { ChatMessageList } from '@/components/chat/message-list'
@@ -15,7 +15,6 @@ export default function ChatPage() {
 
   const { getMessages } = useChatStore()
   const router = useRouter()
-const [chatName, setChatName] = useState();
   useEffect(() => {
     console.log(id);
 

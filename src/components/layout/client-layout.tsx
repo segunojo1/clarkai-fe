@@ -1,14 +1,12 @@
 'use client';
 
-import { Edit, File, PlusIcon } from "lucide-react";
-import { AppSidebar } from "../app-sidebar";
-import { SidebarProvider, SidebarTrigger, useSidebar } from "../ui/sidebar";
+import { Edit } from "lucide-react";
+import { SidebarTrigger, useSidebar } from "../ui/sidebar";
 import { Button } from "../ui/button";
 import authService from "@/services/auth.service";
 import { useRouter } from "next/navigation";
 import ThemeSwitcher from "../theme-switcher";
 import Link from "next/link";
-import UserAvatar from "../user-avatar";
 
 export default function ClientLayout({
     children,

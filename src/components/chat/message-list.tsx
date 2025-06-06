@@ -12,22 +12,22 @@ import UserAvatar from '../user-avatar';
 import { cn } from '@/lib/utils';
 import { useSidebar } from '../ui/sidebar';
 
-const isFile = (obj: unknown): obj is File => {
-  if (obj instanceof File) return true;
-  if (typeof obj !== 'object' || obj === null) return false;
+// const isFile = (obj: unknown): obj is File => {
+//   if (obj instanceof File) return true;
+//   if (typeof obj !== 'object' || obj === null) return false;
 
-  const fileLike = obj as Record<keyof File, unknown>;
-  return (
-    typeof fileLike.name === 'string' &&
-    typeof fileLike.size === 'number' &&
-    typeof fileLike.type === 'string'
-  );
-};
+//   const fileLike = obj as Record<keyof File, unknown>;
+//   return (
+//     typeof fileLike.name === 'string' &&
+//     typeof fileLike.size === 'number' &&
+//     typeof fileLike.type === 'string'
+//   );
+// };
 
 const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) => {
   const [showPdfViewer, setShowPdfViewer] = useState(false);
   const fileUrlRef = useRef<string>('');
-  const {open, setOpen} = useSidebar()
+  const { setOpen } = useSidebar()
 
   // Create object URL for the file
   useEffect(() => {
@@ -125,7 +125,9 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
 
       {showPdfViewer && (
         <PDFViewer
-          file={file instanceof File ? file : fileUrlRef.current || file}
+          file={file instanceof File ? file :
+            'url' in file && file.url ? file.url :
+              new File([], file.name, { type: file.type })}
           onClose={() => setShowPdfViewer(false)}
         />
       )}
@@ -194,7 +196,7 @@ export function ChatMessageList({
             </div>
           </div>
         ))}
-        
+
         {isLoading && (
           <div className="flex justify-start">
             <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 max-w-[80%]">
@@ -206,7 +208,7 @@ export function ChatMessageList({
             </div>
           </div>
         )}
-        
+
         {/* This empty div will be used for auto-scrolling */}
         <div ref={messagesEndRef} />
       </div>
