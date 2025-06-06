@@ -101,8 +101,15 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   },
 
   getMessages: async (page = 1, chat_id) => {
-    const messages = await chatService.getChat(page, chat_id)
-    console.log(messages);
-    return messages.messages
+    try {
+      const messages = await chatService.getChat(page, chat_id)
+      console.log(messages);
+      return messages
+    } catch (error) {
+
+      console.error(error);
+      throw error
+    }
+
   }
 }))

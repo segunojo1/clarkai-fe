@@ -4,16 +4,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChatMessage } from "@/lib/types";
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-
 import type { FileAttachment as FileAttachmentType } from '@/lib/types';
-
-// type ExtendedFile = File & {
-//   url?: string;
-// };
+import { ChevronRight, FileText } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { PDFViewer } from './pdf-viewer';
+import UserAvatar from '../user-avatar';
 
 const isFile = (obj: unknown): obj is File => {
   if (obj instanceof File) return true;
-  
   if (typeof obj !== 'object' || obj === null) return false;
   
   const fileLike = obj as Record<keyof File, unknown>;
@@ -24,115 +22,79 @@ const isFile = (obj: unknown): obj is File => {
   );
 };
 
-// Helper function to convert FileAttachment to File-like object
-// const toFile = (attachment: FileAttachmentType): File => {
-//   return new File(
-//     [],
-//     attachment.name,
-//     {
-//       type: attachment.type,
-//       lastModified: Date.now()
-//     }
-//   );
-// };
-import { ChevronRight, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { PDFViewer } from './pdf-viewer';
-
 const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) => {
   const [showPdfViewer, setShowPdfViewer] = useState(false);
-  const [objectUrl, setObjectUrl] = useState<string>('');
-
-  console.log(file);
-
-  // Create and clean up object URL for the file
   const fileUrlRef = useRef<string>('');
 
+  // Create object URL for the file
   useEffect(() => {
-    const createObjectUrl = async () => {
+    const createObjectUrl = () => {
       // Clean up previous URL if it exists
       if (fileUrlRef.current) {
         URL.revokeObjectURL(fileUrlRef.current);
         fileUrlRef.current = '';
       }
 
-      if (!file) {
-        setObjectUrl('');
-        return;
-      }
+      if (!file) return;
 
       try {
-        let newUrl = '';
-
         // If it's a File object
         if (file instanceof File) {
-          newUrl = URL.createObjectURL(file);
-          fileUrlRef.current = newUrl;
-        }
-        // If it's a FileAttachment with a URL
-        else if ('url' in file && file.url) {
-          newUrl = file.url;
+          fileUrlRef.current = URL.createObjectURL(file);
         }
         // If it's a FileAttachment with data
         else if ('type' in file) {
           const blob = new Blob([], { type: file.type });
-          newUrl = URL.createObjectURL(blob);
-          fileUrlRef.current = newUrl;
+          fileUrlRef.current = URL.createObjectURL(blob);
         }
-
-        setObjectUrl(newUrl);
       } catch (error) {
         console.error('Error creating file URL:', error);
-        setObjectUrl('');
       }
     };
 
     createObjectUrl();
 
-    // Cleanup function to revoke the object URL
+    // Cleanup function
     return () => {
       if (fileUrlRef.current) {
         URL.revokeObjectURL(fileUrlRef.current);
-        fileUrlRef.current = '';
       }
     };
   }, [file]);
 
   const handleOpenInCanvas = (e: React.MouseEvent) => {
     e.stopPropagation();
-
-    // Always use the same objectUrl that was created in the effect
-    if (objectUrl) {
-      setShowPdfViewer(true);
-    }
+    setShowPdfViewer(true);
   };
 
-  // const handleOpenInNewTab = (e: React.MouseEvent) => {
-  //   e.stopPropagation();
-
-  //   if (objectUrl) {
-  //     window.open(objectUrl, '_blank');
-  //   }
-  // };
-
   if (!file) return null;
+
+  const getFileUrl = () => {
+    if (file instanceof File) {
+      return fileUrlRef.current || URL.createObjectURL(file);
+    }
+    if ('url' in file && file.url) {
+      return file.url;
+    }
+    return fileUrlRef.current;
+  };
 
   return (
     <>
       <div className="mt-2 flex flex-col items-start gap-2">
         <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-gray-700 dark:text-gray-300 flex items-center gap-2"
-              onClick={handleOpenInCanvas}
-            >
-              View in Canvas
-              <ChevronRight />
-            </Button>
-          </div>
-        <div className="bg-gray-50 p-3 rounded-lg dark:bg-[#404040]  flex flex-col items-center gap-2">
-          <div className="flex-1 flex  gap-2 min-w-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-gray-700 dark:text-gray-300 flex items-center gap-2"
+            onClick={handleOpenInCanvas}
+          >
+            View in Canvas
+            <ChevronRight />
+          </Button>
+        </div>
+        <div className="bg-gray-50 p-3 rounded-lg dark:bg-[#404040] flex flex-col items-center gap-2">
+          <div className="flex-1 flex gap-2 min-w-0">
             <FileText className="text-[#FF3D00]" size={20} />
             <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
               {file.name}
@@ -147,29 +109,19 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
               size="sm"
               className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 px-0"
               onClick={() => {
-                if (objectUrl) {
-                  window.open(objectUrl, '_blank');
-                } else if (isFile(file)) {
-                  const url = URL.createObjectURL(file);
-                  window.open(url, '_blank');
-                  // The URL will be revoked when the window is closed
-                } else if ('url' in file && file.url) {
-                  window.open(file.url, '_blank');
-                }
+                const url = getFileUrl();
+                if (url) window.open(url, '_blank');
               }}
             >
               Open
             </Button>
-
-
           </div>
-          
         </div>
       </div>
 
       {showPdfViewer && (
         <PDFViewer
-          file={file}
+          file={file instanceof File ? file : fileUrlRef.current || file}
           onClose={() => setShowPdfViewer(false)}
         />
       )}
@@ -184,34 +136,32 @@ export function ChatMessageList({
   messages: ChatMessage[],
   isLoading: boolean
 }) {
-  console.log(messages);
-
   return (
-    <div className="flex flex-col space-y-4 p-4 overflow-y-auto h-[calc(100vh-200px)]">
+    <div className="flex  w-full flex-col space-y-4 p-4 overflow-y-auto h-[calc(100vh-200px)]">
+      <div className='absolute left-5'>
+
+      <UserAvatar  />
+      </div>
       {messages.length > 0 && (
         <div className="h-[140px]"></div>
       )}
+      <div className='max-w-[750px] mx-auto'>
+
       {messages.map((message, index) => (
         <div
           key={index}
-          className={`flex flex-col items-${message.fromUser ? 'end' : 'start'
-            } text-[15px] satoshi font-normal mb-4 w-full`}
+          className={`flex flex-col items-${message.fromUser ? 'end' : 'start'} text-[15px] satoshi font-normal mb-4 w-full`}
         >
           <div className="flex flex-col items-end max-w-[80%] gap-2">
-            {/* File attachments */}
             {message.attachments?.map((file, fileIndex) => (
               <div
                 key={fileIndex}
-                className={`w-full rounded-2xl ${message.fromUser === true
-                    ? ''
-                    : 'bg-gray-100 dark:bg-gray-800'
-                  }`}
+                className={`w-full rounded-2xl ${message.fromUser ? '' : 'bg-gray-100 dark:bg-gray-800'}`}
               >
                 <FileAttachmentPreview file={file} />
               </div>
             ))}
 
-            {/* Message content */}
             {message.text && (
               <div
                 className={`rounded-[69px] p-4 ${message.fromUser
@@ -219,22 +169,17 @@ export function ChatMessageList({
                     : 'bg-transparent'
                   }`}
               >
-                {
-                  message.fromUser ? (
-                    <p>{message.text}</p>
-                  ) : (
-                    <Markdown remarkPlugins={[remarkGfm]}>{message.text}</Markdown>
-                  )
-                }
+                {message.fromUser ? (
+                  <p>{message.text}</p>
+                ) : (
+                  <Markdown remarkPlugins={[remarkGfm]}>{message.text}</Markdown>
+                )}
               </div>
             )}
-            {/* <p className='self-start '>
-            {message.createdAt}
-
-            </p> */}
           </div>
         </div>
       ))}
+      </div>
       {isLoading && (
         <div className="flex justify-start">
           <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 max-w-[80%]">
