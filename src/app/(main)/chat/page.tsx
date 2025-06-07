@@ -10,7 +10,7 @@ import { useEffect } from 'react'
 import chatService from '@/services/chat.service'
 
 const Chat = () => {
-  const { isLoading, setCurrentChatId, setIsLoading } = useChatStore()
+  const { isLoading, setCurrentChatId, setIsLoading, sendMessage } = useChatStore()
   const { chatId } = useParams()
   const router = useRouter()
 
@@ -22,10 +22,12 @@ const Chat = () => {
   const handleSend = async (message: string) => {
     setIsLoading(true)
     if (!message.trim()) return
-    const {id} = await chatService.createChat();
+    const { id } = await chatService.createChat();
     console.log(id);
     router.push(`/chat/${id}`)
-    // await sendMessage(message)
+    if (id) {
+      await sendMessage(id, message, [], false)
+    }
   }
 
   return (

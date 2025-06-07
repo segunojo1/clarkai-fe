@@ -41,3 +41,11 @@ export interface ChatResponse {
     createdAt: Date
     updatedAt: Date
   }
+
+  export interface ChatBox {
+    createdAt: string
+    id: string
+    name: string
+    updatedAt: string
+    workspaceId: null | string
+  }

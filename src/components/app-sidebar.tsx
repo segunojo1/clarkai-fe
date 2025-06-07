@@ -23,19 +23,36 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "./ui/button"
 import { useUserStore } from "@/store/user.store"
+import { useChatStore } from "@/store/chat.store"
 
 export const LatestChat = () => {
-    return (
-        <Card className="text-[#525252] dark:text-[#D4D4D4] bg-[#F0F0EF] dark:bg-[#404040] rounded-[10px] !p-[10px] h-[132px] w-[214px] shadow-none mx-auto">
-            <CardContent className=" flex flex-col items-center justify-between px-0 h-full">
-                <Globe width={20} height={20} />
-                <p className=" text-[12px]/[22px] font-medium satoshi text-center">Your latest chats will show up once you start talking to Clark.</p>
-                <Link href="/chat" className="w-full cursor-pointer">
-                <Button className="min-w-full  bg-[#F8F8F7] dark:bg-[#2C2C2C] text-[#525252] text-3 font-semibold">Start a Chat</Button>
-                </Link>
-            </CardContent>
-        </Card>
+    const {chats} = useChatStore();
+console.log(chats);
 
+    return (
+        <div>
+            {
+                chats.length == 0 ? (
+                    <Card className="text-[#525252] dark:text-[#D4D4D4] bg-[#F0F0EF] dark:bg-[#404040] rounded-[10px] !p-[10px] h-[132px] w-[214px] shadow-none mx-auto">
+                        <CardContent className=" flex flex-col items-center justify-between px-0 h-full">
+                            <Globe width={20} height={20} />
+                            <p className=" text-[12px]/[22px] font-medium satoshi text-center">Your latest chats will show up once you start talking to Clark.</p>
+                            <Link href="/chat" className="w-full cursor-pointer">
+                            <Button className="min-w-full  bg-[#F8F8F7] dark:bg-[#2C2C2C] text-[#525252] text-3 font-semibold">Start a Chat</Button>
+                            </Link>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <div>
+                    {chats.map(chat => (
+                        <Link href={`/chat/${chat.id}`} className="p-2 w-full py-1 bg-gray-500 hover:bg-gray-800">
+                        <p>{chat.name}</p>
+                        </Link>
+                    ))}  
+                    </div>
+                )
+            }
+        </div>
     )
 }
 

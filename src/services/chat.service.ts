@@ -68,7 +68,7 @@ class ChatService {
     }
   }
 
-  public async getChat(page: number, chat_id: string) {
+  public async getChat(page: number, chat_id?: string) {
     try {
         const response = await this.api.get(`/aichat`, {
             params: {page, chat_id}

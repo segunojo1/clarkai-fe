@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
+import { Canvas } from '@react-pdf/renderer';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -248,6 +249,17 @@ console.log(chatDetails);
                   </div>
                 }
               />
+
+              <Canvas
+    pageNumber={pageNumber}
+    width={800}
+    className="border border-gray-200 dark:border-gray-700 mt-4"
+    loading={
+      <div className="flex justify-center items-center h-64">
+        <p>Rendering canvas for page {pageNumber}...</p>
+      </div>
+    }
+  />
             </Document>
           </div>
         </div>

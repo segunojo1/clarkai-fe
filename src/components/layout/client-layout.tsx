@@ -7,12 +7,15 @@ import authService from "@/services/auth.service";
 import { useRouter } from "next/navigation";
 import ThemeSwitcher from "../theme-switcher";
 import Link from "next/link";
+import { useEffect } from "react";
+import { useChatStore } from "@/store/chat.store";
 
 export default function ClientLayout({
     children,
 }: {
     children: React.ReactNode;
 }) { 
+    const {getAllChats, setChats} = useChatStore()
     const {
     open
   } = useSidebar()
@@ -21,6 +24,20 @@ export default function ClientLayout({
         authService.logout();
         route.push("/auth/login")
     }
+    useEffect(() => {
+        const getChatss = async () => {
+            try {
+                const answer = await getAllChats(1)
+                console.log(answer);
+                setChats(answer)
+                
+            } catch (error) {
+                console.error(error);
+                
+            }
+        }
+        getChatss()
+    }, [])
     return (
             <main className="w-full relative">
                 {!open && (

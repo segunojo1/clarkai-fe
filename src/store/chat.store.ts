@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { ChatMessage, ChatResponse } from '@/lib/types'
+import { ChatBox, ChatMessage, ChatResponse } from '@/lib/types'
 import chatService from '@/services/chat.service'
 
 interface ChatStore {
@@ -7,6 +7,7 @@ interface ChatStore {
   chatDetails: ChatResponse | null
   isLoading: boolean
   currentChatId: string | null
+  chats: ChatBox[]
   addMessage: (message: ChatMessage) => void
   clearMessages: () => void
   setIsLoading: (isLoading: boolean) => void
@@ -15,6 +16,8 @@ interface ChatStore {
   getMessages: (page: number, chat_id: string) => Promise<ChatResponse>
   setMessages: (messages: ChatMessage[]) => void
   setChatDetails: (chatDetails: ChatResponse) => void
+  getAllChats: (page: number) => Promise<ChatBox[]>
+  setChats: (chats: ChatBox[]) => void
 }
 
 export const useChatStore = create<ChatStore>((set, get) => ({
@@ -22,6 +25,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   isLoading: false,
   currentChatId: null,
   chatDetails: null,
+  chats: [],
   setChatDetails: (chatDetails: ChatResponse) => {
     set({ chatDetails })
   },
@@ -41,6 +45,10 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
   setMessages: (messages: ChatMessage[]) => {
     set({ messages })
+  },
+
+  setChats: (chats: ChatBox[]) => {
+    set({ chats })
   },
 
   setCurrentChatId: (chatId: string | null) => {
@@ -116,5 +124,16 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       throw error
     }
 
+  },
+
+  getAllChats: async (page = 1) => {
+    try {
+      const messages = await chatService.getChat(page)
+      console.log(messages);
+      return messages.chats
+    } catch (error) {
+      console.error(error);
+      throw error
+    }
   }
 }))
