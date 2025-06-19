@@ -45,7 +45,7 @@ console.log(chats);
                 ) : (
                     <div>
                     {chats.map(chat => (
-                        <Link href={`/chat/${chat.id}`} className="p-2 w-full py-1 bg-gray-500 hover:bg-gray-800">
+                        <Link key={chat.id} href={`/chat/${chat.id}`} className="p-2 w-full py-1 bg-gray-500 hover:bg-gray-800">
                         <p>{chat.name}</p>
                         </Link>
                     ))}  
