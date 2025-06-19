@@ -81,7 +81,7 @@ export function PDFViewer({ file, onClose }: PDFViewerProps) {
   };
 
   const { messages, sendMessage, chatDetails } = useChatStore()
-console.log(chatDetails);
+  console.log(chatDetails);
 
   const handleSend = async (text: string, files?: File) => {
     if (!text.trim()) return
@@ -250,16 +250,16 @@ console.log(chatDetails);
                 }
               />
 
-              <Canvas
-    pageNumber={pageNumber}
-    width={800}
-    className="border border-gray-200 dark:border-gray-700 mt-4"
-    loading={
-      <div className="flex justify-center items-center h-64">
-        <p>Rendering canvas for page {pageNumber}...</p>
-      </div>
-    }
-  />
+              {/* <Canvas
+                pageNumber={pageNumber}
+                width={800}
+                className="border border-gray-200 dark:border-gray-700 mt-4"
+                loading={
+                  <div className="flex justify-center items-center h-64">
+                    <p>Rendering canvas for page {pageNumber}...</p>
+                  </div>
+                }
+              /> */}
             </Document>
           </div>
         </div>
