@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { Canvas } from '@react-pdf/renderer';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
