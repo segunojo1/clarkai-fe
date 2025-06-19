@@ -13,7 +13,7 @@ const SideBar = () => {
         </div>
         <Image src="/assets/clark-log.png" alt="clark logo" />
         {SideBarItems.map(items => <SidebarItem key={items.text} {...items}/>)}
-    </aside>
+    </aside> 
   )
 }
 

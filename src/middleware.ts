@@ -33,7 +33,7 @@ export function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  const isPublicPath = pathname.startsWith('/auth/');
+  const isPublicPath = pathname.startsWith('/auth/') || pathname.startsWith('/');
 
   if (!isAuthenticated && !isPublicPath) {
     const loginUrl = new URL('/auth/login', request.url);
