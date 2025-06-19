@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Clark AI - Your Smart Study Sidekick
+
+Clark AI is a revolutionary study companion built by students, for students. This web application helps you learn faster and smarter by:
+- Uploading PDFs and converting them into interactive learning materials
+- Chatting with AI to get personalized explanations and insights
+- Collaborating on an infinite whiteboard for group study sessions
+- Tracking your progress and understanding in real-time
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js (Latest LTS version recommended)
+- npm (comes with Node.js)
+
+### Installation
+1. Clone the repository:
+```bash
+git clone [repository-url]
+cd clarkai-fe
+```
+
+2. Install dependencies (use --force flag):
+```bash
+npm install --force
+# or
+yarn install --force
+```
 
 ## Getting Started
 
-First, run the development server:
+### Development
 
+Start the development server:
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📚 Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Smart PDF Processing**: Upload your study materials and get interactive learning experiences
+- **AI-Powered Learning**: Get personalized explanations and insights from AI tutors
+- **Collaborative Whiteboard**: Study with friends using our infinite whiteboard feature
+- **Progress Tracking**: Monitor your learning progress and understanding
 
-## Learn More
+## 🛠️ Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- **Frontend**: Next.js with TypeScript
+- **UI Components**: React with custom animations
+- **Styling**: Tailwind CSS for responsive design
+- **Motion**: Framer Motion for smooth animations
+- **State Management**: Zustand for global state management
+- **API Services**: 
+  - Authentication service for user management
+  - Chat service for AI interactions
+  - Workspace service for collaborative features
+- **API Integration**: 
+  - GeminiAI API integration for AI features
+  - Custom backend API integration for core functionality
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📈 Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The project follows a modular architecture:
+- `/src/components`: Reusable React components
+- `/src/app`: Next.js app directory
+- `/src/services`: API integration services
+- `/src/store`: Zustand store for state management
+- `/public`: Static assets and images
+- `/src/styles`: Global styles and theme configuration
 
-## Deploy on Vercel
+## 🤝 Contributing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+We welcome contributions from the community! Please read our contributing guidelines before submitting pull requests.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Built by:
+  - Seyi Ogundipe
+  - Ashiru Sheriffdeen
+  - Hasbiyallah Oyebo
+- Special thanks to our early users for their valuable feedback
+- Inspired by the belief that learning should be smarter, not harder
+- Developed with a passion for making education more accessible and efficient
