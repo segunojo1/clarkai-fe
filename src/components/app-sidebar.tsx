@@ -26,8 +26,8 @@ import { useUserStore } from "@/store/user.store"
 import { useChatStore } from "@/store/chat.store"
 
 export const LatestChat = () => {
-    const {chats} = useChatStore();
-console.log(chats);
+    const { chats } = useChatStore();
+    console.log(chats);
 
     return (
         <div>
@@ -38,17 +38,21 @@ console.log(chats);
                             <Globe width={20} height={20} />
                             <p className=" text-[12px]/[22px] font-medium satoshi text-center">Your latest chats will show up once you start talking to Clark.</p>
                             <Link href="/chat" className="w-full cursor-pointer">
-                            <Button className="min-w-full  bg-[#F8F8F7] dark:bg-[#2C2C2C] text-[#525252] text-3 font-semibold">Start a Chat</Button>
+                                <Button className="min-w-full  bg-[#F8F8F7] dark:bg-[#2C2C2C] text-[#525252] text-3 font-semibold">Start a Chat</Button>
                             </Link>
                         </CardContent>
                     </Card>
                 ) : (
-                    <div>
-                    {chats.map(chat => (
-                        <Link key={chat.id} href={`/chat/${chat.id}`} className="p-2 w-full py-1 bg-gray-500 hover:bg-gray-800">
-                        <p>{chat.name}</p>
-                        </Link>
-                    ))}  
+                    <div className="">
+                        <h2 className="text-[12px]/[22px] font-bold">Recent Chats</h2>
+                        <div className="max-h-[120px] overflow-y-scroll">
+                            {chats.map(chat => (
+                                <Link key={chat.id} href={`/chat/${chat.id}`} className="p-1 w-full hover:bg-gray-800 flex px-[11px]">
+                                    <p className="text-[14px] font-medium">{chat.name}</p>
+                                </Link>
+                            ))}
+                        </div>
+                        <Button className="w-full text-[14px] font-bold text-white bg-[#404040] mt-1">View all chat</Button>
                     </div>
                 )
             }
@@ -154,16 +158,16 @@ export function AppSidebar() {
                 </SidebarGroup>
             </SidebarHeader>
 
-<SidebarContent className="[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overflow-y-auto">
-  <SidebarGroupCustom items={items} /> 
-  <SidebarGroup className="mx-auto">
-    <LatestChat />
-  </SidebarGroup>
-  <SidebarGroup className="mx-auto">
-    <LatestWorkspace />
-  </SidebarGroup>
-  <SidebarGroupCustom items={workspaceItems} label="Workspace Hub" />
-</SidebarContent>
+            <SidebarContent className="[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overflow-y-auto">
+                <SidebarGroupCustom items={items} />
+                <SidebarGroup className="mx-auto">
+                    <LatestChat />
+                </SidebarGroup>
+                <SidebarGroup className="mx-auto">
+                    <LatestWorkspace />
+                </SidebarGroup>
+                <SidebarGroupCustom items={workspaceItems} label="Workspace Hub" />
+            </SidebarContent>
 
             {/* <SidebarFooter>
                 <SidebarGroup>
