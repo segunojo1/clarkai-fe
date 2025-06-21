@@ -11,6 +11,7 @@ import { PDFViewer } from './pdf-viewer';
 import UserAvatar from '../user-avatar';
 import { cn } from '@/lib/utils';
 import { useSidebar } from '../ui/sidebar';
+import MarkdownRenderer from '../markdown-renderer';
 
 // const isFile = (obj: unknown): obj is File => {
 //   if (obj instanceof File) return true;
@@ -135,6 +136,14 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
   );
 };
 
+const copyToClipboard = (text: string) => {
+  navigator.clipboard.writeText(text).then(() => {
+    // Optionally show a toast or feedback
+    console.log("Copied to clipboard!");
+  });
+};
+
+
 export function ChatMessageList({
   messages,
   isLoading,
@@ -180,19 +189,27 @@ export function ChatMessageList({
               ))}
 
               {message.text && (
-                <div
-                  className={`rounded-[69px] p-4 ${message.fromUser
-                    ? 'bg-[#F0F0EF] dark:bg-[#404040] dark:text-white text-black'
-                    : 'bg-transparent'
-                    }`}
-                >
-                  {message.fromUser ? (
-                    <p>{message.text}</p>
-                  ) : (
-                    <Markdown remarkPlugins={[remarkGfm]}>{message.text}</Markdown>
-                  )}
-                </div>
-              )}
+  <div className={`relative group rounded-[69px] p-4 ${message.fromUser ? 'bg-[#F0F0EF] dark:bg-[#404040] dark:text-white text-black' : 'bg-transparent'}`}>
+    {message.fromUser ? (
+      <p>{message.text}</p>
+    ) : (
+      <div className="markdown-body text-black dark:text-white">
+        <MarkdownRenderer content={message.text} />
+      </div>
+    )}
+
+    {/* Action buttons */}
+    <div className="absolute right-0 mt-1 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <button
+        onClick={() => copyToClipboard(message.text)}
+        className="text-sm text-blue-500 hover:underline"
+      >
+        Copy
+      </button>
+    </div>
+  </div>
+)}
+
             </div>
           </div>
         ))}
