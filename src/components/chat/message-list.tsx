@@ -189,26 +189,26 @@ export function ChatMessageList({
               ))}
 
               {message.text && (
-  <div className={`relative group rounded-[69px] p-4 ${message.fromUser ? 'bg-[#F0F0EF] dark:bg-[#404040] dark:text-white text-black' : 'bg-transparent'}`}>
-    {message.fromUser ? (
-      <p>{message.text}</p>
-    ) : (
-      <div className="markdown-body text-black dark:text-white">
-        <MarkdownRenderer content={message.text} />
-      </div>
-    )}
+                <div className={`relative group rounded-[69px] p-4 ${message.fromUser ? 'bg-[#F0F0EF] dark:bg-[#404040] dark:text-white text-black' : 'bg-transparent'}`}>
+                  {message.fromUser ? (
+                    <p>{message.text}</p>
+                  ) : (
+                    <div className="markdown-body text-black dark:text-white">
+                      <MarkdownRenderer content={message.text} />
+                    </div>
+                  )}
 
-    {/* Action buttons */}
-    <div className="absolute right-0 mt-1 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-      <button
-        onClick={() => copyToClipboard(message.text)}
-        className="text-sm text-blue-500 hover:underline"
-      >
-        Copy
-      </button>
-    </div>
-  </div>
-)}
+                  {/* Action buttons */}
+                  <div className="absolute right-0 mt-1 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => copyToClipboard(message.text)}
+                      className="text-sm text-blue-500 hover:underline"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </div>
+              )}
 
             </div>
           </div>

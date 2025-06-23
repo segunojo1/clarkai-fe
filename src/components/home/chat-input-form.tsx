@@ -8,13 +8,20 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Button } from "../ui/button"
 import { Textarea } from "../ui/textarea"
-import {  X, FileText } from "lucide-react"
+import {  X, FileText, MicOff } from "lucide-react"
 import { useChatStore } from "@/store/chat.store"
 import { toast } from "sonner"
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs"
 import Image from "next/image"
 import { ArrowUp, Loader } from "lucide-react"
 import { FormMessage } from "../ui/form"
+
+declare global {
+  interface Window {
+    webkitSpeechRecognition: any;
+    SpeechRecognition: any;
+  }
+}
 
 const ChatInputForm = ({
   onSend,
@@ -27,6 +34,11 @@ const ChatInputForm = ({
   const [previewUrl, setPreviewUrl] = useState<string>('')
   const [mode, setMode] = useState<'ask' | 'research' | 'create'>('ask')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const isSpeechSupported = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+  const [isListening, setIsListening] = useState<boolean>(false)
+  const [volume, setVolume] = useState<number>(0)
+  const [interimTranscript, setInterimTranscript] = useState<string>('')
+  const recognitionRef = useRef<any>(null)
 
   const form = useForm<z.infer<typeof chatSchema>>({
     resolver: zodResolver(chatSchema),
@@ -36,6 +48,94 @@ const ChatInputForm = ({
   })
 
   const { isLoading } = useChatStore()
+
+  const toggleListening = () => {
+    if (isListening) {
+      // Stop listening
+      if (recognitionRef.current) {
+        recognitionRef.current.stop()
+        setInterimTranscript('')
+      }
+      setIsListening(false)
+    } else {
+      // Start listening
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+      if (!SpeechRecognition) {
+        toast.error('Speech recognition is not supported in your browser')
+        return
+      }
+
+      const recognition = new SpeechRecognition()
+      recognition.continuous = true
+      recognition.interimResults = true
+      
+      // Add event listener for volume/sound detection
+      if ('webkitAudioContext' in window) {
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        
+        navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+          .then((stream) => {
+            const source = audioContext.createMediaStreamSource(stream);
+            source.connect(analyser);
+            
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            
+            const updateVolume = () => {
+              if (!isListening) return;
+              analyser.getByteFrequencyData(dataArray);
+              const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+              setVolume(Math.min(100, average * 0.5)); // Scale and cap the volume
+              requestAnimationFrame(updateVolume);
+            };
+            updateVolume();
+          })
+          .catch((error) => {
+            console.error('Error accessing microphone:', error);
+          });
+      }
+
+      recognition.onresult = (event: any) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + ' ';
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+
+        if (finalTranscript) {
+          form.setValue('chat', form.getValues('chat') + finalTranscript, { shouldValidate: true });
+        }
+        setInterimTranscript(interimTranscript);
+      }
+
+      recognition.onerror = (event: any) => {
+        console.error('Speech recognition error', event.error)
+        toast.error('Error occurred in speech recognition')
+        setIsListening(false)
+        setInterimTranscript('')
+      }
+
+      recognition.onend = () => {
+        setIsListening(false)
+      }
+
+      try {
+        recognition.start()
+        setIsListening(true)
+        recognitionRef.current = recognition
+      } catch (error) {
+        console.error('Speech recognition start failed:', error)
+        toast.error('Failed to start speech recognition')
+      }
+    }
+  }
 
   const handleSubmit = async (values: z.infer<typeof chatSchema>) => {
     if (!values.chat.trim() && !selectedFile) return
@@ -197,7 +297,32 @@ const ChatInputForm = ({
                             className="hidden"
                           />
                         </div>
-                        <Image src="/assets/waveform.svg" alt="" width={30} height={30} className="h-5 w-5 text-gray-500 hover:text-gray-700 cursor-pointer" />
+                        <button
+                          type="button"
+                          onClick={toggleListening}
+                          disabled={!isSpeechSupported}
+                          className={`relative p-1.5 rounded-full transition-all duration-200 ${
+                            isListening 
+                              ? 'bg-red-100 text-red-500 animate-pulse' 
+                              : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700'
+                          }`}
+                          title={isListening ? 'Stop listening' : 'Start voice input'}
+                        >
+                          {isListening ? (
+                            <div className="relative">
+                              <MicOff className="h-5 w-5" />
+                              <div 
+                                className="absolute -inset-1 rounded-full bg-red-100 opacity-75"
+                                style={{
+                                  transform: `scale(${1 + (volume / 200)})`,
+                                  transition: 'transform 0.1s ease-out'
+                                }}
+                              />
+                            </div>
+                          ) : (
+                            <Image width={20} height={20} alt="" src="/assets/waveform.svg" className="h-5 w-5 text-gray-500 hover:text-gray-700 cursor-pointer" />
+                          )}
+                        </button>
                         <Image src="/assets/at.svg" alt="" width={21} height={30} />
                         <Button
                           type="submit"
