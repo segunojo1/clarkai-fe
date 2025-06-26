@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { ChatMessage } from "@/lib/types";
-import Markdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import type { FileAttachment as FileAttachmentType } from '@/lib/types';
 import { ChevronRight, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
