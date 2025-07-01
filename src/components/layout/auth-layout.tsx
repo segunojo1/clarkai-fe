@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from '../ui/button';
 import Image from 'next/image';
+import { SessionProvider } from 'next-auth/react';
 
 export interface AuthClientLayoutProps {
   children: React.ReactNode;
@@ -24,6 +25,7 @@ export default function AuthClientLayout({
   const { theme, setTheme } = useTheme();
 
   return (
+    <SessionProvider>
     <div className='flex flex-col w-full min-h-screen'>
       {/* Fixed Top Bar */}
       <div className='fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between px-8 py-2'>
@@ -99,5 +101,6 @@ export default function AuthClientLayout({
         {showSidebar && <div className='w-1/3'></div>}
       </div>
     </div>
+    </SessionProvider>
   )
 }

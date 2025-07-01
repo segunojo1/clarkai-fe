@@ -2,7 +2,7 @@
 import Image from 'next/image'
 import React from 'react'
 import AnimatedStoryContent from './story'
-import { Button } from './ui/button'
+import { Button } from '../ui/button'
 import {
     Dialog,
     DialogClose,

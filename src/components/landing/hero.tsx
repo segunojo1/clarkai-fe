@@ -1,8 +1,8 @@
 'use client'
-import Logo from './shared/logo'
+import Logo from '../shared/logo'
 import Image from 'next/image'
 import Link from 'next/link'
-import AnimatedText from './shared/animated-text'
+import AnimatedText from '../shared/animated-text'
 
 const Hero = () => {
     return (

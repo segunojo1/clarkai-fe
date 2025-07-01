@@ -15,6 +15,7 @@ import StudyVibe from '@/components/auth/study-vibe';
 import AddProfile from '@/components/auth/add-profile';
 import useAuthStore from '@/store/auth.store';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSession } from 'next-auth/react';
 
 const variants = {
   enter: (direction: number) => ({
@@ -62,7 +63,7 @@ const SignUpPage = () => {
   } = useAuthStore();
 
   const currentStep = signupData.currentStep || 0;
-  const currentStepName = STEPS[currentStep] as Step;
+  let currentStepName = STEPS[currentStep] as Step;
   const [direction, setDirection] = useState(0);
   const [prevvStep, setPrevStep] = useState(0);
 
@@ -97,6 +98,19 @@ const SignUpPage = () => {
       confirmPassword: signupData.confirmPassword || ""
     },
   });
+
+  const { data: session, status } = useSession();
+  useEffect(() => {
+
+  if (status === "authenticated" && session.googleIdToken) {
+    // Persist the token and flag
+    sessionStorage.setItem("google_oauth_token", session.googleIdToken);
+    sessionStorage.setItem("is_oauth_signup", "true");
+
+    // Update your local step state
+    currentStepName = 'about-you';
+  }
+}, []);
 
   // Update form values when signupData changes
   useEffect(() => {
