@@ -104,7 +104,7 @@ const SignUp = () => {
                     <div className="relative flex items-center">
                         <div className="w-full border-t border-[#D4D4D4]"></div>
                     </div>
-                    <Button
+                    {/* <Button
                         variant="outline"
                         className="w-full flex items-center justify-center gap-2 p-4  border-[#D4D4D4] rounded-[5px] border-[1px] h-[52px] text-[16px] font-normal"
                         type="button"
@@ -116,7 +116,7 @@ const SignUp = () => {
                             <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
                         </svg>
                         Continue with Google
-                    </Button>
+                    </Button> */}
                     <Link href="/auth/login" className="text-[#FF3D00] text-base justify-self-end self-end mb-4">Log in?</Link>
                     <Button type="submit" className="bg-[#FF3D00] w-full py-[13px] h-full">Submit</Button>
                 </form>
