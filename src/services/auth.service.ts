@@ -152,60 +152,90 @@ class AuthService {
   }
 
   public async register(data: SignupPayload): Promise<{ user: User; token: string }> {
-  // Check if it's an OAuth signup
-  const isOauth = sessionStorage.getItem("is_oauth_signup") === "true";
-  const googleToken = sessionStorage.getItem("google_oauth_token");
+    console.log("Starting registration process");
+    
+    // Check if it's an OAuth signup
+    const isOauth = sessionStorage.getItem("is_oauth_signup") === "true";
+    const googleToken = sessionStorage.getItem("google_oauth_token");
+    
+    console.log("OAuth status:", {
+      isOauth,
+      googleToken: googleToken ? "[TOKEN_PRESENT]" : "[NO_TOKEN]"
+    });
 
-  try {
-    const formData = new FormData();
+    try {
+      const formData = new FormData();
 
-    // Inject oauth-specific values into the data object first
-    if (isOauth && googleToken) {
-      data.oauth = true;
-      data.oauth_model = "google";
-      data.oauth_token = googleToken;
-    }
-
-    // Append all fields to formData
-    Object.entries(data).forEach(([key, value]) => {
-      if (key === 'user_image' && value instanceof File) {
-        formData.append('user_image', value);
-      } else if (Array.isArray(value)) {
-        // Handle array fields (interests, study_vibe)
-        value.forEach(item => formData.append(key, item));
-      } else if (value !== undefined && value !== null) {
-        formData.append(key, String(value));
+      // Inject oauth-specific values into the data object first
+      if (isOauth && googleToken) {
+        data.oauth = true;
+        data.oauth_model = "google";
+        data.oauth_token = googleToken;
+        console.log("Setting OAuth data:", {
+          oauth: true,
+          oauth_model: "google",
+          oauth_token: "[TOKEN_PRESENT]"
+        });
       }
-    });
 
-    const response = await this.api.post<{ user: User; token: string }>('/signup', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+      // Append all fields to formData
+      Object.entries(data).forEach(([key, value]) => {
+        if (key === 'user_image' && value instanceof File) {
+          formData.append('user_image', value);
+        } else if (Array.isArray(value)) {
+          // Handle array fields (interests, study_vibe)
+          value.forEach(item => formData.append(key, item));
+        } else if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
+      });
 
-    // Set auth token and user data in cookies
-    if (response.data.token) {
-      Cookies.set('token', response.data.token, this.COOKIE_OPTIONS);
-      Cookies.set('user', JSON.stringify(response.data.user), this.COOKIE_OPTIONS);
-      this.api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      console.log("Sending registration request with data:", {
+        ...data,
+        oauth_token: data.oauth_token ? "[TOKEN_PRESENT]" : "[NO_TOKEN]"
+      });
+
+      const response = await this.api.post<{ user: User; token: string }>('/signup', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log("Registration response:", {
+        user: response.data.user,
+        token: "[TOKEN_PRESENT]"
+      });
+
+      // Set auth token and user data in cookies
+      if (response.data.token) {
+        Cookies.set('token', response.data.token, this.COOKIE_OPTIONS);
+        Cookies.set('user', JSON.stringify(response.data.user), this.COOKIE_OPTIONS);
+        this.api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        console.log("Stored auth token in cookies:", "[TOKEN_PRESENT]");
+      }
+
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Registration error details:', {
+        error,
+        message: error instanceof Error ? error.message : String(error),
+        response: error instanceof Error ? error.response?.data : undefined
+      });
+      let errorMessage = 'Registration failed';
+
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        errorMessage = axiosError.response?.data?.message || errorMessage;
+      }
+      // Handle standard Error
+      else if (error instanceof Error) {
+        errorMessage = error.message || errorMessage;
+      }
+
+      console.error('Registration failed:', errorMessage);
+      throw new Error(errorMessage);
     }
-
-    return response.data;
-  } catch (error: unknown) {
-    let errorMessage = 'Registration failed';
-
-    if (typeof error === 'object' && error !== null && 'response' in error) {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      errorMessage = axiosError.response?.data?.message || errorMessage;
-    } else if (error instanceof Error) {
-      errorMessage = error.message || errorMessage;
-    }
-
-    console.error('Registration failed:', errorMessage);
-    throw new Error(errorMessage);
   }
-}
 
   public async login(email: string, password: string): Promise<{ user: User; token: string }> {
     try {

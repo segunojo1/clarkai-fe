@@ -2,10 +2,8 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 // import "github-markdown.css";
-import NextTopLoader from "nextjs-toploader";
 import { sfProRounded } from "./fonts";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@/components/ui/sonner";
+import { Providers } from "@/components/providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,17 +26,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${sfProRounded.className} antialiased`}
       >
-        
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
+        <Providers>
           {children}
-          <NextTopLoader color="#F14E07"/>
-          <Toaster />
-      </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
