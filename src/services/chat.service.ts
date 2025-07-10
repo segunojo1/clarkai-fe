@@ -15,7 +15,7 @@ class ChatService {
 
     this.api.interceptors.request.use(
       (config) => {
-        const token = Cookies.get("token"); 
+        const token = Cookies.get("token");
         if (token) {
           config.headers = config.headers || {};
           config.headers.Authorization = `Bearer ${token}`;
@@ -39,47 +39,60 @@ class ChatService {
       return response.data;
     } catch (error) {
       console.error("Failed to send message:", error);
-      throw error; 
+      throw error;
     }
   }
 
   public async createChat() {
     try {
-        const response = await this.api.post(`/chats`)
-        return response.data.chat;
+      const response = await this.api.post(`/chats`)
+      return response.data.chat;
     } catch (error) {
-        console.error("failed to create chat", error);
-        
+      console.error("failed to create chat", error);
+
     }
 
   }
 
   public async sendChatMessage(formData: FormData) {
     try {
-        const response = await this.api.post(`/aichat`, formData, {
-          headers: {
-            "Content-Type": "multipart/formdata"
-          }
-        })
-        return response.data
+      const response = await this.api.post(`/aichat`, formData, {
+        headers: {
+          "Content-Type": "multipart/formdata"
+        }
+      })
+      return response.data
     } catch (error) {
-        console.error("err sending chat");
-        throw error;
+      console.error("err sending chat");
+      throw error;
     }
   }
 
   public async getChat(page: number, chat_id?: string) {
     try {
-        const response = await this.api.get(`/aichat`, {
-            params: {page, chat_id}
-        })
-        return response.data
+      const response = await this.api.get(`/aichat`, {
+        params: { page, chat_id }
+      })
+      return response.data
     } catch (error) {
-        console.log(error);
-        throw error;
+      console.log(error);
+      throw error;
     }
   }
 
+  public async generateMaterial(topic: string, word_range: string) {
+    try {
+      const response = await this.api.get(`/generateMaterial`, {
+        params: {
+          topic, word_range
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error("err generating material");
+      throw error;
+    }
+  }
 
 }
 

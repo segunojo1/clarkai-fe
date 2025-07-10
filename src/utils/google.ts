@@ -1,4 +1,5 @@
 import { signIn } from "next-auth/react";
+import useAuthStore from "@/store/auth.store";
 
 export const handleGoogleSignup = async () => {
   try {
@@ -18,7 +19,6 @@ export const handleGoogleSignup = async () => {
       throw new Error(result.error);
     }
 
-    // Store the OAuth state in sessionStorage for the signup process
     sessionStorage.setItem("is_oauth_signup", "true");
     
     // The token should be available in the session after successful sign-in
@@ -39,6 +39,11 @@ export const handleGoogleSignup = async () => {
 
     sessionStorage.setItem("google_oauth_token", token);
     console.log("Stored Google OAuth token in sessionStorage:", token);
+    
+    // Update current step to 3 since we skip steps 1 and 2 with Google sign-in
+    useAuthStore.getState().updateSignupData({ currentStep: 3 });
+    console.log("Updated current step to 3 after Google sign-in");
+    
     console.log("Google sign-in successful");
   } catch (error) {
     console.error("Google sign-in error:", {

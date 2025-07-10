@@ -264,6 +264,26 @@ class AuthService {
     }
   }
 
+  public async verifyOathToken(token: string | undefined): Promise<{token: string }> {
+    try {
+      const response = await this.api.post<{token: string }>('/verifyToken', { token });
+      return response.data;
+    } catch (error: unknown) {
+      let errorMessage = 'Token verification failed';
+
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        errorMessage = axiosError.response?.data?.message || errorMessage;
+      }
+      else if (error instanceof Error) {
+        errorMessage = error.message || errorMessage;
+      }
+
+      console.error('Token verification failed:', errorMessage);
+      throw new Error(errorMessage);
+    }
+  }
+
   public logout(): void {
     // Remove auth token and user data from cookies
     Cookies.remove('token');
@@ -277,5 +297,6 @@ class AuthService {
     userStore.setUser(null);
   }
 }
+
 
 export default AuthService.getInstance();

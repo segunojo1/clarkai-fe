@@ -52,8 +52,9 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
 const { currentStep: _, confirmPassword: __, otp: ___, emailVerified: ____, ...signupDataWithoutStep } = signupData;      
       // Ensure all required fields are present
       console.log(_, __, ___, ____);
+      console.log(signupDataWithoutStep);
       
-      if (!signupDataWithoutStep.name || !signupDataWithoutStep.email || !signupDataWithoutStep.password) {
+      if (!signupDataWithoutStep.name || !signupDataWithoutStep.email) {
         throw new Error('Missing required fields');
       }
 
@@ -71,7 +72,11 @@ const { currentStep: _, confirmPassword: __, otp: ___, emailVerified: ____, ...s
         user_image: selectedFile
       };
       
-      await authService.register(payload);
+      const result = await authService.register(payload);
+      
+      // Clean up OAuth session storage after successful registration
+      sessionStorage.removeItem("is_oauth_signup");
+      sessionStorage.removeItem("google_oauth_token");
       
       resetSignup();
       router.push('/home');

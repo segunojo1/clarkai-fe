@@ -9,7 +9,7 @@ import { signupSchema } from "@/models/validations/auth.validation"
 import { z } from "zod"
 import { toast } from "sonner"
 import authService from "@/services/auth.service"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import useAuthStore from "@/store/auth.store"
 import Link from "next/link"
 import { handleGoogleSignup } from "@/utils/google"
@@ -24,6 +24,33 @@ interface SignUpFormProps {
 const SignUpForm = ({ form, onSubmit }: SignUpFormProps) => {
   const [isLoading, setIsLoading] = useState(false)
   const updateSignupData = useAuthStore((state) => state.updateSignupData)
+
+  const { data: session, status } = useSession();
+console.log(session, status);
+
+  // Check if this is an OAuth signup when component mounts
+  useEffect(() => {
+    const isOauthSignup = sessionStorage.getItem("is_oauth_signup") === "true";
+    if (isOauthSignup) {
+      // Wait for session to be loaded
+      const checkSession = () => {
+        if (status === "authenticated" && session?.user) {
+          // Set current step to 3 since we skip steps 1 and 2 with Google sign-in
+          updateSignupData({ 
+            currentStep: 3, 
+            name: session.user.name || "", 
+            email: session.user.email || "", 
+            nickname: session.user.name || ""
+          });
+        } else if (status === "loading") {
+          setTimeout(checkSession, 100);
+        } else {
+          updateSignupData({ currentStep: 3, name: "", email: "", nickname: "" });
+        }
+      };
+      checkSession();
+    }
+  }, [updateSignupData, status, session]);
 
   const handleSubmit = async (values: z.infer<typeof signupSchema>) => {
     try {
@@ -47,10 +74,7 @@ const SignUpForm = ({ form, onSubmit }: SignUpFormProps) => {
     }
   }
 
-  const { data: session, status } = useSession();
-
-  console.log("Session:", session);
-  console.log("Status:", status);
+  
 
 
   return (

@@ -37,11 +37,11 @@ const AboutYou = ({ onSuccess }: AboutYouProps) => {
     }
 
     return (
-        <section>
+        <section className='max-w-[458px] mx-auto flex flex-col items-center '>
             <h1 className='text-[60px] font-semibold text-[#737373]'>Tell us about you.</h1>
 
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 satoshi flex flex-col">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 satoshi flex flex-col w-[341px]">
                     <FormField
                         control={form.control}
                         name="role"
