@@ -24,6 +24,7 @@ import { usePathname } from "next/navigation"
 import { Button } from "./ui/button"
 import { useUserStore } from "@/store/user.store"
 import { useChatStore } from "@/store/chat.store"
+import { WorkspaceCreationModal } from "./home/workspace-creation-modal"
 
 export const LatestChat = () => {
     const { chats } = useChatStore();
@@ -66,7 +67,9 @@ export const LatestWorkspace = () => {
             <CardContent className=" flex flex-col items-center justify-between px-0 h-full">
                 <Globe width={20} height={20} />
                 <p className=" text-[12px]/[22px] font-medium satoshi text-center">Your workspaces will appear here once you create one.</p>
-                <Button className="min-w-full  bg-[#F8F8F7] dark:bg-[#2C2C2C] text-[#525252] text-3 font-semibold">Start a workspace</Button>
+                <WorkspaceCreationModal>
+                    <Button className="min-w-full  bg-[#F8F8F7] dark:bg-[#2C2C2C] text-[#525252] text-3 font-semibold">Start a workspace</Button>
+                </WorkspaceCreationModal>
             </CardContent>
         </Card>
     )
