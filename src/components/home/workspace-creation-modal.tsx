@@ -1,11 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Globe, X } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 const workspaceTags = [
   { color: "text-blue-500", id: "blue" },
@@ -28,6 +29,7 @@ export function WorkspaceCreationModal({ children }: WorkspaceCreationModalProps
   const [workspaceName, setWorkspaceName] = useState("")
   const [selectedTag, setSelectedTag] = useState("")
   const [note, setNote] = useState("")
+  const router = useRouter()
 
   const handleCreateWorkspace = () => {
     // Handle workspace creation logic here
@@ -41,6 +43,8 @@ export function WorkspaceCreationModal({ children }: WorkspaceCreationModalProps
     setWorkspaceName("")
     setSelectedTag("")
     setNote("")
+    // Navigate to workspaces page
+    router.push("/workspaces")
   }
 
   return (
@@ -60,11 +64,13 @@ export function WorkspaceCreationModal({ children }: WorkspaceCreationModalProps
           <X className="w-4 h-4" />
         </button>
 
+        <DialogHeader className="text-center pt-1">
+          <DialogTitle className="text-lg font-medium text-white">
+            Create a New Workspace
+          </DialogTitle>
+        </DialogHeader>
+
         <div className="space-y-5">
-          {/* Header */}
-          <div className="text-center pt-1">
-            <h2 className="text-lg font-medium text-white">Create a New Workspace</h2>
-          </div>
 
           {/* Workspace Name */}
           <div className="space-y-2">

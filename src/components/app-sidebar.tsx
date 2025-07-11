@@ -10,7 +10,9 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    SidebarRail,
     SidebarTrigger,
+    useSidebar,
 } from "@/components/ui/sidebar"
 import {
     Card,
@@ -28,7 +30,20 @@ import { WorkspaceCreationModal } from "./home/workspace-creation-modal"
 
 export const LatestChat = () => {
     const { chats } = useChatStore();
-    console.log(chats);
+    const { state } = useSidebar();
+
+    // Show collapsed version when sidebar is collapsed
+    if (state === "collapsed") {
+        return (
+            <div className="flex justify-center">
+                <Link href="/chat">
+                    <Button size="icon" className="bg-[#F8F8F7] dark:bg-[#2C2C2C] text-[#525252]">
+                        <Globe width={20} height={20} />
+                    </Button>
+                </Link>
+            </div>
+        );
+    }
 
     return (
         <div>
@@ -62,6 +77,21 @@ export const LatestChat = () => {
 }
 
 export const LatestWorkspace = () => {
+    const { state } = useSidebar();
+
+    // Show collapsed version when sidebar is collapsed
+    if (state === "collapsed") {
+        return (
+            <div className="flex justify-center">
+                <WorkspaceCreationModal>
+                    <Button size="icon" className="bg-[#F8F8F7] dark:bg-[#2C2C2C] text-[#525252]">
+                        <Globe width={20} height={20} />
+                    </Button>
+                </WorkspaceCreationModal>
+            </div>
+        );
+    }
+
     return (
         <Card className="text-[#525252] dark:text-[#D4D4D4] bg-[#F0F0EF] dark:bg-[#404040] rounded-[10px] !p-[10px] h-[132px] w-[214px] shadow-none mx-auto">
             <CardContent className=" flex flex-col items-center justify-between px-0 h-full">
@@ -97,7 +127,11 @@ const SidebarGroupCustom = ({ items, label }: SidebarGroupCustomProps) => {
                     {items.map(item => (
                         <SidebarMenuItem key={item.title} className={`transition-all duration-200 rounded-[5px] ${pathname === item.url ? 'bg-[#F0F0EF] dark:bg-[#404040]' : ''
                             }`}>
-                            <SidebarMenuButton asChild>
+                            <SidebarMenuButton 
+                                asChild
+                                tooltip={item.title}
+                                isActive={pathname === item.url}
+                            >
                                 <Link
                                     href={item.url}
                                     className={`pl-5 transition-colors duration-200 rounded-[5px] ${pathname === item.url
@@ -141,19 +175,24 @@ export function AppSidebar() {
         { title: "Study Groups", url: "/home", icon: Inbox }
     ]
 
-    const { user } = useUserStore();
+    const { user } = useUserStore()
+    
     return (
-        <Sidebar className="max-w-[235px] bg-[#2C2C2C] sidebar z-[99999]">
+        <Sidebar 
+            className="bg-[#2C2C2C] transition-none" 
+            collapsible="icon"
+            variant="sidebar"
+        >
             <SidebarHeader>
                 <SidebarGroup>
                     <SidebarGroupContent className="flex items-center justify-between">
-                        <div className="flex items-center gap-[10px]">
+                        <div className="flex items-center gap-[10px] group-data-[collapsible=icon]:justify-center">
                             <Image src="/assets/orange.png" alt="" width={24} height={24} />
-                            <p className="text-[14px] font-bold">{user?.name || 'User'}</p>
+                            <p className="text-[14px] font-bold group-data-[collapsible=icon]:hidden">{user?.name || 'User'}</p>
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2">
                             <SidebarTrigger />
-                            <Link href="/chat">
+                            <Link href="/chat" className="group-data-[collapsible=icon]:hidden">
                                 <Edit width={20} height={20} />
                             </Link>
                         </div>
@@ -172,37 +211,7 @@ export function AppSidebar() {
                 <SidebarGroupCustom items={workspaceItems} label="Workspace Hub" />
             </SidebarContent>
 
-            {/* <SidebarFooter>
-                <SidebarGroup>
-                    <SidebarGroupContent className="">
-                        <SidebarMenu className="space-y-[9px]">
-                            <SidebarMenuItem className="flex items-center justify-between">
-                                <SidebarMenuButton asChild className="pl-5 py-[10px] px-[9px] bg-white rounded-[6px]">
-                                    <Link href="" className="">
-                                        <Image src="/assets/plus.png" alt="" width={18} height={18} />
-                                        <span className="text-[11px]/[23px] font-medium">Start New Chat</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarMenuItem className="flex items-center justify-between">
-                                <SidebarMenuButton asChild className="pl-5 py-[10px] px-[9px] bg-white rounded-[6px]">
-                                    <Link href="" className="">
-                                        <Image src="/assets/plus.png" alt="" width={18} height={18} />
-                                        <span className="text-[13px]/[28px] font-medium">Start New Session</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarSeparator />
-                            <SidebarMenuItem className="flex items-center justify-between">
-
-                                <LogOut size={24} />
-                                <Settings size={24} />
-                                <Image src="/assets/orange.png" alt="" width={26} height={26} />
-                            </SidebarMenuItem>
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
-            </SidebarFooter> */}
+            <SidebarRail />
         </Sidebar>
     )
 }
