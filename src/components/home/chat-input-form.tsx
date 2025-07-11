@@ -3,7 +3,7 @@
 import { FormField, FormItem, FormControl, Form } from "@/components/ui/form"
 import { chatSchema } from "@/models/validations/chat.validation"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ChangeEvent, KeyboardEvent, useRef, useState } from "react"
+import { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Button } from "../ui/button"
@@ -34,11 +34,18 @@ const ChatInputForm = ({
   const [previewUrl, setPreviewUrl] = useState<string>('')
   const [mode, setMode] = useState<'ask' | 'research' | 'create'>('ask')
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const isSpeechSupported = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+  const [isSpeechSupported, setIsSpeechSupported] = useState<boolean>(false)
   const [isListening, setIsListening] = useState<boolean>(false)
   const [volume, setVolume] = useState<number>(0)
   const [interimTranscript, setInterimTranscript] = useState<string>('')
   const recognitionRef = useRef<any>(null)
+
+  // Check for speech recognition support after component mounts
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsSpeechSupported('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)
+    }
+  }, [])
 
   const form = useForm<z.infer<typeof chatSchema>>({
     resolver: zodResolver(chatSchema),
@@ -50,6 +57,11 @@ const ChatInputForm = ({
   const { isLoading } = useChatStore()
 
   const toggleListening = () => {
+    if (typeof window === 'undefined') {
+      toast.error('Speech recognition is not available')
+      return
+    }
+
     if (isListening) {
       // Stop listening
       if (recognitionRef.current) {
@@ -70,7 +82,7 @@ const ChatInputForm = ({
       recognition.interimResults = true
       
       // Add event listener for volume/sound detection
-      if ('webkitAudioContext' in window) {
+      if (typeof window !== 'undefined' && 'webkitAudioContext' in window) {
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
         const analyser = audioContext.createAnalyser();
         analyser.fftSize = 256;
@@ -212,7 +224,7 @@ const ChatInputForm = ({
                         type="button"
                         className="text-xs text-blue-500 hover:underline flex items-center gap-1"
                         onClick={() => {
-                          if (selectedFile) {
+                          if (selectedFile && typeof window !== 'undefined') {
                             window.open(previewUrl, '_blank')
                           }
                         }}

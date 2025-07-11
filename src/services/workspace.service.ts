@@ -54,15 +54,16 @@ class WorkspaceService {
             throw error;
         }
     }
-    public async getWorkspaces() {
+    public async getWorkspaces(workspaceId?: string) {
         try {
-            const response = await this.api.get(`/workspace`);
+            const endpoint = workspaceId ? `/workspace/${workspaceId}` : `/workspace`;
+            const response = await this.api.get(endpoint);
             
             if (!response.data.success) {
                 throw new Error(response.data.message || 'Failed to get workspaces');
             }
             
-            return response.data.workspaces;
+            return workspaceId ? response.data.workspace : response.data.workspaces;
         } catch (error) {
             console.error("Failed to get workspaces:", error);
             throw error;

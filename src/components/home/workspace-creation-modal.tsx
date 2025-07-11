@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -73,11 +73,13 @@ export function WorkspaceCreationModal({ children }: WorkspaceCreationModalProps
           <X className="w-4 h-4" />
         </button>
 
+        <DialogHeader className="text-center pt-1">
+          <DialogTitle className="text-lg font-medium text-white">
+            Create a New Workspace
+          </DialogTitle>
+        </DialogHeader>
+
         <div className="space-y-5">
-          {/* Header */}
-          <div className="text-center pt-1">
-            <h2 className="text-lg font-medium text-white">Create a New Workspace</h2>
-          </div>
 
           {/* Workspace Name */}
           <div className="space-y-2">
