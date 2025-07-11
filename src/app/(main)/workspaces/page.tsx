@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { ChevronDown, Globe, Star, X, Moon } from "lucide-react"
 import { WorkspaceCreationModal } from "@/components/home/workspace-creation-modal"
+import { UploadMaterialModal } from "@/components/home/upload-material-modal"
 import { useState } from "react"
 import Image from "next/image"
 
@@ -29,6 +30,17 @@ const WorkspacesPage = () => {
                             <ChevronDown className="w-4 h-4" />
                         </Button>
                     </WorkspaceCreationModal>
+                    <UploadMaterialModal>
+                        <button className="p-2 hover:bg-gray-700 rounded-md transition-colors">
+                            <Image 
+                                src="/globe.svg" 
+                                alt="Globe" 
+                                width={20} 
+                                height={20}
+                                className="w-5 h-5"
+                            />
+                        </button>
+                    </UploadMaterialModal>
                     <Moon className="w-5 h-5 text-gray-400 cursor-pointer hover:text-white transition-colors" />
                 </div>
             </div>
