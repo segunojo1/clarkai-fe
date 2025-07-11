@@ -9,13 +9,15 @@ import ThemeSwitcher from "../theme-switcher";
 import Link from "next/link";
 import { useEffect } from "react";
 import { useChatStore } from "@/store/chat.store";
+import { useWorkspaceStore } from "@/store/workspace.store";
 
 export default function ClientLayout({
     children,
 }: {
     children: React.ReactNode;
 }) { 
-    const {getAllChats, setChats} = useChatStore()
+    const { getAllChats, setChats } = useChatStore()
+    const { getWorkspaces } = useWorkspaceStore()
     const {
     open
   } = useSidebar()
@@ -25,18 +27,15 @@ export default function ClientLayout({
         route.push("/auth/login")
     }
     useEffect(() => {
-        const getChatss = async () => {
+        const initializeData = async () => {
             try {
-                const answer = await getAllChats(1)
-                console.log(answer);
-                setChats(answer)
-                
+                await getAllChats(1)
+                await getWorkspaces()
             } catch (error) {
-                console.error(error);
-                
+                console.error("Failed to initialize data:", error)
             }
         }
-        getChatss()
+        initializeData()
     }, [])
     return (
             <main className="w-full relative">

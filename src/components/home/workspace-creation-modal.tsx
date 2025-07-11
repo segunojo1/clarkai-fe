@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Globe, X } from "lucide-react"
+import workspaceServiceInstance from "@/services/workspace.service"
+import { useRouter } from "next/navigation"
 
 const workspaceTags = [
   { color: "text-blue-500", id: "blue" },
@@ -24,23 +26,34 @@ interface WorkspaceCreationModalProps {
 }
 
 export function WorkspaceCreationModal({ children }: WorkspaceCreationModalProps) {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [workspaceName, setWorkspaceName] = useState("")
   const [selectedTag, setSelectedTag] = useState("")
   const [note, setNote] = useState("")
 
-  const handleCreateWorkspace = () => {
-    // Handle workspace creation logic here
-    console.log({
-      workspaceName,
-      selectedTag,
-      note
-    })
-    setOpen(false)
-    // Reset form
-    setWorkspaceName("")
-    setSelectedTag("")
-    setNote("")
+  const handleCreateWorkspace = async () => {
+    if (!workspaceName) {
+      alert("Please enter a workspace name");
+      return;
+    }
+
+    try {
+      const workspaceService = workspaceServiceInstance;
+      await workspaceService.createWorkspace(workspaceName, note);
+      
+      // Close modal and reset form
+      setOpen(false);
+      setWorkspaceName("");
+      setSelectedTag("");
+      setNote("");
+      
+      // Navigate to workspaces page
+      router.push('/workspaces')
+    } catch (error) {
+      console.error("Error creating workspace:", error);
+      alert("Failed to create workspace. Please try again.");
+    }
   }
 
   return (

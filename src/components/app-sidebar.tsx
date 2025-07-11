@@ -25,9 +25,11 @@ import { Button } from "./ui/button"
 import { useUserStore } from "@/store/user.store"
 import { useChatStore } from "@/store/chat.store"
 import { WorkspaceCreationModal } from "./home/workspace-creation-modal"
+import { useWorkspaceStore } from "@/store/workspace.store"
 
 export const LatestChat = () => {
     const { chats } = useChatStore();
+    const  {workspaces} = useWorkspaceStore();
     console.log(chats);
 
     return (
@@ -62,17 +64,52 @@ export const LatestChat = () => {
 }
 
 export const LatestWorkspace = () => {
+    const { workspaces, isLoading } = useWorkspaceStore();
+
+    if (isLoading) {
+        return (
+            <Card className="text-[#525252] dark:text-[#D4D4D4] bg-[#F0F0EF] dark:bg-[#404040] rounded-[10px] !p-[10px] h-[132px] w-[214px] shadow-none mx-auto">
+                <CardContent className=" flex flex-col items-center justify-between px-0 h-full">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400"></div>
+                </CardContent>
+            </Card>
+        );
+    }
+
+    if (workspaces.length === 0) {
+        return (
+            <Card className="text-[#525252] dark:text-[#D4D4D4] bg-[#F0F0EF] dark:bg-[#404040] rounded-[10px] !p-[10px] h-[132px] w-[214px] shadow-none mx-auto">
+                <CardContent className=" flex flex-col items-center justify-between px-0 h-full">
+                    <Globe width={20} height={20} />
+                    <p className=" text-[12px]/[22px] font-medium satoshi text-center">Your workspaces will appear here once you create one.</p>
+                    <WorkspaceCreationModal>
+                        <Button className="min-w-full  bg-[#F8F8F7] dark:bg-[#2C2C2C] text-[#525252] text-3 font-semibold">Start a workspace</Button>
+                    </WorkspaceCreationModal>
+                </CardContent>
+            </Card>
+        );
+    }
+
     return (
         <Card className="text-[#525252] dark:text-[#D4D4D4] bg-[#F0F0EF] dark:bg-[#404040] rounded-[10px] !p-[10px] h-[132px] w-[214px] shadow-none mx-auto">
             <CardContent className=" flex flex-col items-center justify-between px-0 h-full">
-                <Globe width={20} height={20} />
-                <p className=" text-[12px]/[22px] font-medium satoshi text-center">Your workspaces will appear here once you create one.</p>
+                <div className="flex flex-col items-center gap-2">
+                    <div className="flex gap-2">
+                        {workspaces.map((workspace) => (
+                            <div key={workspace.enc_id} className="flex items-center gap-1">
+                                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                                <p className="text-sm font-medium">{workspace.name}</p>
+                            </div>
+                        ))}
+                    </div>
+                    <p className="text-xs text-gray-500">{workspaces.length} workspaces</p>
+                </div>
                 <WorkspaceCreationModal>
-                    <Button className="min-w-full  bg-[#F8F8F7] dark:bg-[#2C2C2C] text-[#525252] text-3 font-semibold">Start a workspace</Button>
+                    <Button className="min-w-full  bg-[#F8F8F7] dark:bg-[#2C2C2C] text-[#525252] text-3 font-semibold">Add workspace</Button>
                 </WorkspaceCreationModal>
             </CardContent>
         </Card>
-    )
+    );
 }
 
 interface SidebarItem {
