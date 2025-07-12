@@ -48,7 +48,7 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
     return (
         <div className="flex h-full w-full ">
             {/* Sidebar */}
-            <div className="w-64 bg-gray-100 dark:bg-[#2c2c2c] pt-16 p-4">
+            <div className="min-w-[235px] bg-gray-100 dark:bg-[#2c2c2c] pt-16 p-4">
                 <Tabs defaultValue="folders" className="w-full">
                     <TabsList className="w-full">
                         <TabsTrigger value="folders">Folders</TabsTrigger>

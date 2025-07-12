@@ -1,3 +1,4 @@
+import { ChatMessage } from "@/lib/types";
 import axios, { AxiosInstance } from "axios";
 import Cookies from "js-cookie";
 
@@ -63,9 +64,57 @@ class WorkspaceService {
                 throw new Error(response.data.message || 'Failed to get workspaces');
             }
             
-            return workspaceId ? response.data.workspace : response.data.workspaces;
+            return workspaceId ? response.data : response.data.workspaces;
         } catch (error) {
             console.error("Failed to get workspaces:", error);
+            throw error;
+        }
+    }
+
+    public async askQuestion(question: string, workspaceId: string, thinking: boolean, mode: 'workspace' | 'file', previous_messages: ChatMessage[], fileId?: string) {
+        try {
+            const response = await this.api.post('/askQuestion', {
+                question,
+                workspace_id: workspaceId,
+                thinking,
+                mode,
+                file_id: fileId,
+                previous_messages
+            });
+
+            if (!response.data.success) {
+                throw new Error(response.data.message || 'Failed to ask question');
+            }
+
+            return {
+                success: response.data.success,
+                answer: response.data.answer
+            };
+        } catch (error) {
+            console.error("Failed to ask question:", error);
+            throw error;
+        }
+    }
+
+    public async uploadFile(file: File, workspaceId: string) {
+        try {
+            const formData = new FormData();
+            formData.append('files', file);
+            formData.append('workspace_id', workspaceId);
+
+            const response = await this.api.post('/files', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            if (!response.data.success) {
+                throw new Error(response.data.message || 'Failed to upload file');
+            }
+
+            return response.data;
+        } catch (error) {
+            console.error("Failed to upload file:", error);
             throw error;
         }
     }

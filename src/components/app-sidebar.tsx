@@ -201,7 +201,8 @@ export function AppSidebar() {
         { title: "Search", url: "/search", icon: Search },
         { title: "Home", url: "/home", icon: Home },
         { title: "Inbox", url: "/home", icon: Inbox },
-        { title: "Chat", url: "/chat", icon: Inbox }
+        { title: "Chat", url: "/chat", icon: Inbox },
+        { title: "Workspaces", url: "/workspaces", icon: Globe },
     ]
     const workspaceItems = [
         { title: "Canvas", url: "/home", icon: Search },
