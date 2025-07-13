@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Globe, X } from "lucide-react"
 import workspaceServiceInstance from "@/services/workspace.service"
 import { useRouter } from "next/navigation"
+import { useWorkspaceStore } from '@/store/workspace.store';
 
 const workspaceTags = [
   { color: "text-blue-500", id: "blue" },
@@ -47,6 +48,9 @@ export function WorkspaceCreationModal({ children }: WorkspaceCreationModalProps
       setWorkspaceName("");
       setSelectedTag("");
       setNote("");
+      
+      // Refresh the workspaces list
+      useWorkspaceStore.getState().getWorkspaces();
       
       // Navigate to workspaces page
       router.push('/workspaces')

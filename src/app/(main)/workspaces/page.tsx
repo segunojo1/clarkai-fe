@@ -18,7 +18,7 @@ const WorkspacesPage = () => {
     useEffect(() => {
         // Fetch workspaces when component mounts
         useWorkspaceStore.getState().getWorkspaces()
-    }, [])
+    }, [workspaces])
 
     return (
         <div className="flex flex-col h-full bg-[#1a1a1a] text-white">
@@ -153,8 +153,8 @@ const WorkspacesPage = () => {
             ) : (
                 <div className="flex flex-1">
                     {/* Left Sidebar - Workspace List */}
-                    <div className="w-64 p-6">
-                        <div className="space-y-4">
+                    <div className="w-full p-6">
+                        <div className="space-y-4 flex  justify-between flex-wrap">
                             {workspaces.map((workspace) => (
                                 <Link href={`/workspaces/${workspace.enc_id}`} className="w-64 p-6" key={workspace.enc_id}>
                                     <div className="bg-[#2a2a2a] rounded-lg p-6 border border-[#444] relative">

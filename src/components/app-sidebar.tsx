@@ -19,7 +19,7 @@ import {
     CardContent,
 } from "@/components/ui/card"
 
-import { Edit, Globe, Home, Inbox, Search } from "lucide-react"
+import { ChevronDown, ChevronRight, Edit, Globe, Home, Inbox, PlusIcon, Search } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -119,14 +119,24 @@ export const LatestWorkspace = () => {
     }
 
     return (
-        <Card className="text-[#525252] dark:text-[#D4D4D4] bg-[#F0F0EF] dark:bg-[#404040] rounded-[10px] !p-[10px] h-[132px] w-[214px] shadow-none mx-auto">
+        <Card className="text-[#525252] dark:text-[#D4D4D4] bg-[#F0F0EF] dark:bg-[#404040] rounded-[10px] !p-[10px] h-[184px] w-[214px] shadow-none mx-auto">
             <CardContent className=" flex flex-col items-center justify-between px-0 h-full">
-                <div className="flex flex-col items-center gap-2">
-                    <div className="flex gap-2">
+                <div className="flex flex-col w-full gap-2">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-[14px] font-medium">Workspaces</h2>
+                        <div className="flex gap-[10px] ">
+                            <PlusIcon className="w-4 h-4" />
+                            <ChevronDown className="h-4 w-4 -rotate-90" />
+                        </div>
+                    </div>
+                    <div className="flex flex-col overflow-scroll gap-1 h-[132px]">
                         {workspaces.map((workspace) => (
-                            <div key={workspace.enc_id} className="flex items-center gap-1">
-                                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                                <p className="text-sm font-medium">{workspace.name}</p>
+                            <div key={workspace.enc_id} className="flex items-center justify-between bg-[#262626] gap-1 px-[10px] py-[5px] rounded-[5px]">
+                                <div className="flex items-center gap-2">
+                                    <Globe width={20} height={20} />
+                                    <p className="text-sm font-medium">{workspace.name}</p>
+                                </div>
+                                <ChevronRight className="h-4 w-4" />
                             </div>
                         ))}
                     </div>
@@ -162,7 +172,7 @@ const SidebarGroupCustom = ({ items, label }: SidebarGroupCustomProps) => {
                     {items.map(item => (
                         <SidebarMenuItem key={item.title} className={`transition-all duration-200 rounded-[5px] ${pathname === item.url ? 'bg-[#F0F0EF] dark:bg-[#404040]' : ''
                             }`}>
-                            <SidebarMenuButton 
+                            <SidebarMenuButton
                                 asChild
                                 tooltip={item.title}
                                 isActive={pathname === item.url}
@@ -212,10 +222,10 @@ export function AppSidebar() {
     ]
 
     const { user } = useUserStore()
-    
+
     return (
-        <Sidebar 
-            className="bg-[#2C2C2C] transition-none" 
+        <Sidebar
+            className="bg-[#2C2C2C] transition-none"
             collapsible="icon"
             variant="sidebar"
         >

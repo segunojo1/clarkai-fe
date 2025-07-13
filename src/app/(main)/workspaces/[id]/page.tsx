@@ -1,7 +1,7 @@
 "use client"
 
-import { useParams, useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import ChatInputForm from '@/components/home/chat-input-form'
 import { WelcomeScreen } from '@/components/chat/welcome-screen'
 import { ChatMessageList } from '@/components/chat/message-list'
@@ -12,6 +12,7 @@ import chatServiceInstance from "@/services/chat.service"
 import { useWorkspaceStore } from '@/store/workspace.store'
 import { UploadMaterialModal } from '@/components/home/upload-material-modal'
 import Image from 'next/image'
+import { SlidingPanel } from '@/components/ui/sliding-panel'
 
 export default function WorkspacePage() {
   const { setCurrentChatId, setChatDetails } = useChatStore()
@@ -19,6 +20,25 @@ export default function WorkspacePage() {
 
   const { id } = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const [isQuizPanelOpen, setIsQuizPanelOpen] = useState(false)
+
+  useEffect(() => {
+    const handleQuizPanelEvent = (event: Event) => {
+      if (event instanceof CustomEvent && event.detail?.workspaceId === id) {
+        setIsQuizPanelOpen(true)
+      }
+    }
+
+    window.addEventListener('openQuizPanel', handleQuizPanelEvent)
+    return () => {
+      window.removeEventListener('openQuizPanel', handleQuizPanelEvent)
+    }
+  }, [id])
+
+  const handleCloseQuizPanel = () => {
+    setIsQuizPanelOpen(false)
+  }
 
   useEffect(() => {
     setCurrentChatId(id as string | null)
@@ -68,12 +88,14 @@ export default function WorkspacePage() {
     if (!text.trim()) return
     if (id) {
       try {
+        // Trim messages to the last 10 messages to limit context length
+        const recentMessages = messages.slice(-10);
         await useWorkspaceStore.getState().askQuestion(
           id.toString(),
           text,
           true,
           'workspace',
-          messages,
+          recentMessages,
           undefined
         )
       } catch (error) {
@@ -86,18 +108,23 @@ export default function WorkspacePage() {
   return (
     <div className="flex flex-col w-full justify-between pb-10 mx-auto h-full">
       <div className='absolute top-10 right-10 '>
-      <UploadMaterialModal workspaceId={id.toString()}>
-        <button className="p-1 border-2 rounded-full border-[#ffffff] transition-colors">
-          <Image
-            src="/globe.svg"
-            alt="Globe"
-            width={20}
-            height={20}
-            className="w-5 h-5"
-          />
-        </button>
-      </UploadMaterialModal>
+        <UploadMaterialModal workspaceId={id.toString()}>
+          <button className="p-1 border-2 rounded-full border-[#ffffff] transition-colors">
+            <Image
+              src="/globe.svg"
+              alt="Globe"
+              width={20}
+              height={20}
+              className="w-5 h-5"
+            />
+          </button>
+        </UploadMaterialModal>
       </div>
+      <SlidingPanel 
+        isOpen={isQuizPanelOpen} 
+        onClose={handleCloseQuizPanel}
+        workspaceId={id.toString()}
+      />
       {messages.length === 0 ? (
         <div className='mt-16'>
           <WelcomeScreen onSend={handleSend} />

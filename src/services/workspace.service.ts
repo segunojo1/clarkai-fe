@@ -82,12 +82,7 @@ class WorkspaceService {
                 previous_messages
             });
 
-            if (!response.data.success) {
-                throw new Error(response.data.message || 'Failed to ask question');
-            }
-
             return {
-                success: response.data.success,
                 answer: response.data.answer
             };
         } catch (error) {
