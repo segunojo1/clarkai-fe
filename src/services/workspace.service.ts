@@ -91,6 +91,26 @@ class WorkspaceService {
         }
     }
 
+    public async generateFlashcards(mode: 'workspace' | 'file', workspaceId: string, size: number, is_context: boolean, context: string, file_id?: string) {
+        try {
+            const response = await this.api.post('/generateFlashcards', {
+                mode,
+                workspace_id: workspaceId,
+                size,
+                is_context,
+                context,
+                file_id
+            });
+console.log(response.data);
+
+            return response.data;
+        } catch (error) {
+            console.error("Failed to generate flashcards:", error);
+            throw error;
+        }
+    }
+
+
     public async uploadFile(file: File, workspaceId: string) {
         try {
             const formData = new FormData();

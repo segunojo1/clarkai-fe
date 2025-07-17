@@ -125,26 +125,26 @@ export const LatestWorkspace = () => {
                     <div className="flex items-center justify-between">
                         <h2 className="text-[14px] font-medium">Workspaces</h2>
                         <div className="flex gap-[10px] ">
-                            <PlusIcon className="w-4 h-4" />
-                            <ChevronDown className="h-4 w-4 -rotate-90" />
+                            <WorkspaceCreationModal>
+                                <PlusIcon className="w-4 h-4" />
+                            </WorkspaceCreationModal>
+                            <Link href="/workspaces">
+                                <ChevronDown className="h-4 w-4 -rotate-90" />
+                            </Link>
                         </div>
                     </div>
-                    <div className="flex flex-col overflow-scroll gap-1 h-[132px]">
+                    <div className="flex flex-col overflow-y-scroll gap-1 h-[132px]">
                         {workspaces.map((workspace) => (
-                            <div key={workspace.enc_id} className="flex items-center justify-between bg-[#262626] gap-1 px-[10px] py-[5px] rounded-[5px]">
+                            <Link href={`/workspaces/${workspace.enc_id}`} key={workspace.enc_id} className="flex items-center justify-between bg-[#262626] gap-1 px-[10px] py-[5px] rounded-[5px]">
                                 <div className="flex items-center gap-2">
                                     <Globe width={20} height={20} />
                                     <p className="text-sm font-medium">{workspace.name}</p>
                                 </div>
                                 <ChevronRight className="h-4 w-4" />
-                            </div>
+                            </Link>
                         ))}
                     </div>
-                    <p className="text-xs text-gray-500">{workspaces.length} workspaces</p>
                 </div>
-                <WorkspaceCreationModal>
-                    <Button className="min-w-full  bg-[#F8F8F7] dark:bg-[#2C2C2C] text-[#525252] text-3 font-semibold">Add workspace</Button>
-                </WorkspaceCreationModal>
             </CardContent>
         </Card>
     );

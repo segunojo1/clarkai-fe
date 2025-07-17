@@ -44,7 +44,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
     const [uploadProgress, setUploadProgress] = useState(0)
     const [uploadedFile, setUploadedFile] = useState<File | null>(null)
     const { selectedWorkspace } = useWorkspaceStore()
-    console.log(selectedWorkspace);
+    // console.log(selectedWorkspace);
 
     // const { workspace } = selectedWorkspace
 

@@ -6,6 +6,7 @@ export interface FileAttachment {
 }
 
 export interface ChatMessage {
+  id?: string;
   role: 'user' | 'assistant'
   text: string
   isFile: boolean

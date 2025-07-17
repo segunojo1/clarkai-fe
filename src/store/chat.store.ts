@@ -130,6 +130,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     try {
       const messages = await chatService.getChat(page)
       console.log(messages);
+      set({ chats: messages.chats })
       return messages.chats
     } catch (error) {
       console.error(error);

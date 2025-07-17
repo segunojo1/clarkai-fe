@@ -18,7 +18,7 @@ const WorkspacesPage = () => {
     useEffect(() => {
         // Fetch workspaces when component mounts
         useWorkspaceStore.getState().getWorkspaces()
-    }, [workspaces])
+    }, [])
 
     return (
         <div className="flex flex-col h-full bg-[#1a1a1a] text-white">
@@ -154,25 +154,24 @@ const WorkspacesPage = () => {
                 <div className="flex flex-1">
                     {/* Left Sidebar - Workspace List */}
                     <div className="w-full p-6">
-                        <div className="space-y-4 flex  justify-between flex-wrap">
+                        <div className="space-y-4 flex items-start flex-wrap">
                             {workspaces.map((workspace) => (
-                                <Link href={`/workspaces/${workspace.enc_id}`} className="w-64 p-6" key={workspace.enc_id}>
-                                    <div className="bg-[#2a2a2a] rounded-lg p-6 border border-[#444] relative">
-                                        {/* Star icon in top right */}
-                                        <Star className="absolute top-4 right-4 w-4 h-4 text-gray-400 hover:text-yellow-400 cursor-pointer transition-colors" />
+                                <Link href={`/workspaces/${workspace.enc_id}`} className="" key={workspace.enc_id}>
+                                    <div className="hover:bg-[#2C2C2C] rounded-[14.6px] p-6 ">
 
-                                        {/* File icon using file.png */}
-                                        <div className="flex justify-center mb-8 mt-4">
+                                        <div className="flex justify-center  mb-[19.44px] relative">
+                                        <Star className="absolute top-2 right-[13px] w-4 h-4 text-gray-400 hover:text-yellow-400 cursor-pointer transition-colors" />
                                             <Image
                                                 src="/assets/file.png"
                                                 alt="File icon"
-                                                width={160}
-                                                height={120}
+                                                width={172}
+                                                height={138}
                                                 className="w-40 h-32"
                                             />
+                                            <Globe className="absolute left-[9.7px] bottom-[9.9px] w-[19px] h-[19px]" color="#99a1af"/>
                                         </div>
 
-                                        <div>
+                                        <div className="flex flex-col items-center">
                                             <h3 className="text-gray-300 font-medium text-lg">{workspace.name}</h3>
                                             {workspace.description && (
                                                 <p className="text-gray-400 text-sm mt-1">{workspace.description}</p>

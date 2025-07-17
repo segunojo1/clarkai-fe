@@ -10,6 +10,7 @@ import UserAvatar from '../user-avatar';
 import { cn } from '@/lib/utils';
 import { useSidebar } from '../ui/sidebar';
 import MarkdownRenderer from '../markdown-renderer';
+import { Flashcard, FlashcardModal } from '@/components/flashcards/flashcard-modal';
 
 // const isFile = (obj: unknown): obj is File => {
 //   if (obj instanceof File) return true;
@@ -141,17 +142,77 @@ const copyToClipboard = (text: string) => {
   });
 };
 
-
 export function ChatMessageList({
   messages,
   isLoading,
   className
 }: {
-  messages: ChatMessage[],
-  isLoading: boolean,
+  messages: ChatMessage[]
+  isLoading: boolean
   className?: string
 }) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [selectedFlashcards, setSelectedFlashcards] = useState<Flashcard[]>([]);
+  const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
+
+  const extractFlashcards = (text: string): Flashcard[] | null => {
+    try {
+      // Check if the message contains flashcard data
+      const regex = /### Flashcard \d+\n\*\*Q:\*\* ([^\n]*)\n\*\*A:\*\* ([^\n]*)(?:\n|$)/g;
+      const matches: RegExpExecArray[] = [];
+      let match;
+      
+      while ((match = regex.exec(text)) !== null) {
+        matches.push(match);
+      }
+      
+      if (matches.length === 0) return null;
+
+      return matches.map(match => ({
+        question: match[1] || '',
+        answer: match[2] || ''
+      }));
+    } catch (error) {
+      console.error('Error parsing flashcards:', error);
+      return null;
+    }
+  };
+
+  const generateFlashcards = (context: string): Flashcard[] => {
+    // Simple flashcard generation based on the context
+    // You can customize this to create more meaningful flashcards
+    return [
+      {
+        question: `What is the main topic of: ${context}?`,
+        answer: context,
+        explanation: 'This is a generated flashcard based on your input.'
+      },
+      {
+        question: `Explain in detail: ${context}`,
+        answer: `Detailed explanation about ${context} would go here.`,
+        explanation: 'This is a generated flashcard for detailed explanation.'
+      }
+    ];
+  };
+
+  const handleFlashcardClick = (text: string, isUserMessage: boolean) => {
+    if (isUserMessage) {
+      // For user messages with @flashcard tag, generate flashcards based on the context
+      const context = text.replace(/@flashcard\s*/g, '').trim();
+      if (context) {
+        const generatedFlashcards = generateFlashcards(context);
+        setSelectedFlashcards(generatedFlashcards);
+        setIsFlashcardModalOpen(true);
+      }
+    } else {
+      // For AI responses, try to parse existing flashcards
+      const flashcards = extractFlashcards(text);
+      if (flashcards) {
+        setSelectedFlashcards(flashcards);
+        setIsFlashcardModalOpen(true);
+      }
+    }
+  };
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -171,58 +232,109 @@ export function ChatMessageList({
         <div className="h-[140px]"></div>
       )}
       <div className='max-w-[750px] w-full mx-auto'>
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`flex flex-col items-${message.fromUser ? 'end' : 'start'} text-[15px] satoshi font-normal mb-4 w-full`}
-          >
-            <div className="flex flex-col items-end max-w-[80%] gap-2">
-              {message.attachments?.map((file, fileIndex) => (
-                <div
-                  key={fileIndex}
-                  className={`w-full rounded-2xl ${message.fromUser ? '' : 'bg-gray-100 dark:bg-gray-800'}`}
-                >
-                  <FileAttachmentPreview file={file} />
-                </div>
-              ))}
+        {messages.map((message) => {
+          const isFlashcardMessage = message.fromUser 
+            ? message.text.includes('@flashcard')
+            : message.text.includes('Flashcard');
+          
+          return (
+            <div key={`${message.role}`} className={cn({
+              'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors': isFlashcardMessage
+            })}
+            onClick={() => isFlashcardMessage && handleFlashcardClick(message.text, message.fromUser)}
+            >
+              <div
+                className={`flex flex-col items-${message.fromUser ? 'end' : 'start'} text-[15px] satoshi font-normal mb-4 w-full`}
+              >
+                <div className="flex flex-col items-end max-w-[80%] gap-2">
+                  {message.attachments?.map((file, fileIndex) => (
+                    <div
+                      key={fileIndex}
+                      className={`w-full rounded-2xl ${message.fromUser ? '' : 'bg-gray-100 dark:bg-gray-800'}`}
+                    >
+                      <FileAttachmentPreview file={file} />
+                    </div>
+                  ))}
 
-              {message.text && (
-                <div className={`relative group rounded-[69px] p-4 ${message.fromUser ? 'bg-[#F0F0EF] dark:bg-[#404040] dark:text-white text-black' : 'bg-transparent'}`}>
-                  {message.fromUser ? (
-                    <p>{message.text}</p>
-                  ) : (
-                    <div className="markdown-body text-black dark:text-white">
-                      <MarkdownRenderer content={message.text} />
+                  {message.text && (
+                    <div className={`relative group rounded-[69px] p-4 ${message.fromUser ? 'bg-[#F0F0EF] dark:bg-[#404040] dark:text-white text-black' : 'bg-transparent'}`}>
+                      {message.fromUser ? (
+                        <p>{message.text}</p>
+                      ) : (
+                        <div className="markdown-body text-black dark:text-white">
+                          <MarkdownRenderer content={message.text} />
+                        </div>
+                      )}
+
+                      {/* Action buttons */}
+                      <div className="absolute right-0 mt-1 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => copyToClipboard(message.text)}
+                          className="text-sm text-blue-500 hover:underline"
+                        >
+                          Copy
+                        </button>
+                      </div>
                     </div>
                   )}
-
-                  {/* Action buttons */}
-                  <div className="absolute right-0 mt-1 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => copyToClipboard(message.text)}
-                      className="text-sm text-blue-500 hover:underline"
-                    >
-                      Copy
-                    </button>
+                </div>
+              </div>
+              {isFlashcardMessage && message.fromUser && (
+                <div className="mt-2 ml-14">
+                  <div className="bg-gray-50 p-4 rounded-lg dark:bg-[#404040] flex flex-col items-center gap-2">
+                    <div className="flex-1 flex gap-2 min-w-0">
+                      <div className="bg-primary/10 text-primary p-1.5 rounded-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="3" y1="9" x2="21" y2="9"></line>
+                          <line x1="9" y1="21" x2="9" y2="9"></line>
+                        </svg>
+                      </div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                        Click to view generated flashcards
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}
-
+              
+              {message.text === 'Generating flashcards...' && (
+                <div className="mt-2 ml-14">
+                  <div className="bg-gray-50 p-4 rounded-lg dark:bg-[#404040] flex flex-col items-center gap-2">
+                    <div className="flex-1 flex gap-2 min-w-0">
+                      <div className="bg-primary/10 text-primary p-1.5 rounded-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 12c0 5.5-4.5 10-10 10S1 17.5 1 12 5.5 2 11 2 21 6.5 21 12z"></path>
+                          <circle cx="11" cy="12" r="2"></circle>
+                        </svg>
+                      </div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                        Flashcards are being generated...
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        ))}
-
+          );
+        })}
+        
         {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 max-w-[80%]">
-              <div className="flex gap-2">
-                <div className="w-4 h-4 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse"></div>
-                <div className="w-4 h-4 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse delay-100"></div>
-                <div className="w-4 h-4 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse delay-200"></div>
-              </div>
+          <div className="flex items-center justify-center">
+            <div className="flex gap-2">
+              <div className="w-4 h-4 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse"></div>
+              <div className="w-4 h-4 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse delay-100"></div>
+              <div className="w-4 h-4 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse delay-200"></div>
             </div>
           </div>
         )}
+
+        {/* Flashcard Modal */}
+        <FlashcardModal 
+          isOpen={isFlashcardModalOpen} 
+          onClose={() => setIsFlashcardModalOpen(false)} 
+          flashcards={selectedFlashcards} 
+        />
 
         {/* This empty div will be used for auto-scrolling */}
         <div ref={messagesEndRef} />

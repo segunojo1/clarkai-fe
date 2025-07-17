@@ -1,24 +1,36 @@
 "use client"
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import ChatInputForm from '@/components/home/chat-input-form'
 import { WelcomeScreen } from '@/components/chat/welcome-screen'
 import { ChatMessageList } from '@/components/chat/message-list'
 import { useChatStore } from '@/store/chat.store'
 import { toast } from 'sonner'
+import { ChatMessage } from '@/lib/types'
 import workspaceServiceInstance from "@/services/workspace.service"
 import chatServiceInstance from "@/services/chat.service"
 import { useWorkspaceStore } from '@/store/workspace.store'
 import { UploadMaterialModal } from '@/components/home/upload-material-modal'
 import Image from 'next/image'
 import { SlidingPanel } from '@/components/ui/sliding-panel'
+import { Loader2 } from 'lucide-react'
+
+// Helper function to format flashcards as markdown
+const formatFlashcards = (flashcards: Array<{ question: string, answer: string, explanation?: string }>) => {
+  return flashcards.map((card, index) =>
+    `### Flashcard ${index + 1}\n` +
+    `**Q:** ${card.question}\n` +
+    `**A:** ${card.answer}\n` +
+    (card.explanation ? `*${card.explanation}*\n\n` : '\n')
+  ).join('\n');
+};
 
 export default function WorkspacePage() {
   const { setCurrentChatId, setChatDetails } = useChatStore()
-  const { messages, setMessages, isLoading, askQuestion } = useWorkspaceStore()
-
-  const { id } = useParams()
+  const { messages, setMessages, isLoading, setIsLoading, askQuestion, generateFlashcards } = useWorkspaceStore()
+  const [loadChats, setLoadChats] = useState(false);
+  const { id } = useParams<{ id: string }>()
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isQuizPanelOpen, setIsQuizPanelOpen] = useState(false)
@@ -49,7 +61,7 @@ export default function WorkspacePage() {
     if (id) {
       const getWorkspaceChat = async () => {
         try {
-          // Get workspace details and chat info
+          setLoadChats(true)
           const workspace = await workspaceServiceInstance.getWorkspaces(id.toString())
 
           // Set workspace in store
@@ -66,7 +78,7 @@ export default function WorkspacePage() {
 
           const response = await chatServiceInstance.getChat(1, chatId)
           console.log(response);
-
+          setLoadChats(false)
           setChatDetails(response)
           if (response.messages) {
             setMessages(response.messages)
@@ -84,13 +96,120 @@ export default function WorkspacePage() {
     }
   }, [id, askQuestion])
 
+  interface FlashcardQuestion {
+    question: string;
+    answer: string;
+  }
+
+  interface FlashcardResponse {
+    flashcard_id: string;
+    message: string;
+    questions: FlashcardQuestion[];
+    success: boolean;
+  }
+
+  const handleGenerateFlashcards = useCallback(async (context: string) => {
+    if (!context.trim() || !id) return Promise.resolve();
+    
+    // Create loading message ID at the start of the function
+    const loadingMessageId = `loading-${Date.now()}`;
+    let updatedMessages = [...messages];
+    
+    try {
+      setIsLoading(true);
+      
+      // Add user message
+      const userMessage: ChatMessage = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        text: `@flashcard ${context}`,
+        fromUser: true,
+        isFile: false,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      // Update messages with the new user message
+      updatedMessages = [...messages, userMessage];
+      setMessages(updatedMessages);
+      
+      // Add loading message
+      const loadingMessage: ChatMessage = {
+        id: loadingMessageId,
+        role: 'assistant',
+        text: 'Generating flashcards...',
+        fromUser: false,
+        isFile: false,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      // Update messages with loading state
+      updatedMessages = [...updatedMessages, loadingMessage];
+      setMessages(updatedMessages);
+      
+      // Call the API to generate flashcards
+      const response = await useWorkspaceStore.getState().generateFlashcards(
+        'workspace',
+        id,
+        10, // Default number of flashcards
+        false, // is_context set to false since we're passing the context directly
+        context
+      );
+      
+      const flashcardResponse = response as unknown as FlashcardResponse;
+      
+      if (flashcardResponse.success && flashcardResponse.questions) {
+        // Format the flashcard response as markdown
+        const flashcardMarkdown = flashcardResponse.questions
+          .map((card: FlashcardQuestion, index: number) => 
+            `### Flashcard ${index + 1}\n` +
+            `**Q:** ${card.question}\n` +
+            `**A:** ${card.answer}`
+          )
+          .join('\n\n');
+        
+        // Add assistant message with flashcard content
+        const assistantMessage: ChatMessage = {
+          id: `flashcard-${Date.now()}`,
+          role: 'assistant',
+          text: `Here are your flashcards based on: "${context}"\n\n${flashcardMarkdown}`,
+          fromUser: false,
+          isFile: false,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        
+        // Update messages by replacing the loading message with the actual flashcards
+        updatedMessages = [
+          ...updatedMessages.filter(msg => msg.id !== loadingMessageId),
+          assistantMessage
+        ];
+        setMessages(updatedMessages);
+      }
+      
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Error generating flashcards:', error);
+      toast.error('Failed to generate flashcards');
+      
+      // Update messages by removing the loading message
+      updatedMessages = updatedMessages.filter(msg => msg.id !== loadingMessageId);
+      setMessages(updatedMessages);
+      
+      return Promise.reject(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id, messages, setIsLoading, setMessages]);
+
   const handleSend = async (text: string, files?: File) => {
     if (!text.trim()) return
     if (id) {
       try {
         // Trim messages to the last 10 messages to limit context length
         const recentMessages = messages.slice(-10);
-        await useWorkspaceStore.getState().askQuestion(
+        const resp = await useWorkspaceStore.getState().askQuestion(
           id.toString(),
           text,
           true,
@@ -98,6 +217,8 @@ export default function WorkspacePage() {
           recentMessages,
           undefined
         )
+        console.log(resp);
+        
       } catch (error) {
         console.error('Error sending message:', error)
         toast('Error: Failed to send message')
@@ -120,19 +241,33 @@ export default function WorkspacePage() {
           </button>
         </UploadMaterialModal>
       </div>
-      <SlidingPanel 
-        isOpen={isQuizPanelOpen} 
+      <SlidingPanel
+        isOpen={isQuizPanelOpen}
         onClose={handleCloseQuizPanel}
         workspaceId={id.toString()}
       />
-      {messages.length === 0 ? (
-        <div className='mt-16'>
-          <WelcomeScreen onSend={handleSend} />
-        </div>
-      ) : (
-        <ChatMessageList messages={messages} isLoading={isLoading} />
-      )}
-      <ChatInputForm onSend={handleSend} disabled={isLoading} />
+      {
+        loadChats ? (
+          <div className='flex items-center justify-center min-h-screen'>
+            <Loader2 className='w-8 h-8 animate-spin' />
+          </div>
+        ) : (
+          <div>
+            {messages.length === 0 ? (
+              <div className='mt-16'>
+                <WelcomeScreen onSend={handleSend} />
+              </div>
+            ) : (
+              <ChatMessageList messages={messages} isLoading={isLoading} />
+            )}
+          </div>
+        )
+      }
+      <ChatInputForm
+        onSend={handleSend}
+        onGenerateFlashcards={handleGenerateFlashcards}
+        disabled={isLoading}
+      />
     </div>
   )
 }

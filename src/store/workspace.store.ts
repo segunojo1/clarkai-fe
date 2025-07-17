@@ -54,6 +54,7 @@ interface WorkspaceStore {
     askQuestion: (workspaceId: string, question: string, thinking: boolean, mode: 'workspace' | 'file', previous_messages: ChatMessage[], fileId?: string) => Promise<void>
     uploadFile: (file: File, workspaceId: string) => Promise<void>
     getWorkspace: (id: string) => Workspace | undefined
+    generateFlashcards: (mode: 'workspace' | 'file', workspaceId: string, size: number, is_context: boolean, context: string, file_id?: string) => Promise<void>
 }
 
 export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
@@ -155,6 +156,21 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
             get().addMessage(errorMessage)
         } finally {
             setIsLoading(false)
+        }
+    },
+
+    generateFlashcards: async (mode: 'workspace' | 'file', workspaceId: string, size: number, is_context: boolean, context: string, file_id?: string) => {
+        if (!workspaceId) return
+
+        try {
+            const dataa = await workspaceService.generateFlashcards(mode, workspaceId, size, is_context, context, file_id)
+            // Refresh workspaces to update the list
+            console.log(dataa);
+            return dataa
+            // await get().getWorkspaces()
+        } catch (error) {
+            console.error('Error generating flashcards:', error)
+            set({ error: 'Failed to generate flashcards' })
         }
     },
 
