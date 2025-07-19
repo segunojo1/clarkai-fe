@@ -4,14 +4,7 @@ import { useState, useCallback } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Flashcard } from './flashcard'
-
-export interface FlashcardData {
-  question: string
-  answer: string
-  explanation?: string
-}
-
-export type Flashcard = FlashcardData;
+import { FlashcardData } from '@/lib/types'
 
 interface FlashcardModalProps {
   isOpen: boolean

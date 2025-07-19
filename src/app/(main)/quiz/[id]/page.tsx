@@ -2,7 +2,9 @@
 import { Checkbox } from '@/components/ui/checkbox'
 import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import Cookies from 'js-cookie'
 import quizService from '@/services/quiz.service'
+import { GuestInfoModal } from '@/components/quiz/guest-info-modal'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 
@@ -15,6 +17,9 @@ interface Question {
 
 const Quiz = () => {
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+  const [showGuestModal, setShowGuestModal] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { id } = useParams()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
@@ -46,6 +51,11 @@ const Quiz = () => {
 
   // Fetch quiz data
   useEffect(() => {
+    const token = Cookies.get('token');
+    setIsAuthenticated(!!token);
+    console.log(isAuthenticated);
+    
+    
     const fetchQuiz = async () => {
       try {
         setLoading(true);
@@ -144,35 +154,79 @@ const Quiz = () => {
 
   const { name, questions } = quizData;
 
-  const handleOpenSubmitModal = () => {
-    setIsSubmitModalOpen(true);
+  const handleSubmit = () => {
+    if (isAuthenticated) {
+      setIsSubmitModalOpen(true);
+    } else {
+      setShowGuestModal(true);
+    }
   };
 
   const handleCloseSubmitModal = () => {
     setIsSubmitModalOpen(false);
   };
 
-  const handleSubmitQuiz = async () => {
+  const submitQuiz = async (guestData?: { name: string; email: string }) => {
     try {
-      // Submit the quiz answers
-      // const response = await quizService.submitQuizAnswers(id as string, {
-      //   answers: Object.entries(selectedAnswers).map(([questionId, answer]) => ({
-      //     questionId: parseInt(questionId),
-      //     answer
-      //   }))
-      // });
+      setIsSubmitting(true);
+      const answers = Array(questions.length).fill('');
+      Object.entries(selectedAnswers).forEach(([questionId, answer]) => {
+        const index = parseInt(questionId) - 1;
+        if (index >= 0 && index < answers.length) {
+          answers[index] = answer;
+        }
+      });
 
-      // if (response.success) {
+      const submitData: any = {
+        answers,
+        timeRemaining: timeLeft.toString(),
+        ...(guestData && {
+          name: guestData.name,
+          email: guestData.email
+        })
+      };
+      
+      const response = await quizService.submitQuizAnswers(id as string, submitData);
+
+      if (response.success) {
         toast.success('Quiz submitted successfully!');
-        // Navigate to results or dashboard
-        router.push('/workspaces');
-      // }
+        return { success: true };
+      } else {
+        throw new Error(response.message || 'Failed to submit quiz');
+      }
     } catch (error) {
       console.error('Failed to submit quiz:', error);
-      toast.error('Failed to submit quiz. Please try again.');
+      toast.error(error.message || 'Failed to submit quiz. Please try again.');
+      return { success: false, error };
     } finally {
+      setIsSubmitting(false);
       setIsSubmitModalOpen(false);
     }
+  };
+
+  // For authenticated users
+  const handleSubmitQuiz = async () => {
+    const result = await submitQuiz();
+    if (result?.success) {
+      router.push(`/quiz/${id}/overview`);
+    }
+  };
+
+  // For guest submissions
+  const handleGuestSubmit = async (guestData: { name: string; email: string }) => {
+    
+    console.log(guestData);
+    
+    const result = await submitQuiz(guestData);
+    if (result?.success) {
+      setShowGuestModal(false);
+      router.push(`/quiz/${id}/overview`);
+    }
+    return result;
+  };
+
+  const handleQuizSubmit = async () => {
+    await handleSubmitQuiz();
   };
 
   return (
@@ -180,7 +234,7 @@ const Quiz = () => {
       <div className='p-[25px] sticky top-0 bg-[#1a1a1a] z-10 flex justify-between items-center'>
         <h2 className='text-[14px] font-bold'>{name || 'Untitled Quiz'}</h2>
         <button
-          onClick={handleOpenSubmitModal}
+          onClick={handleSubmit}
           className='px-4 py-2 bg-[#FF3D00] text-white rounded-md text-sm font-medium hover:bg-[#FF4D1A] transition-colors'
         >
           Submit Quiz
@@ -235,11 +289,10 @@ const Quiz = () => {
               Previous
             </button>
             <button
-              onClick={handleNext}
-              className='px-4 py-2 rounded-tr-[5px] rounded-br-[5px] bg-[#2C2C2C] text-white hover:bg-[#333333]'
-              disabled={currentPage === Math.ceil(questions.length / questionsPerPage)}
+              onClick={currentPage === Math.ceil(questions.length / questionsPerPage) ? handleSubmit : handleNext}
+              className={`px-4 py-2 rounded-tr-[5px] rounded-br-[5px] ${currentPage === Math.ceil(questions.length / questionsPerPage) ? 'bg-[#FF3D00] hover:bg-[#FF4D1A]' : 'bg-[#2C2C2C] hover:bg-[#333333]'} text-white`}
             >
-              Next
+              {currentPage === Math.ceil(questions.length / questionsPerPage) ? 'Submit' : 'Next'}
             </button>
           </div>
         </div>
@@ -278,10 +331,17 @@ const Quiz = () => {
       <SubmitModal
         isOpen={isSubmitModalOpen}
         onClose={handleCloseSubmitModal}
-        onSubmit={handleSubmitQuiz}
+        onSubmit={handleQuizSubmit}
         timeLeft={timeLeft}
         selectedAnswers={selectedAnswers}
         questions={questions}
+        isAuthenticated={isAuthenticated}
+      />
+      <GuestInfoModal
+        isOpen={showGuestModal}
+        onClose={() => setShowGuestModal(false)}
+        onSubmit={handleGuestSubmit}
+        isLoading={isSubmitting}
       />
     </div>
   )
@@ -297,6 +357,7 @@ interface SubmitModalProps {
   timeLeft: number;
   selectedAnswers: Record<number, string>;
   questions: Question[];
+  isAuthenticated: boolean;
 }
 
 export const SubmitModal: React.FC<SubmitModalProps> = ({
@@ -305,182 +366,82 @@ export const SubmitModal: React.FC<SubmitModalProps> = ({
   onSubmit,
   timeLeft,
   selectedAnswers,
-  questions
+  questions,
+  isAuthenticated
 }) => {
-  const [isConfirmed, setIsConfirmed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+  const { id } = useParams();
 
   if (!isOpen) return null;
 
-  // Calculate score and results
-  const calculateResults = () => {
-    let correct = 0;
-    const results = questions.map((question) => {
-      const userAnswer = selectedAnswers[question.id];
-      const isCorrect = userAnswer === question.correctAnswer;
-      
-      if (isCorrect) correct++;
-      
-      return {
-        question: question.question,
-        userAnswer: userAnswer || 'Not answered',
-        correctAnswer: question.correctAnswer,
-        isCorrect,
-        questionId: question.id
-      };
-    });
-
-    return {
-      score: correct,
-      total: questions.length,
-      percentage: Math.round((correct / questions.length) * 100),
-      results
-    };
-  };
-
-  const { score, total, percentage, results } = calculateResults();
   const timeInMinutes = Math.floor(timeLeft / 60);
   const timeInSeconds = timeLeft % 60;
   const timeFormatted = `${timeInMinutes.toString().padStart(2, '0')}:${timeInSeconds.toString().padStart(2, '0')}`;
 
   const handleConfirmSubmit = async () => {
-    if (!isConfirmed) {
-      setIsConfirmed(true);
-      return;
-    }
-    
-    setIsSubmitting(true);
     try {
+      setIsSubmitting(true);
+      if (!isAuthenticated) {
+        onClose();
+        return;
+      }
       await onSubmit();
+    } catch (error) {
+      console.error('Error submitting quiz:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#2C2C2C] rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-        <div className="flex justify-between items-start mb-6">
-          <h2 className="text-xl font-bold">
-            {isConfirmed ? 'Quiz Results' : 'Submit Quiz'}
-          </h2>
-          {!isConfirmed && (
-            <button 
-              onClick={onClose}
-              className="text-gray-400 hover:text-white"
-            >
-              ✕
-            </button>
-          )}
+    <div className="fixed inset-0 bg-[#000000bd] bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-[#2C2C2C] rounded-lg p-6 w-full max-w-xl">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold">Submit Quiz</h2>
+          <button 
+            onClick={onClose}
+            className="text-gray-400 hover:text-white text-2xl"
+          >
+            ✕
+          </button>
         </div>
 
-        {!isConfirmed ? (
-          <div className="space-y-6">
-            <div className="bg-[#3a3a3a] p-4 rounded-lg">
-              <h3 className="font-semibold mb-4">Are you sure you want to submit your quiz?</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Questions Answered:</span>
-                  <span>{Object.keys(selectedAnswers).length} of {total}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Time Remaining:</span>
-                  <span>{timeFormatted}</span>
-                </div>
+        <div className="space-y-6">
+          <div className="bg-[#3a3a3a] p-4 rounded-lg">
+            <h3 className="font-semibold mb-4">Are you sure you want to submit your quiz?</h3>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-gray-400">Questions Answered:</span>
+                <span>{Object.keys(selectedAnswers).length} of {questions.length}</span>
               </div>
-              <p className="mt-4 text-sm text-gray-300">
-                Once submitted, you won't be able to change your answers.
-              </p>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Time Remaining:</span>
+                <span>{timeFormatted}</span>
+              </div>
             </div>
-
-            <div className="flex justify-end gap-3 pt-2">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 rounded bg-[#404040] text-white hover:bg-[#505050] transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmSubmit}
-                className="px-4 py-2 rounded bg-[#FF3D00] text-white hover:bg-[#FF4D1A] transition-colors"
-              >
-                Submit Quiz
-              </button>
-            </div>
+            <p className="mt-4 text-sm text-gray-300">
+              Once submitted, you'll be redirected to view your results.
+            </p>
           </div>
-        ) : (
-          <div className="space-y-6">
-            <div className="bg-[#3a3a3a] p-4 rounded-lg">
-              <h3 className="font-semibold mb-4">Quiz Results</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <p className="text-sm text-gray-400">Questions Answered</p>
-                  <p className="text-lg">{Object.keys(selectedAnswers).length} / {total}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm text-gray-400">Time Remaining</p>
-                  <p className="text-lg">{timeFormatted}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm text-gray-400">Your Score</p>
-                  <p className="text-2xl font-bold">{score} / {total}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm text-gray-400">Percentage</p>
-                  <p 
-                    className={`text-2xl font-bold ${
-                      percentage >= 70 ? 'text-green-500' : 
-                      percentage >= 50 ? 'text-yellow-500' : 'text-red-500'
-                    }`}
-                  >
-                    {percentage}%
-                  </p>
-                </div>
-              </div>
-            </div>
 
-            <div className="space-y-4">
-              <h3 className="font-semibold">Your Answers</h3>
-              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
-                {results.map((result, index) => (
-                  <div key={index} className="border-b border-[#404040] pb-3 last:border-0">
-                    <p className="font-medium">Q{result.questionId}. {result.question}</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1 text-sm">
-                      <div>
-                        <p className="text-gray-400">Your answer:</p>
-                        <p className={result.isCorrect ? 'text-green-400' : 'text-red-400'}>
-                          {result.userAnswer}
-                        </p>
-                      </div>
-                      {!result.isCorrect && (
-                        <div>
-                          <p className="text-gray-400">Correct answer:</p>
-                          <p className="text-green-400">{result.correctAnswer}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-4">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 rounded bg-[#404040] text-white hover:bg-[#505050] transition-colors"
-              >
-                Close
-              </button>
-              <button
-                onClick={handleConfirmSubmit}
-                disabled={isSubmitting}
-                className="px-4 py-2 rounded bg-[#FF3D00] text-white hover:bg-[#FF4D1A] transition-colors disabled:opacity-50"
-              >
-                {isSubmitting ? 'Submitting...' : 'Confirm Submission'}
-              </button>
-            </div>
+          <div className="flex justify-end space-x-4">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-600 rounded-md hover:bg-gray-700"
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleConfirmSubmit}
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Submitting...' : isAuthenticated ? 'Submit' : 'Submit as Guest'}
+            </button>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

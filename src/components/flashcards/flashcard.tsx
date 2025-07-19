@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight, RotateCw } from 'lucide-react';
+import { FlashcardData } from '@/lib/types';
 
-interface FlashcardProps {
+interface FlashcardProps extends Omit<FlashcardData, 'question' | 'answer'> {
   question: string;
   answer: string;
-  explanation?: string;
   cardNumber: number;
   totalCards: number;
   onNext: () => void;
@@ -32,14 +32,17 @@ export function Flashcard({
   }, [cardNumber]);
 
   return (
-    <div className="w-full max-w-2xl">
-      <div className="w-full h-96 perspective-1000">
+    <div className="w-full h-full">
+      <div 
+        className="w-full h-[400px] rounded-xl cursor-pointer"
+        onClick={() => setIsFlipped(!isFlipped)}
+      >
         <div 
           className={`relative w-full h-full transition-transform duration-500 transform-gpu ${isFlipped ? 'rotate-y-180' : ''}`}
           style={{
             transformStyle: 'preserve-3d',
+            height: '100%'
           }}
-          onClick={() => setIsFlipped(!isFlipped)}
         >
           {/* Front of card */}
           <div 
@@ -50,7 +53,7 @@ export function Flashcard({
               transform: 'rotateY(0deg)',
             }}
           >
-            <Card className="w-full h-full bg-white dark:bg-gray-800 flex flex-col">
+            <Card className="w-full h-full bg-white dark:bg-[#262626] flex flex-col">
               <CardContent className="flex-1 flex flex-col items-center justify-center p-6 text-center">
                 <h3 className="text-xl font-semibold mb-4">Question</h3>
                 <p className="text-lg mb-6">{question}</p>
@@ -60,7 +63,6 @@ export function Flashcard({
               </CardContent>
             </Card>
           </div>
-
           {/* Back of card */}
           <div 
             className="absolute w-full h-full rounded-xl"
@@ -70,13 +72,13 @@ export function Flashcard({
               transform: 'rotateY(180deg)',
             }}
           >
-            <Card className="w-full h-full bg-white dark:bg-gray-800 flex flex-col">
-              <CardContent className="flex-1 flex flex-col p-6">
+            <Card className="w-full h-full bg-white dark:bg-[#262626] flex flex-col">
+              <CardContent className="flex-1 flex flex-col items-center justify-center p-6 text-center">
                 <h3 className="text-xl font-semibold mb-4">Answer</h3>
-                <p className="text-lg mb-4">{answer}</p>
+                <p className="text-lg mb-6">{answer}</p>
                 {explanation && (
-                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <h4 className="font-medium mb-2">Explanation:</h4>
+                  <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg w-full">
+                    <h4 className="text-sm font-medium mb-2">Explanation</h4>
                     <p className="text-sm text-muted-foreground">{explanation}</p>
                   </div>
                 )}
@@ -107,15 +109,12 @@ export function Flashcard({
             e.stopPropagation();
             setIsFlipped(!isFlipped);
           }}
-          className="flex items-center gap-2"
+          className="flex text-[14px] font-medium items-center gap-2 text-[#A3A3A3]"
         >
-          <RotateCw className="h-4 w-4" />
-          <span>Flip Card</span>
+          {cardNumber} / {totalCards}
+          <span className='text-[16px] font-medium text-[#FAFAFA]'>Show Front</span>
         </Button>
         
-        <div className="text-sm text-muted-foreground mx-4">
-          {cardNumber} / {totalCards}
-        </div>
         
         <Button 
           variant="outline" 

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { X, CheckCircle } from "lucide-react"
+import { X, CheckCircle, Edit } from "lucide-react"
 import { useWorkspaceStore } from "@/store/workspace.store"
 import quizService from "@/services/quiz.service"
 import { toast } from "sonner"
@@ -38,7 +38,7 @@ interface QuizFormData {
 export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps) {
     const [currentStep, setCurrentStep] = useState(1)
     const [isGenerating, setIsGenerating] = useState(false)
-    const [generatedQuiz, setGeneratedQuiz] = useState<{id: string} | null>(null)
+    const [generatedQuiz, setGeneratedQuiz] = useState<{ id: string } | null>(null)
     const [error, setError] = useState<string | null>(null)
     const [formData, setFormData] = useState<QuizFormData>({
         step1: {
@@ -63,7 +63,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
     })
 
     const { selectedWorkspace } = useWorkspaceStore()
-    
+
     const materials = [
         { id: 'all', name: 'All Materials' },
         ...((selectedWorkspace as any)?.workspace?.files?.pdfFiles?.map((file: any) => ({
@@ -75,7 +75,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
         const [step, field] = name.split('.');
-        
+
         setFormData(prev => {
             const newFormData = {
                 ...prev,
@@ -84,22 +84,22 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                     [field]: type === 'number' ? Number(value) : value
                 }
             };
-            
+
             // If changing quiz type in step 1, update step 3 if it exists
             if (step === 'step1' && field === 'quizType' && currentStep >= 3) {
                 newFormData.step3.questionType = value;
             }
-            
+
             // If changing number of questions in step 2, update step 3 if it exists
             if (step === 'step2' && field === 'numQuestions' && currentStep >= 3) {
                 newFormData.step3.numQuestions = Number(value);
             }
-            
+
             // If changing material in step 1, update step 3 source if it exists
             if (step === 'step1' && field === 'materialId' && currentStep >= 3) {
                 newFormData.step3.source = value;
             }
-            
+
             return newFormData;
         });
     }
@@ -128,7 +128,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                 }
             }));
         }
-        
+
         if (currentStep <= 2) {
             setCurrentStep(currentStep + 1);
         }
@@ -142,8 +142,10 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsGenerating(true);
         setError(null);
+        
+        // Move to loading state (case 4) immediately
+        setCurrentStep(4);
         
         try {
             // Use the most specific values (from step3 if available, otherwise from previous steps)
@@ -152,13 +154,13 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
             const difficulty = formData.step2.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard';
             const isTimed = formData.step1.isTimed === 'yes';
             const duration = isTimed ? Number(formData.step1.timePerQuestion) : undefined;
-            
+
             // Determine mode and file ID
             const source = formData.step3.source || formData.step1.materialId || 'all';
             const isWorkspaceMode = source === 'all';
             const mode = isWorkspaceMode ? 'workspace' as const : 'file' as const;
             const fileId = !isWorkspaceMode ? source : undefined;
-            
+
             console.log('Generating quiz with params:', {
                 workspace_id: workspaceId,
                 size: numQuestions,
@@ -168,7 +170,8 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                 difficulty,
                 duration
             });
-            
+
+            // Run the quiz generation in the background
             const response = await quizService.generateQuiz({
                 workspace_id: workspaceId,
                 size: numQuestions,
@@ -178,13 +181,14 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                 difficulty,
                 duration
             });
-            
+
             console.log('Quiz generated successfully:', response);
             setGeneratedQuiz({ id: response.quiz_id });
-            setCurrentStep(4); // Move to success step
-        } catch (err) {
-            console.error('Failed to generate quiz:', err);
-            setError('Failed to generate quiz. Please try again.');
+            setCurrentStep(5); // Move to success step (case 5)
+        } catch (err: any) {
+            console.error('Error generating quiz:', err);
+            setError(err.message || 'Failed to generate quiz. Please try again.');
+            setCurrentStep(3); // Go back to the form if there's an error
         } finally {
             setIsGenerating(false);
         }
@@ -195,12 +199,12 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
             case 1:
                 return (
                     <div className="p-4">
-                        <h3 className="text-2xl font-bold text-white mb-6">Let's Build a Quiz!</h3>
-                        <form onSubmit={handleSubmit} className="space-y-6">
+                        <h3 className="text-3xl font-bold text-white mb-6">Let's Build a Quiz!</h3>
+                        <form onSubmit={handleSubmit} className="space-y-3 w-[341px]">
                             {/* Step 1 form content remains unchanged */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Enter a Topic
+                                <label className="block text-sm font-medium text-gray-300 mb-[5px]">
+                                    Enter a Topic
                                 </label>
                                 <input
                                     type="text"
@@ -212,9 +216,9 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                     required
                                 />
                             </div>
-                            
+
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                <label className="block text-sm font-medium text-gray-300 mb-[5px]">
                                     Where should we pull questions from?
                                 </label>
                                 <select
@@ -230,9 +234,9 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                     ))}
                                 </select>
                             </div>
-                            
+
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                <label className="block text-sm font-medium text-gray-300 mb-[5px]">
                                     How do you want the quiz to be structured?
                                 </label>
                                 <select
@@ -246,7 +250,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                     <option value="short_answer">Short Answer</option>
                                     <option value="mixed">Mixed</option>
                                 </select>
-                                
+
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-gray-300">Timed Quiz?</span>
                                     <div className="flex items-center space-x-2">
@@ -274,24 +278,24 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                         </label>
                                     </div>
                                 </div>
-                                
+
                                 {formData.step1.isTimed === 'yes' && (
                                     <div className="mt-4">
                                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                                            Total quiz duration (seconds)
+                                            Total quiz duration (minutes)
                                         </label>
                                         <input
                                             type="number"
                                             name="step1.timePerQuestion"
                                             value={formData.step1.timePerQuestion}
                                             onChange={handleInputChange}
-                                            min="30"
+                                            min="1"
                                             className="w-full bg-[#232323] border border-[#333] rounded-lg p-2 text-white text-sm focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]"
                                         />
                                     </div>
                                 )}
                             </div>
-                            
+
                             <button
                                 type="button"
                                 onClick={handleNext}
@@ -308,26 +312,17 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                         <div className="flex items-center justify-between mb-4">
                             <button
                                 onClick={handleBack}
-                                className="flex items-center text-gray-400 hover:text-white transition-colors"
+                                className="flex items-center text-gray-400 p-2 hover:bg-[#232323] rounded-full  hover:text-white transition-colors"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                                 </svg>
-                                Back
                             </button>
-                            <div className="flex items-center space-x-2">
-                                <button
-                                    onClick={onClose}
-                                    className="p-2 hover:bg-[#232323] rounded-full transition-colors"
-                                >
-                                    <X className="h-4 w-4 text-gray-400" />
-                                </button>
-                            </div>
                         </div>
-                        
+
                         <h3 className="text-3xl font-bold text-white mb-8">Customize your quiz experience.</h3>
-                        
-                        <form onSubmit={handleSubmit} className="space-y-6">
+
+                        <form onSubmit={handleSubmit} className="space-y-3 w-[341px]">
                             <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
                                     Number of Questions
@@ -343,7 +338,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                     required
                                 />
                             </div>
-                            
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
                                     Difficulty
@@ -359,7 +354,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                     <option value="Hard">Hard</option>
                                 </select>
                             </div>
-                            
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
                                     Focus Area
@@ -376,7 +371,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                     <option value="theorems">Theorems & Proofs</option>
                                 </select>
                             </div>
-                            
+
                             <div className="border-t border-[#333] pt-4">
                                 <button
                                     type="button"
@@ -411,76 +406,76 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                 </button>
                             </div>
                         </div>
-                        
+
                         <div className="space-y-6">
                             <div>
                                 <h3 className="text-2xl font-bold text-white mb-2">Ready to quiz?</h3>
                                 <p className="text-gray-400 text-sm">All done...</p>
                             </div>
-                            
+
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div className="space-y-4">
                                     {/* Preview of selected options */}
                                     <div className="bg-[#1E1E1E] p-4 rounded-lg border border-[#333]">
                                         <h4 className="text-[#FF3D00] text-sm font-medium mb-3">Quiz Preview</h4>
-                                        
+
                                         <div className="space-y-3">
                                             <div className="flex justify-between">
                                                 <span className="text-gray-400">Source:</span>
                                                 <span className="text-white">
-                                                    {formData.step3.source === 'all' 
-                                                        ? 'All Materials' 
+                                                    {formData.step3.source === 'all'
+                                                        ? 'All Materials'
                                                         : materials.find(m => m.id === formData.step3.source)?.name || 'N/A'}
                                                 </span>
                                             </div>
-                                            
+
                                             <div className="flex justify-between">
                                                 <span className="text-gray-400">Question Type:</span>
                                                 <span className="text-white capitalize">
-                                                    {formData.step3.questionType === 'mcq' ? 'Multiple Choice' : 
-                                                     formData.step3.questionType === 'true_false' ? 'True/False' :
-                                                     formData.step3.questionType === 'short_answer' ? 'Short Answer' :
-                                                     formData.step3.questionType === 'mixed' ? 'Mixed' : 'N/A'}
+                                                    {formData.step3.questionType === 'mcq' ? 'Multiple Choice' :
+                                                        formData.step3.questionType === 'true_false' ? 'True/False' :
+                                                            formData.step3.questionType === 'short_answer' ? 'Short Answer' :
+                                                                formData.step3.questionType === 'mixed' ? 'Mixed' : 'N/A'}
                                                 </span>
                                             </div>
-                                            
+
                                             <div className="flex justify-between">
                                                 <span className="text-gray-400">Number of Questions:</span>
                                                 <span className="text-white">{formData.step3.numQuestions}</span>
                                             </div>
-                                            
+
                                             <div className="flex justify-between">
-                                                <span className="text-gray-400">Time per Question:</span>
+                                                <span className="text-gray-400">Total Time:</span>
                                                 <span className="text-white">
-                                                    {formData.step1.isTimed === 'yes' 
-                                                        ? `${formData.step1.timePerQuestion} seconds` 
+                                                    {formData.step1.isTimed === 'yes'
+                                                        ? `${formData.step1.timePerQuestion} seconds`
                                                         : 'No time limit'}
                                                 </span>
                                             </div>
-                                            
+
                                             {formData.step3.focusArea && (
                                                 <div className="flex justify-between">
                                                     <span className="text-gray-400">Focus Area:</span>
                                                     <span className="text-white capitalize">
                                                         {formData.step3.focusArea === 'concepts' ? 'Key Concepts' :
-                                                         formData.step3.focusArea === 'examples' ? 'Examples & Applications' :
-                                                         formData.step3.focusArea === 'theorems' ? 'Theorems & Proofs' : ''}
+                                                            formData.step3.focusArea === 'examples' ? 'Examples & Applications' :
+                                                                formData.step3.focusArea === 'theorems' ? 'Theorems & Proofs' : ''}
                                                     </span>
                                                 </div>
                                             )}
-                                            
+
                                             <div className="flex justify-between">
                                                 <span className="text-gray-400">Difficulty:</span>
                                                 <span className="text-white capitalize">{formData.step2.difficulty.toLowerCase()}</span>
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="text-sm text-gray-400 text-center py-2">
                                         Review your quiz settings. Click "Generate Quiz" to create your quiz.
                                     </div>
                                 </div>
-                                
+
                                 <div className="border-t border-[#333] pt-6">
                                     <button
                                         type="submit"
@@ -497,7 +492,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                             </>
                                         ) : 'Generate Quiz'}
                                     </button>
-                                    
+
                                     <button
                                         type="button"
                                         onClick={handleBack}
@@ -508,17 +503,25 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                 </div>
                             </form>
                         </div>
-                    </div>
-                )
+                    </div>)
             case 4:
                 return (
-                    <div className="p-6 text-white">
+                    <div className="p-6 flex flex-col items-center justify-center h-full">
+                        <Edit />
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF3D00] mb-4"></div>
+                        <h3 className="text-xl font-bold text-white mb-2">Assembling questions...</h3>
+                        <p className="text-gray-400 text-center">Please wait while we prepare your quiz. This may take a moment.</p>
+                    </div>
+                )
+            case 5:
+                return (
+                    <div className="p-6 text-white max-w-[440px] mx-auto">
                         {/* Header */}
                         <div className="text-center mb-8">
                             <h2 className="text-2xl font-bold mb-2">Quiz Generated!</h2>
                             <p className="text-gray-400">
-                                Your quiz is ready to go. You can start now, 
-                                <span 
+                                Your quiz is ready to go. You can start now,
+                                <span
                                     className="underline cursor-pointer hover:text-white"
                                     onClick={() => {
                                         // TODO: Implement preview functionality
@@ -526,8 +529,8 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                     }}
                                 >
                                     review the questions
-                                </span>, or 
-                                <span 
+                                </span>, or
+                                <span
                                     className="underline cursor-pointer hover:text-white"
                                     onClick={async () => {
                                         try {
@@ -554,7 +557,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                 <h3 className="text-xl font-semibold">
                                     {formData.step1.topic || 'Untitled Quiz'}
                                 </h3>
-                                <button 
+                                <button
                                     className="text-gray-400 hover:text-white"
                                     onClick={() => {
                                         // TODO: Implement edit quiz functionality
@@ -575,16 +578,16 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                         </svg>
                                         <span>Source:</span>
                                         <span className="text-white">
-                                            {formData.step3.source === 'all' 
-                                                ? 'All Materials' 
+                                            {formData.step3.source === 'all'
+                                                ? 'All Materials'
                                                 : materials.find(m => m.id === formData.step3.source)?.name || 'Unknown'}
                                         </span>
                                     </div>
-                                    <button 
+                                    <button
                                         className="text-gray-400 hover:text-white"
                                         onClick={() => {
-                                            const source = formData.step3.source === 'all' 
-                                                ? 'All materials in the workspace' 
+                                            const source = formData.step3.source === 'all'
+                                                ? 'All materials in the workspace'
                                                 : materials.find(m => m.id === formData.step3.source)?.name || 'Unknown';
                                             toast.info(`Source: ${source}`);
                                         }}
@@ -602,14 +605,14 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                         </svg>
                                         <span>Created:</span>
                                         <span className="text-white">
-                                            {new Date().toLocaleDateString('en-US', { 
-                                                year: 'numeric', 
-                                                month: 'long', 
-                                                day: 'numeric' 
+                                            {new Date().toLocaleDateString('en-US', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
                                             })}
                                         </span>
                                     </div>
-                                    <button 
+                                    <button
                                         className="text-gray-400 hover:text-white"
                                         onClick={() => {
                                             // TODO: Implement refresh functionality
@@ -630,7 +633,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                         <span>Status:</span>
                                         <span className="text-white">Ready to start</span>
                                     </div>
-                                    <button 
+                                    <button
                                         className="text-gray-400 hover:text-white"
                                         onClick={() => {
                                             // TODO: Implement delete functionality
@@ -646,13 +649,13 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex space-x-4">
+                        <div className="flex flex-col space-y-2">
                             <Link href={`/quiz/${generatedQuiz?.id}`}
-                                className="flex-1 py-3 bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-medium rounded-lg transition-colors"
+                                className="flex items-center justify-center py-3 bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-medium rounded-lg transition-colors"
                             >
                                 Start Quiz
                             </Link>
-                            
+
                             <button
                                 onClick={async () => {
                                     if (generatedQuiz?.id) {
@@ -695,9 +698,8 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
     }
 
     return (
-        <div className={`fixed top-0 right-0 h-full w-[400px] bg-[#18191A] z-[9999999] border-l border-[#333] transition-transform duration-300 ${
-            isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}>
+        <div className={`fixed top-0 right-0 h-full w-[540px] bg-[#2C2C2C] z-[9999999] border-l border-[#333] transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'
+            }`}>
             <div className="flex flex-col h-full">
                 <div className="flex justify-between items-center p-4 border-b border-[#333]">
                     <h2 className="text-lg font-medium text-white">Create Quiz</h2>
@@ -709,8 +711,8 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                         <span className="sr-only">Close</span>
                     </button>
                 </div>
-                
-                <div className="p-4 overflow-y-auto flex-1">
+
+                <div className="overflow-y-auto flex-1 satoshi">
                     {renderStepContent()}
                 </div>
             </div>

@@ -5,15 +5,26 @@ export interface FileAttachment {
   size?: number;
 }
 
+export interface FlashcardData {
+  question: string;
+  answer: string;
+  explanation?: string;
+}
+export interface ChatMessageMetadata {
+  type: 'flashcards';
+  data: FlashcardData[];
+}
+
 export interface ChatMessage {
   id?: string;
-  role: 'user' | 'assistant'
-  text: string
-  isFile: boolean
-  fromUser: boolean
-  createdAt?: Date
+  role: 'user' | 'assistant';
+  text: string;
+  isFile: boolean;
+  fromUser: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
   attachments?: FileAttachment[];
-  updatedAt?: Date
+  metadata?: ChatMessageMetadata;
 }
 
 export interface FileAttachment {

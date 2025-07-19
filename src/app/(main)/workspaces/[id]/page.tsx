@@ -99,6 +99,7 @@ export default function WorkspacePage() {
   interface FlashcardQuestion {
     question: string;
     answer: string;
+    explanation?: string;
   }
 
   interface FlashcardResponse {
@@ -122,7 +123,7 @@ export default function WorkspacePage() {
       const userMessage: ChatMessage = {
         id: `user-${Date.now()}`,
         role: 'user',
-        text: `@flashcard ${context}`,
+        text: `${context}`,
         fromUser: true,
         isFile: false,
         createdAt: new Date(),
@@ -153,31 +154,33 @@ export default function WorkspacePage() {
         'workspace',
         id,
         10, // Default number of flashcards
-        false, // is_context set to false since we're passing the context directly
+        true,
         context
       );
       
       const flashcardResponse = response as unknown as FlashcardResponse;
       
       if (flashcardResponse.success && flashcardResponse.questions) {
-        // Format the flashcard response as markdown
-        const flashcardMarkdown = flashcardResponse.questions
-          .map((card: FlashcardQuestion, index: number) => 
-            `### Flashcard ${index + 1}\n` +
-            `**Q:** ${card.question}\n` +
-            `**A:** ${card.answer}`
-          )
-          .join('\n\n');
+        // Create structured flashcard data
+        const flashcards = flashcardResponse.questions.map((card: FlashcardQuestion) => ({
+          question: card.question,
+          answer: card.answer,
+          explanation: card.explanation || ''
+        }));
         
-        // Add assistant message with flashcard content
+        // Add assistant message with flashcard data
         const assistantMessage: ChatMessage = {
           id: `flashcard-${Date.now()}`,
           role: 'assistant',
-          text: `Here are your flashcards based on: "${context}"\n\n${flashcardMarkdown}`,
+          text: `I've generated ${flashcards.length} flashcards based on: "${context}"`,
           fromUser: false,
           isFile: false,
           createdAt: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
+          metadata: {
+            type: 'flashcards',
+            data: flashcards
+          }
         };
         
         // Update messages by replacing the loading message with the actual flashcards

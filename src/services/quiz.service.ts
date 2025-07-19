@@ -154,15 +154,171 @@ class QuizService {
     }
   }
 
-  public async submitQuizAnswers(quizId: string, params: SubmitQuizAnswersParams): Promise<SubmitQuizResponse> {
+  public async submitQuizAnswers(quizId: string, params: {
+    answers: string[];
+    timeRemaining: string;
+    name?: string;
+    email?: string;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    userScore: any;
+  }> {
     try {
-      const response = await this.api.post<SubmitQuizResponse>(`/quizzes/${quizId}/submit`, params);
-      if (!response.data.success) {
-        throw new Error('Failed to submit quiz answers');
+      const payload: any = {
+        quiz_id: quizId,
+        answers: params.answers,
+        time_remaining: params.timeRemaining
+      };
+
+      // Add guest info if provided
+      if (params.name && params.email) {
+        payload.name = params.name;
+        payload.email = params.email;
       }
+
+      const response = await this.api.post('/assessAnswers', payload);
+      
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to submit quiz answers');
+      }
+      
       return response.data;
     } catch (error) {
       console.error('Failed to submit quiz answers:', error);
+      throw error;
+    }
+  }
+  public async getUserQuizScore(quizId: string): Promise<{
+    success: boolean;
+    message: string;
+    userScore: {
+      name: string;
+      userEmail: string;
+      quizId: string;
+      userScore: string;
+      totalQuestions: string;
+      timeTaken: number;
+      userAnswers: string; // JSON string of user answers
+      percentage: string;
+    };
+    quiz: {
+      id: string;
+      name: string;
+      creator: string;
+      userId: number;
+      workspaceId: string;
+      fileId: string;
+      quizSource: string;
+      quizSourceType: string;
+      duration: number;
+      createdAt: string;
+      updatedAt: string;
+    };
+    quizData: Array<{
+      question: string;
+      options: string[];
+      correctAnswer: string;
+      explanation: string;
+      userAnswer: string;
+      isCorrect: boolean;
+    }>;
+  }> {
+    try {
+      const response = await this.api.get(`/quizScore/${quizId}`);
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to fetch quiz score');
+      }
+      
+      // Transform the response to match our expected format
+      const { quizData, ...rest } = response.data;
+      
+      // Parse userAnswers if it's a string
+      if (typeof rest.userScore.userAnswers === 'string') {
+        try {
+          rest.userScore.userAnswers = JSON.parse(rest.userScore.userAnswers);
+        } catch (e) {
+          console.warn('Failed to parse userAnswers:', e);
+        }
+      }
+      
+      return {
+        ...rest,
+        quizData: quizData || []
+      };
+    } catch (error) {
+      console.error('Failed to fetch quiz score:', error);
+      throw error;
+    }
+  }
+
+  public async getQuizDetails(quizId: string): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      name: string;
+      timeLimit?: number;
+      questions: Array<{
+        question: string;
+        options: string[];
+      }>;
+    };
+  }> {
+    try {
+      const response = await this.api.get(`/quiz/${quizId}`);
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to fetch quiz details');
+      }
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch quiz details:', error);
+      throw error;
+    }
+  }
+
+  public async getQuizLeaderboard(quizId: string): Promise<{
+    success: boolean;
+    message: string;
+    leaderboard: Array<{
+      rank: number;
+      name: string;
+      email: string;
+      score: number;
+      totalQuestions: number;
+      percentage: string;
+      timeTaken?: string | null;
+      submittedAt?: string;
+    }>;
+    totalParticipants?: number;
+    averageScore?: string;
+    quiz_id?: string;
+  }> {
+    try {
+      const response = await this.api.get(`/leaderboard/${quizId}`);
+      
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to fetch leaderboard');
+      }
+
+      // Transform the API response to match our UI requirements
+      const leaderboard = response.data.leaderboard.map((entry: any, index: number) => ({
+        rank: index + 1,
+        name: entry.name,
+        email: entry.userEmail,
+        score: parseInt(entry.userScore, 10),
+        totalQuestions: parseInt(entry.totalQuestions, 10),
+        percentage: entry.percentage,
+        // These fields are not provided by the API, so we'll leave them undefined
+        timeTaken: undefined,
+        submittedAt: undefined
+      }));
+
+      return {
+        ...response.data,
+        leaderboard
+      };
+    } catch (error) {
+      console.error('Failed to fetch leaderboard:', error);
       throw error;
     }
   }

@@ -252,13 +252,11 @@ const ChatInputForm = ({
       const hasFlashcardTag = messageText.includes('@flashcard');
       
       if (hasFlashcardTag && onGenerateFlashcards) {
-        // Only call generateFlashcards, not onSend
-        const context = messageText.replace(/@flashcard\s*/g, '').trim();
-        if (context) {
-          await onGenerateFlashcards(context);
-        }
+        // For flashcard generation, only call onGenerateFlashcards
+        // The message will be added to the chat in the page component
+        await onGenerateFlashcards(messageText);
       } else {
-        // Regular message sending
+        // For regular messages, send to the backend
         onSend(messageText, selectedFile || undefined);
       }
       

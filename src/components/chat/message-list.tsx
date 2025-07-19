@@ -10,7 +10,8 @@ import UserAvatar from '../user-avatar';
 import { cn } from '@/lib/utils';
 import { useSidebar } from '../ui/sidebar';
 import MarkdownRenderer from '../markdown-renderer';
-import { Flashcard, FlashcardModal } from '@/components/flashcards/flashcard-modal';
+import { FlashcardData } from '@/lib/types';
+import { FlashcardPanel } from '@/components/flashcards/flashcard-panel';
 
 // const isFile = (obj: unknown): obj is File => {
 //   if (obj instanceof File) return true;
@@ -152,64 +153,55 @@ export function ChatMessageList({
   className?: string
 }) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [selectedFlashcards, setSelectedFlashcards] = useState<Flashcard[]>([]);
+  const [selectedFlashcards, setSelectedFlashcards] = useState<FlashcardData[]>([]);
   const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
 
-  const extractFlashcards = (text: string): Flashcard[] | null => {
-    try {
-      // Check if the message contains flashcard data
-      const regex = /### Flashcard \d+\n\*\*Q:\*\* ([^\n]*)\n\*\*A:\*\* ([^\n]*)(?:\n|$)/g;
-      const matches: RegExpExecArray[] = [];
-      let match;
-      
-      while ((match = regex.exec(text)) !== null) {
-        matches.push(match);
-      }
-      
-      if (matches.length === 0) return null;
+  const handleFlashcardClick = async (message: ChatMessage) => {
+    if (message.metadata?.type === 'flashcards') {
+      setSelectedFlashcards(message.metadata.data);
+      setIsFlashcardModalOpen(true);
+    } else if (message.fromUser && message.text.includes('@flashcard')) {
+      // Show loading state
+      const context = message.text.replace(/@flashcard\s*/g, '').trim();
+      setSelectedFlashcards([{
+        question: `Loading flashcards...`,
+        answer: 'Please wait while we fetch your flashcards',
+        explanation: 'This may take a moment'
+      }]);
+      setIsFlashcardModalOpen(true);
 
-      return matches.map(match => ({
-        question: match[1] || '',
-        answer: match[2] || ''
-      }));
-    } catch (error) {
-      console.error('Error parsing flashcards:', error);
-      return null;
-    }
-  };
+      try {
+        // Get workspace ID from the URL
+        const workspaceId = window.location.pathname.split('/').pop();
+        if (!workspaceId) throw new Error('Workspace ID not found');
 
-  const generateFlashcards = (context: string): Flashcard[] => {
-    // Simple flashcard generation based on the context
-    // You can customize this to create more meaningful flashcards
-    return [
-      {
-        question: `What is the main topic of: ${context}?`,
-        answer: context,
-        explanation: 'This is a generated flashcard based on your input.'
-      },
-      {
-        question: `Explain in detail: ${context}`,
-        answer: `Detailed explanation about ${context} would go here.`,
-        explanation: 'This is a generated flashcard for detailed explanation.'
-      }
-    ];
-  };
-
-  const handleFlashcardClick = (text: string, isUserMessage: boolean) => {
-    if (isUserMessage) {
-      // For user messages with @flashcard tag, generate flashcards based on the context
-      const context = text.replace(/@flashcard\s*/g, '').trim();
-      if (context) {
-        const generatedFlashcards = generateFlashcards(context);
-        setSelectedFlashcards(generatedFlashcards);
-        setIsFlashcardModalOpen(true);
-      }
-    } else {
-      // For AI responses, try to parse existing flashcards
-      const flashcards = extractFlashcards(text);
-      if (flashcards) {
-        setSelectedFlashcards(flashcards);
-        setIsFlashcardModalOpen(true);
+        // Fetch flashcards from the workspace
+        const workspaceService = (await import('@/services/workspace.service')).default;
+        const flashcards = await workspaceService.fetchWorkspaceFlashcards(workspaceId);
+        
+        if (flashcards && flashcards.length > 0) {
+          // Transform the API response to match the FlashcardData format
+          const formattedFlashcards = flashcards.map((card: any) => ({
+            question: `Flashcard ${card.id.substring(0, 8)}`,
+            answer: `Created on: ${new Date(card.createdAt).toLocaleDateString()}`,
+            explanation: `Workspace: ${card.workspaceId}`
+          }));
+          
+          setSelectedFlashcards(formattedFlashcards);
+        } else {
+          setSelectedFlashcards([{
+            question: 'No Flashcards Found',
+            answer: 'There are no flashcards available for this workspace yet.',
+            explanation: 'Try generating some flashcards first!'
+          }]);
+        }
+      } catch (error) {
+        console.error('Error fetching flashcards:', error);
+        setSelectedFlashcards([{
+          question: 'Error Loading Flashcards',
+          answer: 'Failed to load flashcards. Please try again later.',
+          explanation: error instanceof Error ? error.message : 'Unknown error occurred'
+        }]);
       }
     }
   };
@@ -233,15 +225,14 @@ export function ChatMessageList({
       )}
       <div className='max-w-[750px] w-full mx-auto'>
         {messages.map((message) => {
-          const isFlashcardMessage = message.fromUser 
-            ? message.text.includes('@flashcard')
-            : message.text.includes('Flashcard');
+          const isFlashcardMessage = message.metadata?.type === 'flashcards' || 
+            (message.fromUser && message.text.includes('@flashcard')) || 
+            (!message.fromUser && message.text.includes('Flashcard'));
           
           return (
             <div key={`${message.role}`} className={cn({
-              'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors': isFlashcardMessage
+              ' rounded-lg transition-colors': isFlashcardMessage
             })}
-            onClick={() => isFlashcardMessage && handleFlashcardClick(message.text, message.fromUser)}
             >
               <div
                 className={`flex flex-col items-${message.fromUser ? 'end' : 'start'} text-[15px] satoshi font-normal mb-4 w-full`}
@@ -259,7 +250,19 @@ export function ChatMessageList({
                   {message.text && (
                     <div className={`relative group rounded-[69px] p-4 ${message.fromUser ? 'bg-[#F0F0EF] dark:bg-[#404040] dark:text-white text-black' : 'bg-transparent'}`}>
                       {message.fromUser ? (
-                        <p>{message.text}</p>
+                        <p className="whitespace-pre-wrap break-words">
+                          {message.text.split(/(@\w+)/).map((part, i) => {
+                            // Only process non-empty parts
+                            if (!part) return null;
+                            return part.startsWith('@') ? (
+                              <span key={i} className="bg-[#FCC095] bg-opacity-10 text-[#FF3C00] px-1.5 py-0.5 rounded-[2.8px] font-bold">
+                                {part}
+                              </span>
+                            ) : (
+                              <span key={i}>{part}</span>
+                            );
+                          })}
+                        </p>
                       ) : (
                         <div className="markdown-body text-black dark:text-white">
                           <MarkdownRenderer content={message.text} />
@@ -279,20 +282,37 @@ export function ChatMessageList({
                   )}
                 </div>
               </div>
-              {isFlashcardMessage && message.fromUser && (
-                <div className="mt-2 ml-14">
-                  <div className="bg-gray-50 p-4 rounded-lg dark:bg-[#404040] flex flex-col items-center gap-2">
-                    <div className="flex-1 flex gap-2 min-w-0">
-                      <div className="bg-primary/10 text-primary p-1.5 rounded-md">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                          <line x1="3" y1="9" x2="21" y2="9"></line>
-                          <line x1="9" y1="21" x2="9" y2="9"></line>
-                        </svg>
-                      </div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                        Click to view generated flashcards
-                      </p>
+              {isFlashcardMessage && message.metadata?.type === 'flashcards' && (
+                <div 
+                  className="mt-2 ml-14 mb-4 cursor-pointer"
+                  onClick={() => {
+                    setSelectedFlashcards(message.metadata?.data || []);
+                    setIsFlashcardModalOpen(true);
+                  }}
+                >
+                  <div className="bg-gray-50 p-4 rounded-lg dark:bg-[#404040] hover:bg-gray-100 dark:hover:bg-[#4a4a4a] transition-colors">
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+                      {message.metadata.data.length} Generated Flashcards
+                    </h4>
+                    <div className="space-y-2">
+                      {message.metadata.data.slice(0, 3).map((card: FlashcardData, index: number) => (
+                        <div 
+                          key={index}
+                          className="p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600"
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className="flex-shrink-0 w-2 h-2 rounded-full bg-primary"></div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white line-clamp-1">
+                              {card.question}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                      {message.metadata.data.length > 3 && (
+                        <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                          + {message.metadata.data.length - 3} more flashcards
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -329,8 +349,8 @@ export function ChatMessageList({
           </div>
         )}
 
-        {/* Flashcard Modal */}
-        <FlashcardModal 
+        {/* Flashcard Panel */}
+        <FlashcardPanel 
           isOpen={isFlashcardModalOpen} 
           onClose={() => setIsFlashcardModalOpen(false)} 
           flashcards={selectedFlashcards} 

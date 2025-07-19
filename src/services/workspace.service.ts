@@ -15,15 +15,15 @@ class WorkspaceService {
         });
         this.api.interceptors.request.use(
             (config) => {
-              const token = Cookies.get("token");
-              if (token) {
-                config.headers = config.headers || {};
-                config.headers.Authorization = `Bearer ${token}`;
-              }
-              return config;
+                const token = Cookies.get("token");
+                if (token) {
+                    config.headers = config.headers || {};
+                    config.headers.Authorization = `Bearer ${token}`;
+                }
+                return config;
             },
             (error) => Promise.reject(error)
-          );
+        );
     }
 
     public static getInstance(): WorkspaceService {
@@ -39,17 +39,17 @@ class WorkspaceService {
                 name,
                 description
             });
-            
+
             if (!response.data.success) {
                 throw new Error(response.data.message || 'Failed to create workspace');
             }
-            
+
             return {
                 id: response.data.workspace_id,
                 name: response.data.name,
                 chat: response.data.chat
             };
-            
+
         } catch (error) {
             console.error("Failed to create workspace:", error);
             throw error;
@@ -59,11 +59,11 @@ class WorkspaceService {
         try {
             const endpoint = workspaceId ? `/workspace/${workspaceId}` : `/workspace`;
             const response = await this.api.get(endpoint);
-            
+
             if (!response.data.success) {
                 throw new Error(response.data.message || 'Failed to get workspaces');
             }
-            
+
             return workspaceId ? response.data : response.data.workspaces;
         } catch (error) {
             console.error("Failed to get workspaces:", error);
@@ -101,7 +101,7 @@ class WorkspaceService {
                 context,
                 file_id
             });
-console.log(response.data);
+            console.log(response.data);
 
             return response.data;
         } catch (error) {
@@ -130,6 +130,23 @@ console.log(response.data);
             return response.data;
         } catch (error) {
             console.error("Failed to upload file:", error);
+            throw error;
+        }
+    }
+
+    public async fetchWorkspaceFlashcards(workspaceId: string) {
+        try {
+            const response = await this.api.get('/workspaceFlashCard', {
+                params: { workspace_id: workspaceId }
+            });
+
+            if (!response.data.success) {
+                throw new Error(response.data.message || 'Failed to fetch flashcards');
+            }
+
+            return response.data.flashcards || [];
+        } catch (error) {
+            console.error('Failed to fetch workspace flashcards:', error);
             throw error;
         }
     }
