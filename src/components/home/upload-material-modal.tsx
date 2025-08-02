@@ -9,7 +9,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { ChevronDown, Globe, Star, Link as LinkIcon, FileText, Scan, Loader2, X } from "lucide-react"
+import { ChevronDown, Globe, Star, Link as LinkIcon, FileText, Scan, Loader2, X, Play } from "lucide-react"
 import Image from "next/image"
 import { useWorkspaceStore } from "@/store/workspace.store"
 import { toast } from "sonner"
@@ -17,6 +17,7 @@ import { Progress } from "@/components/ui/progress"
 import { Card, CardContent } from "@/components/ui/card"
 import { useParams } from "next/navigation"
 import workspaceServiceInstance from "@/services/workspace.service"
+import Link from "next/link"
 
 
 interface UploadMaterialModalProps {
@@ -53,9 +54,9 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
             <DialogTrigger asChild>
                 {children}
             </DialogTrigger>
-            <DialogContent className="bg-[#18191A] border border-[#333] text-white  w-[540px] max-h-[800px] mx-auto p-0 overflow-hidden rounded-2xl shadow-2xl overflow-y-auto" style={{ marginLeft: '300px' }}>
+            <DialogContent className="bg-[#18191A] border border-[#333] text-white md:max-w-[500px] max-h-[80vh] p-0 rounded-2xl shadow-2xl overflow-y-auto !top-[30%] !left-[80%] mt-0 ml-0" style={{ transform: 'none' }}>
                 {/* Nav Tabs */}
-                <div className="flex items-center gap-2 px-8 pt-4 pb-2">
+                <div className="flex items-center justify-center gap-2 px-8 pt-4 pb-2">
                     <button
                         onClick={() => setActiveTab("Materials")}
                         className={`font-medium text-base transition-colors flex items-center gap-1 px-4 py-2 rounded-lg ${activeTab === "Materials"
@@ -93,17 +94,9 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                     >
                         Courses
                     </button>
-                    <div className="flex-1" />
-                    <Button className="bg-transparent border-none text-white font-bold text-2xl p-0 hover:bg-gray-700 w-10 h-10">+</Button>
-                    <Button className="bg-transparent border-none text-white p-0 hover:bg-gray-700 w-10 h-10">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M9 18l6-6-6-6" />
-                            <path d="M9 18l6-6-6-6" />
-                        </svg>
-                    </Button>
                 </div>
                 {/* Stats Row - conditional positioning based on active tab */}
-                <div className={`flex items-center gap-6 px-8 pb-2 text-base text-gray-400 w-full ${activeTab === "Quizzes" ? "pt-0" : "pt-1"
+                <div className={`flex items-center justify-between  px-8 pb-2 text-[14px] text-gray-400 w-full ${activeTab === "Quizzes" ? "pt-0" : "pt-1"
                     }`}>
                     <div className="flex items-center gap-2 bg-[#232323] px-4 py-2 rounded-full font-medium">
                         <span>0 Mat. Uploaded</span>
@@ -122,11 +115,11 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                     </div>
                 </div>
                 {/* Main Content - single column */}
-                <div className="flex flex-col items-start justify-start px-12 pb-8 pt-4 w-full h-full">
+                <div className="flex flex-col items-start justify-start px-4 pb-8 pt-4 w-full h-full">
                     {activeTab === "Materials" && (
                         <>
                             {/* Files List */}
-                            {selectedWorkspace.workspace.files.pdfFiles.length > 0 ? (
+                            {selectedWorkspace?.workspace?.files?.pdfFiles?.length > 0 ? (
                                 <div className="flex justify-between flex-wrap gap-2 mx-auto">
                                     {selectedWorkspace?.workspace.files.pdfFiles.map((file: { id: string; filePath: string; fileName: string; size: string }) => (
                                         <div key={file.id} className="flex flex-col items-center w-fit max-w-[130px] justify-start mb-8 cursor-pointer hover:bg-[#232323] rounded-2xl p-2" onClick={() => window.open(file.filePath, '_blank')}>
@@ -251,7 +244,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                         </CardContent>
                                     </Card>
                                 ) : (
-                                    <div className="flex justify-start w-full">
+                                    <div className="flex justify-center  w-full">
                                         <FileUploadButton workspaceId={workspaceId} />
                                     </div>
                                 )}
@@ -260,48 +253,75 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                     )}
                     {activeTab === "Quizzes" && (
                         <>
-                        {
-                            selectedWorkspace.
-                        }
-                            <div className="w-full flex flex-col items-start justify-start">
-                                <DialogHeader className="text-left mb-8 w-full">
-                                    <DialogTitle className="text-3xl font-normal text-white flex items-center gap-3 mb-4">
-                                        Nothing to answer here... yet
-                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A3A3A3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-                                            <path d="M9 14h6" />
-                                            <path d="M9 10h6" />
-                                            <path d="M9 18h2" />
-                                        </svg>
-                                    </DialogTitle>
-                                </DialogHeader>
-                                <div className="space-y-6 text-gray-300 leading-relaxed mb-8 w-full max-w-xl text-left break-words">
-                                    <p className="text-sm">
-                                        Create quizzes from your uploaded materials, notes, or custom questions to start testing your knowledge.
-                                    </p>
-                                    <p className="text-sm">
-                                        Clark helps you generate questions in seconds—organized, trackable, and tailored to what you're learning. You'll be able to revisit them, share with friends, or build streaks by taking them daily.
-                                    </p>
-                                    <div className="border-l-2 border-[#5A5A5A] pl-4">
-                                        <p className="break-words whitespace-normal text-sm">
-                                            Use the <span className="bg-[#FF3D00] text-white px-2 py-1 rounded text-xs font-medium">@quiz</span> tag or "create" button in chat to generate one instantly.
-                                        </p>
+                            {selectedWorkspace?.workspace?.quizzes?.length > 0 ? (
+                                <div className="w-full space-y-4">
+                                    <h3 className="text-lg font-medium text-white mb-4">Available Quizzes</h3>
+                                    <div className="grid gap-4">
+                                        {selectedWorkspace.workspace.quizzes.map((quiz, index) => (
+                                            <div key={quiz.id || index} className="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-primary transition-colors">
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <h4 className="text-white font-medium">{quiz.name || 'Untitled Quiz'}</h4>
+                                                        <p className="text-sm text-gray-400 mt-1">
+                                                            Created {new Date(quiz.createdAt).toLocaleDateString()}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex gap-2 items-center">
+                                                        <Link href={`/quiz/${quiz.id}`}>
+                                                            Start Quiz
+                                                        </Link>
+                                                    </div>
+                                                </div>
+                                                {quiz.quizSource && (
+                                                    <p className="text-sm text-gray-300 mt-2 line-clamp-2">
+                                                        {quiz.quizSource}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
-                                <div className="flex justify-start w-full">
-                                    <Button
-                                        className="bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-medium text-lg px-32 py-4 rounded-md transition-colors ml-4 w-96"
-                                        onClick={() => {
-                                            window.dispatchEvent(new CustomEvent('openQuizPanel', {
-                                                detail: { workspaceId: workspaceId }
-                                            }))
-                                            setIsOpen(false)
-                                        }}
-                                    >
-                                        Create a Quiz
-                                    </Button>
+                            ) : (
+                                <div className="w-full flex flex-col items-start justify-start">
+                                    <DialogHeader className="text-left mb-8 w-full">
+                                        <DialogTitle className="text-3xl font-normal text-white flex items-center gap-3 mb-4">
+                                            Nothing to answer here... yet
+                                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A3A3A3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                                                <path d="M9 14h6" />
+                                                <path d="M9 10h6" />
+                                                <path d="M9 18h2" />
+                                            </svg>
+                                        </DialogTitle>
+                                    </DialogHeader>
+                                    <div className="space-y-6 text-gray-300 leading-relaxed mb-8 w-full max-w-xl text-left break-words">
+                                        <p className="text-sm">
+                                            Create quizzes from your uploaded materials, notes, or custom questions to start testing your knowledge.
+                                        </p>
+                                        <p className="text-sm">
+                                            Clark helps you generate questions in seconds—organized, trackable, and tailored to what you're learning. You'll be able to revisit them, share with friends, or build streaks by taking them daily.
+                                        </p>
+                                        <div className="border-l-2 border-[#5A5A5A] pl-4">
+                                            <p className="break-words whitespace-normal text-sm">
+                                                Use the <span className="bg-[#FF3D00] text-white px-2 py-1 rounded text-xs font-medium">@quiz</span> tag or "create" button in chat to generate one instantly.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-start w-full">
+                                        <Button
+                                            className="bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-medium text-lg px-32 py-4 rounded-md transition-colors ml-4 w-96"
+                                            onClick={() => {
+                                                window.dispatchEvent(new CustomEvent('openQuizPanel', {
+                                                    detail: { workspaceId: workspaceId }
+                                                }))
+                                                setIsOpen(false)
+                                            }}
+                                        >
+                                            Create a Quiz
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </>
                     )}
                     {activeTab === "Courses" && (
