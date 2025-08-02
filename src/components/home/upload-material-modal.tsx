@@ -126,7 +126,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                     {activeTab === "Materials" && (
                         <>
                             {/* Files List */}
-                            {selectedWorkspace?.workspace?.files?.pdfFiles?.length > 0 ? (
+                            {selectedWorkspace.workspace.files.pdfFiles.length > 0 ? (
                                 <div className="flex justify-between flex-wrap gap-2 mx-auto">
                                     {selectedWorkspace?.workspace.files.pdfFiles.map((file: { id: string; filePath: string; fileName: string; size: string }) => (
                                         <div key={file.id} className="flex flex-col items-center w-fit max-w-[130px] justify-start mb-8 cursor-pointer hover:bg-[#232323] rounded-2xl p-2" onClick={() => window.open(file.filePath, '_blank')}>
@@ -260,6 +260,9 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                     )}
                     {activeTab === "Quizzes" && (
                         <>
+                        {
+                            selectedWorkspace.
+                        }
                             <div className="w-full flex flex-col items-start justify-start">
                                 <DialogHeader className="text-left mb-8 w-full">
                                     <DialogTitle className="text-3xl font-normal text-white flex items-center gap-3 mb-4">

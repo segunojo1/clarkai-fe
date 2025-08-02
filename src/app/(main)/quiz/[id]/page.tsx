@@ -220,7 +220,7 @@ const Quiz = () => {
     const result = await submitQuiz(guestData);
     if (result?.success) {
       setShowGuestModal(false);
-      router.push(`/quiz/${id}/overview`);
+      router.push(`/workspaces`);
     }
     return result;
   };

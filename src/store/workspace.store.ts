@@ -3,42 +3,57 @@ import workspaceService from '@/services/workspace.service'
 import { ChatMessage, FileAttachment } from '@/lib/types'
 
 interface Workspace {
-    name: string
-    description?: string
-    enc_id: string
-    files: {
-        imageFiles: Array<{
-            id: string
-            filePath: string
-            fileName: string
-            size: string
-        }>
-        pdfFiles: Array<{
-            id: string
-            filePath: string
-            fileName: string
-            size: string
-        }>
-        youtubeVideos: Array<{
-            id: string
-            filePath: string
-            fileName: string
-            size: string
-        }>
-    }
-    chat: {
-        id: string
-        userId: number
-        workspaceId: string
+    workspace: {
         name: string
-        createdAt: string
-        updatedAt: string
+        description?: string
+        enc_id: string
+        files: {
+            imageFiles: Array<{
+                id: string
+                filePath: string
+                fileName: string
+                size: string
+            }>
+            pdfFiles: Array<{
+                id: string
+                filePath: string
+                fileName: string
+                size: string
+            }>
+            youtubeVideos: Array<{
+                id: string
+                filePath: string
+                fileName: string
+                size: string
+            }>
+        }
+        quizzes: Array<{
+            id: string
+            name: string
+            creator: string
+            userId: number
+            workspaceId: string
+            fileId: string
+            quizSource: string
+            quizSourceType: string
+            duration: number
+            createdAt: string
+            updatedAt: string
+        }>
+        chat: {
+            id: string
+            userId: number
+            workspaceId: string
+            name: string
+            createdAt: string
+            updatedAt: string
+        }
     }
 }
 
 interface WorkspaceStore {
     workspaces: Workspace[]
-    selectedWorkspace: Workspace | null
+    selectedWorkspace: Workspace
     workspaceId: string | null
     messages: ChatMessage[]
     isLoading: boolean

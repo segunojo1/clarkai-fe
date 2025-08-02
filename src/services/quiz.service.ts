@@ -11,7 +11,7 @@ interface GenerateQuizParams {
   mode: QuizMode;
   file_id?: string;
   difficulty?: QuizDifficulty;
-  duration?: number; // Total duration in seconds
+  duration?: number;
 }
 
 interface QuizQuestion {
@@ -322,6 +322,22 @@ class QuizService {
       throw error;
     }
   }
-}
 
+  public async fetchWorkspaceQuiz(workspaceId: string): Promise<{
+    success: boolean;
+    message: string;
+    quiz: QuizData[];
+  }> {
+    try {
+      const response = await this.api.get(`/workspaceQuiz/?workspace_id=${workspaceId}`);
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to fetch workspace quiz');
+      }
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch workspace quiz:', error);
+      throw error;
+    }
+  }
+}
 export default QuizService.getInstance();
