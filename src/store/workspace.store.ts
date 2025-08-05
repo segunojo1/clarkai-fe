@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import workspaceService from '@/services/workspace.service'
-import { ChatMessage, FileAttachment } from '@/lib/types'
+import { ChatMessage, FileAttachment, FlashcardData } from '@/lib/types'
 
 interface Workspace {
     workspace: {
@@ -70,6 +70,7 @@ interface WorkspaceStore {
     uploadFile: (file: File, workspaceId: string) => Promise<void>
     getWorkspace: (id: string) => Workspace | undefined
     generateFlashcards: (mode: 'workspace' | 'file', workspaceId: string, size: number, is_context: boolean, context: string, file_id?: string) => Promise<void>
+    fetchFlashcard: (id: string) => any
 }
 
 export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
@@ -136,6 +137,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
             role: 'user',
             text: question,
             isFile: false,
+            
             fromUser: true,
             createdAt: new Date(),
             updatedAt: new Date()
@@ -199,6 +201,17 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
         } catch (error) {
             console.error('Error uploading file:', error)
             set({ error: 'Failed to upload file' })
+        }
+    },
+
+    fetchFlashcard: async (id: string): Promise<FlashcardData[] | null> => {
+        try {
+            const response = await workspaceService.fetchFlashcards(id);
+            return response || null;
+        } catch (error) {
+            console.error('Error fetching flashcards:', error);
+            set({ error: 'Failed to fetch flashcards' });
+            return null;
         }
     }
 }))

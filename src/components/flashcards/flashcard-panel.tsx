@@ -1,27 +1,96 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { X } from 'lucide-react'
+import { X, ArrowLeft, ArrowRight, AlertCircle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+// Remove unused Flashcard import since we're not using it anymore
+import workspaceService from '@/services/workspace.service'
+import { useWorkspaceStore } from '@/store/workspace.store'
 import { Flashcard } from './flashcard'
-import { FlashcardData } from '@/lib/types'
 
-interface FlashcardPanelProps {
-  isOpen: boolean
-  onClose: () => void
-  flashcards: FlashcardData[]
+interface FlashcardQuestion {
+  question: string;
+  answer: string;
+  explanation: string;
 }
 
-export function FlashcardPanel({ isOpen, onClose, flashcards }: FlashcardPanelProps) {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [isMounted, setIsMounted] = useState(false)
+interface FlashcardResponse {
+  success: boolean;
+  message: string;
+  flashcard: {
+    id: string;
+    workspaceId: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  questions: FlashcardQuestion[];
+}
 
-  // Reset index when flashcards change
+interface FlashcardPanelProps {
+  isOpen: boolean;
+  onClose: () => void;
+  flashcards?: FlashcardQuestion[];
+  flashcardId: string | null;
+}
+
+export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initialFlashcards = [] }: FlashcardPanelProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isMounted, setIsMounted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [flashcardData, setFlashcardData] = useState<{
+    id: string;
+    workspaceId: string;
+    questions: FlashcardQuestion[];
+    createdAt: string;
+    updatedAt: string;
+  } | null>(null);
+  const [showingAnswer, setShowingAnswer] = useState(false);
+  const { fetchFlashcard } = useWorkspaceStore();
+  // Fetch flashcards when the panel is opened or flashcardId changes
   useEffect(() => {
-    if (flashcards.length > 0) {
-      setCurrentIndex(0)
+    const fetchFlashcards = async () => {
+      if (!flashcardId || !isOpen) return;
+      
+      try {
+        setLoading(true);
+        setError(null);
+        const response = (await fetchFlashcard(flashcardId)) as unknown as FlashcardResponse;
+        
+        if (response?.success && response.flashcard) {
+          setFlashcardData({
+            ...response.flashcard,
+            questions: response.questions || []
+          });
+          setCurrentIndex(0);
+          setShowingAnswer(false);
+        } else {
+          setError('Failed to load flashcard data');
+        }
+      } catch (err) {
+        console.error('Failed to fetch flashcards:', err);
+        setError('Failed to load flashcard. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (flashcardId) {
+      fetchFlashcards().catch((err) => {
+        console.error('Error in fetchFlashcards:', err);
+      });
+    } else if (initialFlashcards?.length) {
+      setFlashcardData({
+        id: 'local-flashcard',
+        workspaceId: '',
+        questions: initialFlashcards,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      setCurrentIndex(0);
+      setShowingAnswer(false);
     }
-  }, [flashcards])
+  }, [flashcardId, isOpen, fetchFlashcard, initialFlashcards]);
 
   // Handle mount state for animations
   useEffect(() => {
@@ -32,22 +101,44 @@ export function FlashcardPanel({ isOpen, onClose, flashcards }: FlashcardPanelPr
       const timer = setTimeout(() => {
         setIsMounted(true);
       }, 10);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        document.body.style.overflow = 'auto';
+        setIsMounted(false);
+      };
     } else {
       setIsMounted(false);
       document.body.style.overflow = 'auto';
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   const handleNext = useCallback(() => {
-    setCurrentIndex((prev) => Math.min(prev + 1, flashcards.length - 1))
-  }, [flashcards.length])
+    if (!flashcardData?.questions) return;
+    setCurrentIndex((prev) => {
+      const newIndex = Math.min(prev + 1, flashcardData.questions.length - 1);
+      if (newIndex !== prev) {
+        setShowingAnswer(false);
+      }
+      return newIndex;
+    });
+  }, [flashcardData?.questions]);
 
   const handlePrevious = useCallback(() => {
-    setCurrentIndex((prev) => Math.max(prev - 1, 0))
-  }, [])
+    if (!flashcardData?.questions) return;
+    setCurrentIndex((prev) => {
+      const newIndex = Math.max(prev - 1, 0);
+      if (newIndex !== prev) {
+        setShowingAnswer(false);
+      }
+      return newIndex;
+    });
+  }, [flashcardData?.questions]);
 
-  if (!isOpen) return null
+  const toggleAnswer = useCallback(() => {
+    setShowingAnswer(prev => !prev);
+  }, []);
+
+  if (!isMounted || !flashcardId) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
@@ -61,7 +152,7 @@ export function FlashcardPanel({ isOpen, onClose, flashcards }: FlashcardPanelPr
           willChange: 'opacity',
           pointerEvents: isMounted ? 'auto' : 'none'
         }}
-        onClick={onClose}
+        onClick={onClose} 
       />
       
       {/* Panel */}
@@ -90,50 +181,78 @@ export function FlashcardPanel({ isOpen, onClose, flashcards }: FlashcardPanelPr
         </div>
 
         {/* Content */}
-        <div className="h-[calc(100%-56px)] flex flex-col">
-          {/* Flashcard Counter */}
-          <div className="px-6 pt-4 text-sm text-gray-500 dark:text-gray-400">
-            Card {currentIndex + 1} of {flashcards.length}
-          </div>
-
-          {/* Flashcard */}
-          <div className="flex-1 flex items-center justify-center p-6">
-            {flashcards.length > 0 ? (
-              <Flashcard
-                question={flashcards[currentIndex].question}
-                answer={flashcards[currentIndex].answer}
-                explanation={flashcards[currentIndex].explanation}
-                cardNumber={currentIndex + 1}
-                totalCards={flashcards.length}
-                onNext={handleNext}
-                onPrevious={handlePrevious}
-              />
-            ) : (
-              <div className="text-center text-gray-500 dark:text-gray-400">
-                No flashcards available
+        <div className="h-[calc(100%-56px)] flex flex-col p-4">
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="flex flex-col items-center gap-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                <p className="text-gray-600 dark:text-gray-400">Loading flashcards...</p>
               </div>
-            )}
-          </div>
+            </div>
+          ) : error ? (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center p-4">
+                <div className="text-red-500 mb-2">
+                  <AlertCircle className="h-8 w-8 mx-auto" />
+                </div>
+                <p className="text-gray-700 dark:text-gray-300">{error}</p>
+                <Button 
+                  variant="outline" 
+                  className="mt-4"
+                  onClick={() => flashcardId && fetchFlashcard(flashcardId)}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Try Again
+                </Button>
+              </div>
+            </div>
+          ) : flashcardData?.questions?.length ? (
+            <div className="w-full h-full flex flex-col">
+              {/* Flashcard Counter */}
+              <div className="px-6 pt-4 text-sm text-gray-500 dark:text-gray-400">
+                Card {currentIndex + 1} of {flashcardData.questions.length}
+              </div>
 
-          {/* Action Buttons */}
-          <div className="border-t border-gray-200 dark:border-gray-700 p-4 flex justify-between gap-4">
-            <Button
-              variant="outline"
-              className="flex-1 bg-white dark:bg-[#262626] hover:bg-gray-50 dark:hover:bg-[#333] text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-            >
-              Preview Set ({flashcards.length} cards)
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1 bg-white dark:bg-[#262626] hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800 hover:text-red-700 dark:hover:text-red-300"
-            >
-              Delete Set
-            </Button>
-          </div>
+              {/* Flashcard */}
+              <div className="flex-1 flex items-center justify-center p-6">
+                <Flashcard
+                  question={flashcardData.questions[currentIndex].question}
+                  answer={flashcardData.questions[currentIndex].answer}
+                  explanation={flashcardData.questions[currentIndex].explanation}
+                  cardNumber={currentIndex + 1}
+                  totalCards={flashcardData.questions.length}
+                  onNext={handleNext}
+                  onPrevious={handlePrevious}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-gray-500 dark:text-gray-400">No flashcards available</p>
+            </div>
+          )}
 
-          <div className='text-[15px] rounded-[4px] mx-[10px] mb-[10px] font-normal text-white px-[30px] py-[10px] bg-[#ff3c0027]'>You can also generate a quiz based on this set — just type @quiz or generate another Flashcard set using @flashcard</div>
+        {/* Action Buttons */}
+        <div className="border-t border-gray-200 dark:border-gray-700 p-4 flex justify-between gap-4">
+          <Button
+            variant="outline"
+            className="flex-1 bg-white dark:bg-[#262626] hover:bg-gray-50 dark:hover:bg-[#333] text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+          >
+            Preview Set ({flashcardData?.questions?.length || 0} cards)
+          </Button>
+          <Button
+            variant="outline"
+            className="flex-1 bg-white dark:bg-[#262626] hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800 hover:text-red-700 dark:hover:text-red-300"
+          >
+            Delete Set
+          </Button>
+        </div>
+
+        <div className='text-[15px] rounded-[4px] mx-[10px] mb-[10px] font-normal text-white px-[30px] py-[10px] bg-[#ff3c0027]'>
+          You can also generate a quiz based on this set — just type @quiz or generate another Flashcard set using
         </div>
       </div>
     </div>
+  </div>
   )
 }

@@ -21,6 +21,10 @@ export interface ChatMessage {
   text: string;
   isFile: boolean;
   fromUser: boolean;
+  isFlashcard: boolean;
+  flashcardId: string | null;
+  size: number | null;
+  filePath?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
   attachments?: FileAttachment[];

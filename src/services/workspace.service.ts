@@ -150,6 +150,16 @@ class WorkspaceService {
             throw error;
         }
     }
+
+    public async fetchFlashcards(id: string) {
+        try {
+            const response = await this.api.get(`/flashcard/${id}`)
+            return response.data;
+        } catch (error) {
+            console.error("Failed to fetch flashcards:", error)
+            throw error;
+        }
+    }
 }
 
 export default WorkspaceService.getInstance();

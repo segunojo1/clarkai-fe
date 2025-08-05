@@ -126,6 +126,9 @@ export default function WorkspacePage() {
         text: `${context}`,
         fromUser: true,
         isFile: false,
+        isFlashcard: true,
+        flashcardId: '',
+        size: 0,
         createdAt: new Date(),
         updatedAt: new Date()
       };
@@ -170,12 +173,16 @@ export default function WorkspacePage() {
         
         // Add assistant message with flashcard data
         const assistantMessage: ChatMessage = {
-          id: `flashcard-${Date.now()}`,
+          createdAt: new Date(),
+          filePath: null,
+          flashcardId: flashcardResponse.flashcard_id,
           role: 'assistant',
           text: `I've generated ${flashcards.length} flashcards based on: "${context}"`,
           fromUser: false,
           isFile: false,
-          createdAt: new Date(),
+          isFlashcard: true,
+          size: 0,
+          
           updatedAt: new Date(),
           metadata: {
             type: 'flashcards',
@@ -190,6 +197,7 @@ export default function WorkspacePage() {
         ];
         setMessages(updatedMessages);
       }
+      console.log(messages);
       
       return Promise.resolve();
     } catch (error) {

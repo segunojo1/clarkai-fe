@@ -225,7 +225,7 @@ export function AppSidebar() {
 
     return (
         <Sidebar
-            className="bg-[#2C2C2C] transition-none"
+            className="dark:bg-[#2c2c2c] transition-none"
             collapsible="icon"
             variant="sidebar"
         >

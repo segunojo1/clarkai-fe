@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChatMessage } from "@/lib/types";
 import type { FileAttachment as FileAttachmentType } from '@/lib/types';
-import { ChevronRight, FileText } from 'lucide-react';
+import { ChevronRight, FileText, Link } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PDFViewer } from './pdf-viewer';
 import UserAvatar from '../user-avatar';
@@ -155,6 +155,7 @@ export function ChatMessageList({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [selectedFlashcards, setSelectedFlashcards] = useState<FlashcardData[]>([]);
   const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
+  const [selectedFlashcardId, setSelectedFlashcardId] = useState<string | null>(null);
 
   const handleFlashcardClick = async (message: ChatMessage) => {
     if (message.metadata?.type === 'flashcards') {
@@ -282,37 +283,24 @@ export function ChatMessageList({
                   )}
                 </div>
               </div>
-              {isFlashcardMessage && message.metadata?.type === 'flashcards' && (
+              {isFlashcardMessage && message.isFlashcard && message.flashcardId && (
                 <div 
                   className="mt-2 ml-14 mb-4 cursor-pointer"
                   onClick={() => {
-                    setSelectedFlashcards(message.metadata?.data || []);
+                    console.log('Opening flashcard with ID:', message.flashcardId);
+                    setSelectedFlashcards([]);
+                    setSelectedFlashcardId(message.flashcardId);
                     setIsFlashcardModalOpen(true);
                   }}
-                >
-                  <div className="bg-gray-50 p-4 rounded-lg dark:bg-[#404040] hover:bg-gray-100 dark:hover:bg-[#4a4a4a] transition-colors">
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
-                      {message.metadata.data.length} Generated Flashcards
+                > 
+                  <div className="bg-gray-50 p-4 border border-[#d4d4d439] w-fit rounded-[10px] dark:bg-[#2C2C2C] hover:bg-gray-100 dark:hover:bg-[#4a4a4a] transition-colors">
+                    <h4 className="text-sm font-bold text-gray-900 dark:text-[#D4D4D4] mb-2">
+                      Flashcard Pack Generated
                     </h4>
-                    <div className="space-y-2">
-                      {message.metadata.data.slice(0, 3).map((card: FlashcardData, index: number) => (
-                        <div 
-                          key={index}
-                          className="p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600"
-                        >
-                          <div className="flex items-center gap-2">
-                            <div className="flex-shrink-0 w-2 h-2 rounded-full bg-primary"></div>
-                            <p className="text-sm font-medium text-gray-900 dark:text-white line-clamp-1">
-                              {card.question}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                      {message.metadata.data.length > 3 && (
-                        <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                          + {message.metadata.data.length - 3} more flashcards
-                        </div>
-                      )}
+                    <div className="mt-[10px]">
+                      <div className="text-sm font-bold gap-1 flex items-center dark:text-[#D4D4D4] w-fit p-[6px] bg-[#404040] text-center rounded-[4px]">
+                        <Link width={16} className="mr-1" /> Open Flashcards
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -352,8 +340,12 @@ export function ChatMessageList({
         {/* Flashcard Panel */}
         <FlashcardPanel 
           isOpen={isFlashcardModalOpen} 
-          onClose={() => setIsFlashcardModalOpen(false)} 
-          flashcards={selectedFlashcards} 
+          onClose={() => {
+            setIsFlashcardModalOpen(false);
+            setSelectedFlashcardId(null);
+          }} 
+          flashcards={selectedFlashcards}
+          flashcardId={selectedFlashcardId}
         />
 
         {/* This empty div will be used for auto-scrolling */}

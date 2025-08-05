@@ -1,7 +1,7 @@
 "use client"
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { PlusIcon, Globe, File, FileText, ChevronDown, Edit } from "lucide-react"
+import { PlusIcon, Globe, File, FileText, ChevronDown, Edit, ChevronUp } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import Image from "next/image"
@@ -104,6 +104,7 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
 const WorkspaceItem = ({ workspace }: { workspace: Workspace }) => {
     const [expanded, setExpanded] = useState(false)
     const [materialsExpanded, setMaterialsExpanded] = useState(false)
+    const [quizExpanded, setQuizExpanded] = useState(false)
     const [loading, setLoading] = useState(false)
     const [workspaceData, setWorkspaceData] = useState<Workspace | null>(null)
     const [hasFetched, setHasFetched] = useState(false)
@@ -120,8 +121,8 @@ const WorkspaceItem = ({ workspace }: { workspace: Workspace }) => {
                         <Globe width={19} height={19} color="#9747FF" />
                         {workspace.name}
                     </div>
-                    <ChevronDown className="w-4 h-4 ml-2" />
-                </div>
+                    {expanded ? <ChevronUp className="w-4 h-4 transition-transform duration-200" /> : <ChevronDown className="w-4 h-4 transition-transform duration-200" />}
+                    </div>
             </div>
 
             {expanded && (
@@ -156,7 +157,7 @@ const WorkspaceItem = ({ workspace }: { workspace: Workspace }) => {
                                 <FileText className="w-4 h-4 mr-2" />
                                 Materials
                             </div>
-                            <ChevronDown className="w-4 h-4 transition-transform duration-200" />
+                            {materialsExpanded ? <ChevronUp className="w-4 h-4 transition-transform duration-200" /> : <ChevronDown className="w-4 h-4 transition-transform duration-200" />}
                         </div>
 
                         {materialsExpanded && (
@@ -178,13 +179,13 @@ const WorkspaceItem = ({ workspace }: { workspace: Workspace }) => {
                                                     <div key={material.id} className="relative pl-6 flex items-center gap-2">
                                                         <div className="absolute left-3 top-0 h-full w-px bg-gray-200 dark:bg-[#E5E5E5]" />
                                                         <File color="#D4D4D4" fill="#D4D4D4" height={12} width={9.6} />
-                                                        <div>{material.fileName.length > 10 ? `${material.fileName.slice(0,10)}...pdf` :  material.fileName}</div>
+                                                        <div>{material.fileName.length > 10 ? `${material.fileName.slice(0, 10)}...pdf` : material.fileName}</div>
                                                     </div>
                                                 ))}
                                             </div>
                                         )}
 
-                                        
+
                                     </>
                                 )}
                             </div>
@@ -193,16 +194,65 @@ const WorkspaceItem = ({ workspace }: { workspace: Workspace }) => {
 
                     {/* Quizzes */}
                     <div className="space-y-1 relative mt-3">
-                        <div className="pl-2 flex items-center">
-                            <File className="w-4 h-4 mr-2" />
-                            Quizzes
+                        <div
+                            className="pl-2 flex items-center justify-between cursor-pointer"
+                            onClick={async () => {
+                                setQuizExpanded(!quizExpanded)
+                                if (!quizExpanded && workspace && !hasFetched) {
+                                    setLoading(true)
+                                    try {
+                                        const data = await workspaceService.getWorkspaces(workspace.enc_id)
+                                        setWorkspaceData(data.workspace)
+                                        setHasFetched(true)
+                                        // Set workspace in store
+                                        useWorkspaceStore.getState().selectWorkspace(data.workspace)
+                                    } catch (error) {
+                                        console.error('Error fetching workspace data:', error)
+                                    } finally {
+                                        setLoading(false)
+                                    }
+                                }
+                            }}
+                        >
+                            <div className="flex items-center gap-2">
+                                <FileText className="w-4 h-4 mr-2" />
+                                Quizzes
+                            </div>
+                            {quizExpanded ? <ChevronUp className="w-4 h-4 transition-transform duration-200" /> : <ChevronDown className="w-4 h-4 transition-transform duration-200" />}
+                            
                         </div>
-                        {(workspace.quizzes || []).map((quiz) => (
+
+                        {quizExpanded && (
+                            <div className="pl-6 space-y-2">
+                                {loading ? (
+                                    <div className="flex items-center gap-2">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400" />
+                                        Loading quizzes...
+                                    </div>
+                                ) : (
+                                    <>
+                                        {(workspaceData?.quizzes || []).length > 0 && (
+                                            <div className="space-y-1">
+                                                {(workspaceData?.quizzes || []).map((quiz) => (
+                                                    <div key={quiz.id} className="relative pl-3 flex items-center gap-2">
+                                                        <div className="absolute -left-2 top-0 h-full w-px bg-gray-200 dark:bg-[#E5E5E5]" />
+                                                        <div>{quiz.name}</div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+
+                                    </>
+                                )}
+                            </div>
+                        )}
+                        {/* {(workspace.quizzes || []).map((quiz) => (
                             <div key={quiz.id} className="relative pl-6">
                                 <div className="absolute left-3 top-0 h-full w-px bg-gray-200 dark:bg-gray-700" />
                                 <div>{quiz.name}</div>
                             </div>
-                        ))}
+                        ))} */}
                     </div>
 
                     {/* Notes */}

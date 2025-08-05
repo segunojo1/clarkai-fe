@@ -84,13 +84,16 @@ const ChatInputForm = ({
   onGenerateFlashcards
 }: ChatInputFormProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [previewUrl, setPreviewUrl] = useState<string>('')
-  const [mode, setMode] = useState<'ask' | 'research' | 'create'>('ask')
+  const [isCLoading, setIsCLoading] = useState(false)
+  const [mode, setMode] = useState<'ask' | 'create' | 'research'>('ask')
+  const [caretPosition, setCaretPosition] = useState(0)
+  const caretRef = useRef<HTMLSpanElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isSpeechSupported, setIsSpeechSupported] = useState<boolean>(false)
   const [isListening, setIsListening] = useState<boolean>(false)
   const [volume, setVolume] = useState<number>(0)
   const [interimTranscript, setInterimTranscript] = useState<string>('')
+  const [previewUrl, setPreviewUrl] = useState<string>('')
   const recognitionRef = useRef<SpeechRecognition | null>(null)
   const [showTagSuggestions, setShowTagSuggestions] = useState(false)
   const [tagSearch, setTagSearch] = useState('')
@@ -450,7 +453,7 @@ const ChatInputForm = ({
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <div className="relative border-[0.3px] border-[#D4D4D4] bg-white dark:bg-[#2C2C2C] rounded-[12px] overflow-hidden">
+                  <div className="relative border-[0.3px] bg-white dark:bg-[#2C2C2C] rounded-[12px] overflow-hidden">
                     <div className="relative">
 
                       <div className="relative">
@@ -462,36 +465,32 @@ const ChatInputForm = ({
                                 ? "Research a topic..."
                                 : "Create something new..."
                           }
-                          className="min-h-[100px] max-h-[180px] text-[16px] max-w-[750px] font-medium p-3 w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none resize-none relative z-20 bg-transparent"
+                          className="min-h-[100px] max-h-[180px] text-[16px] max-w-[750px] font-medium p-3 w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none resize-none relative z-20"
                           {...field}
                           onKeyDown={handleKeyDown}
-                          disabled={disabled || isLoading}
+                          disabled={disabled || isCLoading}
                           ref={textareaRef}
                           style={{
-                            color: 'transparent',
-                            caretColor: 'currentColor'
+                            caretColor: 'white'
                           }}
                         />
                         <div 
-                          className="absolute inset-0 pointer-events-none z-10 p-3 whitespace-pre-wrap break-words"
+                          className="absolute inset-0 pointer-events-none z-10 p-3 opacity-0"
                           style={{
                             font: 'inherit',
                             lineHeight: '1.5',
                             minHeight: '100px',
                             maxHeight: '180px',
-                            overflow: 'hidden',
                             whiteSpace: 'pre-wrap',
                             wordBreak: 'break-word',
                             padding: '0.75rem',
                             margin: '1px',
-                            pointerEvents: 'none',
-                            color: 'inherit'
                           }}
                         >
-                          {renderTextWithTags(field.value || '') || field.value || ''}
+                          {field.value}
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2 p-2 border-t border-[#D4D4D4] bg-white dark:bg-[#2C2C2C]">
+                    </div>
+                      <div className="flex items-center gap-2 p-2 bg-white dark:bg-[#2c2c2c]">
                         <Tabs
                           value={mode}
                           onValueChange={(value) => setMode(value as 'ask' | 'research' | 'create')}
@@ -500,19 +499,19 @@ const ChatInputForm = ({
                           <TabsList className="bg-[#F5F5F5] dark:bg-[#262626] rounded-[8px] p-0 py-5 px-2 h-8 justify-start gap-1 text-[12px]">
                             <TabsTrigger
                               value="ask"
-                              className="data-[state=active]:bg-white py-4 data-[state=active]:shadow-none rounded-md px-4 h-full text-sm font-medium text-gray-600 data-[state=active]:text-[#FF3D00]"
+                              className="data-[state=active]:bg-white border-none py-4 data-[state=active]:shadow-none rounded-md px-4 h-full text-sm font-medium text-gray-600 data-[state=active]:text-[#FF3D00]"
                             >
                               Ask
                             </TabsTrigger>
                             <TabsTrigger
                               value="research"
-                              className="data-[state=active]:bg-white data-[state=active]:shadow-none rounded-md px-4 py-4 h-full text-sm font-medium text-gray-600 data-[state=active]:text-[#FF3D00]"
+                              className="data-[state=active]:bg-white border-none data-[state=active]:shadow-none rounded-md px-4 py-4 h-full text-sm font-medium text-gray-600 data-[state=active]:text-[#FF3D00]"
                             >
                               Research
                             </TabsTrigger>
                             <TabsTrigger
                               value="create"
-                              className="data-[state=active]:bg-white data-[state=active]:shadow-none rounded-md px-4 py-4 h-full text-sm font-medium text-gray-600 data-[state=active]:text-[#FF3D00]"
+                              className="data-[state=active]:bg-white border-none data-[state=active]:shadow-none rounded-md px-4 py-4 h-full text-sm font-medium text-gray-600 data-[state=active]:text-[#FF3D00]"
                             >
                               Create
                             </TabsTrigger>
