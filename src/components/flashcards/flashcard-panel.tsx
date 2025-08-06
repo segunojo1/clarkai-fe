@@ -141,9 +141,14 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
   if (!isMounted || !flashcardId) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <div className=" min-w-[500px] inset-0 z-50 overflow-hidden"  style={{
+      transition: 'opacity 300ms ease-in-out',
+      willChange: 'opacity',
+      pointerEvents: isMounted ? 'auto' : 'none'
+    }}>
+       
       {/* Backdrop */}
-      <div 
+      {/* <div 
         className={`fixed inset-0 bg-black/50 transition-opacity duration-300 ease-in-out ${
           isMounted ? 'opacity-100' : 'opacity-0'
         }`}
@@ -153,11 +158,11 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
           pointerEvents: isMounted ? 'auto' : 'none'
         }}
         onClick={onClose} 
-      />
+      /> */}  
       
       {/* Panel */}
       <div 
-        className={`fixed right-0 top-0 h-full w-full max-w-lg bg-white dark:bg-[#2C2C2C] shadow-xl`}
+        className={` h-full w-[500px] max-w-lg bg-white dark:bg-[#2C2C2C] shadow-xl`}
         style={{
           transform: isMounted ? 'translateX(0)' : 'translateX(100%)',
           transition: 'transform 300ms cubic-bezier(0.16, 1, 0.3, 1)',
@@ -255,4 +260,4 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
     </div>
   </div>
   )
-}
+}                                     

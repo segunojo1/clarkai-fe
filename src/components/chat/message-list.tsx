@@ -12,6 +12,7 @@ import { useSidebar } from '../ui/sidebar';
 import MarkdownRenderer from '../markdown-renderer';
 import { FlashcardData } from '@/lib/types';
 import { FlashcardPanel } from '@/components/flashcards/flashcard-panel';
+import { useWorkspaceStore } from '@/store/workspace.store';
 
 // const isFile = (obj: unknown): obj is File => {
 //   if (obj instanceof File) return true;
@@ -153,9 +154,10 @@ export function ChatMessageList({
   className?: string
 }) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [selectedFlashcards, setSelectedFlashcards] = useState<FlashcardData[]>([]);
-  const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
-  const [selectedFlashcardId, setSelectedFlashcardId] = useState<string | null>(null);
+  const {selectedFlashcards, setSelectedFlashcards, isFlashcardModalOpen, setIsFlashcardModalOpen, selectedFlashcardId, setSelectedFlashcardId} = useWorkspaceStore()
+  // const [selectedFlashcards, setSelectedFlashcards] = useState<FlashcardData[]>([]);
+  // const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
+  // const [selectedFlashcardId, setSelectedFlashcardId] = useState<string | null>(null);
 
   const handleFlashcardClick = async (message: ChatMessage) => {
     if (message.metadata?.type === 'flashcards') {
@@ -337,8 +339,8 @@ export function ChatMessageList({
           </div>
         )}
 
-        {/* Flashcard Panel */}
-        <FlashcardPanel 
+        
+        {/* <FlashcardPanel 
           isOpen={isFlashcardModalOpen} 
           onClose={() => {
             setIsFlashcardModalOpen(false);
@@ -346,7 +348,7 @@ export function ChatMessageList({
           }} 
           flashcards={selectedFlashcards}
           flashcardId={selectedFlashcardId}
-        />
+        /> */}
 
         {/* This empty div will be used for auto-scrolling */}
         <div ref={messagesEndRef} />

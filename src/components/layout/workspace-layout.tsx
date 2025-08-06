@@ -9,6 +9,7 @@ import workspaceServiceInstance from "@/services/workspace.service"
 import Link from "next/link"
 import { Input } from "../ui/input"
 import { useWorkspaceStore } from "@/store/workspace.store"
+import { FlashcardPanel } from "../flashcards/flashcard-panel"
 
 interface Workspace {
     enc_id: string
@@ -30,7 +31,7 @@ interface WorkspaceLayoutProps {
 
 const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
     const router = useRouter()
-    const { workspaces } = useWorkspaceStore()
+    const { workspaces, isFlashcardModalOpen, setIsFlashcardModalOpen, setSelectedFlashcardId, selectedFlashcardId, selectedFlashcards } = useWorkspaceStore()
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
@@ -94,8 +95,18 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
             </div>
 
             {/* Main Content */}
-            <div className="w-full bg-[#1a1a1a] text-white">
+            <div className="w-full flex bg-[#1a1a1a] text-white">
                 {children}
+                {/* Flashcard Panel */}
+        <FlashcardPanel
+          isOpen={isFlashcardModalOpen} 
+          onClose={() => {
+            setIsFlashcardModalOpen(false);
+            setSelectedFlashcardId(null);
+          }} 
+          flashcards={selectedFlashcards}
+          flashcardId={selectedFlashcardId}
+        />
             </div>
         </div>
     )
@@ -122,7 +133,7 @@ const WorkspaceItem = ({ workspace }: { workspace: Workspace }) => {
                         {workspace.name}
                     </div>
                     {expanded ? <ChevronUp className="w-4 h-4 transition-transform duration-200" /> : <ChevronDown className="w-4 h-4 transition-transform duration-200" />}
-                    </div>
+                </div>
             </div>
 
             {expanded && (
@@ -219,7 +230,7 @@ const WorkspaceItem = ({ workspace }: { workspace: Workspace }) => {
                                 Quizzes
                             </div>
                             {quizExpanded ? <ChevronUp className="w-4 h-4 transition-transform duration-200" /> : <ChevronDown className="w-4 h-4 transition-transform duration-200" />}
-                            
+
                         </div>
 
                         {quizExpanded && (

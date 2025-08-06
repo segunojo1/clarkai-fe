@@ -71,6 +71,12 @@ interface WorkspaceStore {
     getWorkspace: (id: string) => Workspace | undefined
     generateFlashcards: (mode: 'workspace' | 'file', workspaceId: string, size: number, is_context: boolean, context: string, file_id?: string) => Promise<void>
     fetchFlashcard: (id: string) => any
+    selectedFlashcards: FlashcardData[]
+    setSelectedFlashcards: (flashcards: FlashcardData[]) => void
+    isFlashcardModalOpen: boolean
+    setIsFlashcardModalOpen: (open: boolean) => void
+    selectedFlashcardId: string | null
+    setSelectedFlashcardId: (id: string | null) => void
 }
 
 export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
@@ -80,7 +86,18 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     messages: [],
     isLoading: false,
     error: null,
-    
+    selectedFlashcards: [],
+    isFlashcardModalOpen: false,
+    selectedFlashcardId: null,
+    setIsFlashcardModalOpen: (open: boolean) => {
+        set({ isFlashcardModalOpen: open })
+    },
+    setSelectedFlashcards: ( flashcards: FlashcardData[]) => {
+        set({selectedFlashcards: flashcards})
+    },
+    setSelectedFlashcardId: (id: string | null) => {
+        set({selectedFlashcardId: id})
+    },
     setError: (error: string) => {
         set({ error })
     },
