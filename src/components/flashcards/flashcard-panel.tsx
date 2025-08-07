@@ -141,7 +141,7 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
   if (!isMounted || !flashcardId) return null;
 
   return (
-    <div className=" min-w-[500px] inset-0 z-50 overflow-hidden"  style={{
+    <div className=" min-w-[500px] inset-0 z-50 "  style={{
       transition: 'opacity 300ms ease-in-out',
       willChange: 'opacity',
       pointerEvents: isMounted ? 'auto' : 'none'
@@ -154,7 +154,7 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
         }`}
         style={{
           transition: 'opacity 300ms ease-in-out',
-          willChange: 'opacity',
+          willChange: 'opacity',   
           pointerEvents: isMounted ? 'auto' : 'none'
         }}
         onClick={onClose} 

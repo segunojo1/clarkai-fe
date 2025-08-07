@@ -111,14 +111,14 @@ export default function WorkspacePage() {
 
   const handleGenerateFlashcards = useCallback(async (context: string) => {
     if (!context.trim() || !id) return Promise.resolve();
-    
+
     // Create loading message ID at the start of the function
     const loadingMessageId = `loading-${Date.now()}`;
     let updatedMessages = [...messages];
-    
+
     try {
       setIsLoading(true);
-      
+
       // Add user message
       const userMessage: ChatMessage = {
         id: `user-${Date.now()}`,
@@ -132,11 +132,11 @@ export default function WorkspacePage() {
         createdAt: new Date(),
         updatedAt: new Date()
       };
-      
+
       // Update messages with the new user message
       updatedMessages = [...messages, userMessage];
       setMessages(updatedMessages);
-      
+
       // Add loading message
       const loadingMessage: ChatMessage = {
         id: loadingMessageId,
@@ -147,11 +147,11 @@ export default function WorkspacePage() {
         createdAt: new Date(),
         updatedAt: new Date()
       };
-      
+
       // Update messages with loading state
       updatedMessages = [...updatedMessages, loadingMessage];
       setMessages(updatedMessages);
-      
+
       // Call the API to generate flashcards
       const response = await useWorkspaceStore.getState().generateFlashcards(
         'workspace',
@@ -160,9 +160,9 @@ export default function WorkspacePage() {
         true,
         context
       );
-      
+
       const flashcardResponse = response as unknown as FlashcardResponse;
-      
+
       if (flashcardResponse.success && flashcardResponse.questions) {
         // Create structured flashcard data
         const flashcards = flashcardResponse.questions.map((card: FlashcardQuestion) => ({
@@ -170,7 +170,7 @@ export default function WorkspacePage() {
           answer: card.answer,
           explanation: card.explanation || ''
         }));
-        
+
         // Add assistant message with flashcard data
         const assistantMessage: ChatMessage = {
           createdAt: new Date(),
@@ -182,14 +182,14 @@ export default function WorkspacePage() {
           isFile: false,
           isFlashcard: true,
           size: 0,
-          
+
           updatedAt: new Date(),
           metadata: {
             type: 'flashcards',
             data: flashcards
           }
         };
-        
+
         // Update messages by replacing the loading message with the actual flashcards
         updatedMessages = [
           ...updatedMessages.filter(msg => msg.id !== loadingMessageId),
@@ -198,16 +198,16 @@ export default function WorkspacePage() {
         setMessages(updatedMessages);
       }
       console.log(messages);
-      
+
       return Promise.resolve();
     } catch (error) {
       console.error('Error generating flashcards:', error);
       toast.error('Failed to generate flashcards');
-      
+
       // Update messages by removing the loading message
       updatedMessages = updatedMessages.filter(msg => msg.id !== loadingMessageId);
       setMessages(updatedMessages);
-      
+
       return Promise.reject(error);
     } finally {
       setIsLoading(false);
@@ -229,7 +229,7 @@ export default function WorkspacePage() {
           undefined
         )
         console.log(resp);
-        
+
       } catch (error) {
         console.error('Error sending message:', error)
         toast('Error: Failed to send message')
@@ -238,46 +238,53 @@ export default function WorkspacePage() {
   }
 
   return (
-    <div className="flex flex-col w-full justify-between pb-10 mx-auto h-full">
-      <div className='absolute top-10 right-10 '>
-        <UploadMaterialModal workspaceId={id.toString()}>
-          <button className="p-1 border-2 rounded-full border-[#ffffff] transition-colors">
-            <Image
-              src="/globe.svg"
-              alt="Globe"
-              width={20}
-              height={20}
-              className="w-5 h-5"
-            />
-          </button>
-        </UploadMaterialModal>
+    <div className="flex  h-full w-full overflow-hidden">
+      <div className={`flex flex-col h-full w-full justify-between pb-10 ${isQuizPanelOpen ? '' : 'min-w-full'}`}>
+        <div className='absolute top-10 right-10 '>
+          <UploadMaterialModal workspaceId={id.toString()}>
+            <button className="p-1 border-2 rounded-full border-[#ffffff] transition-colors">
+              <Image
+                src="/globe.svg"
+                alt="Globe"
+                width={20}
+                height={20}
+                className="w-5 h-5"
+              />
+            </button>
+          </UploadMaterialModal>
+        </div>
+        {/* <SlidingPanel
+        isOpen={isQuizPanelOpen}
+        onClose={handleCloseQuizPanel}
+        workspaceId={id.toString()}
+            /> */}
+        {
+          loadChats ? (
+            <div className='flex items-center justify-center min-h-screen'>
+              <Loader2 className='w-8 h-8 animate-spin' />
+            </div>
+          ) : (
+            <div>
+              {messages.length === 0 ? (
+                <div className='mt-16'>
+                  <WelcomeScreen onSend={handleSend} />
+                </div>
+              ) : (
+                <ChatMessageList messages={messages} isLoading={isLoading} />
+              )}
+            </div>
+          )
+        }
+        <ChatInputForm
+          onSend={handleSend}
+          onGenerateFlashcards={handleGenerateFlashcards}
+          disabled={isLoading}
+        />
       </div>
       <SlidingPanel
         isOpen={isQuizPanelOpen}
         onClose={handleCloseQuizPanel}
         workspaceId={id.toString()}
-      />
-      {
-        loadChats ? (
-          <div className='flex items-center justify-center min-h-screen'>
-            <Loader2 className='w-8 h-8 animate-spin' />
-          </div>
-        ) : (
-          <div>
-            {messages.length === 0 ? (
-              <div className='mt-16'>
-                <WelcomeScreen onSend={handleSend} />
-              </div>
-            ) : (
-              <ChatMessageList messages={messages} isLoading={isLoading} />
-            )}
-          </div>
-        )
-      }
-      <ChatInputForm
-        onSend={handleSend}
-        onGenerateFlashcards={handleGenerateFlashcards}
-        disabled={isLoading}
       />
     </div>
   )

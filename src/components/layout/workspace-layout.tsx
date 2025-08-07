@@ -10,6 +10,7 @@ import Link from "next/link"
 import { Input } from "../ui/input"
 import { useWorkspaceStore } from "@/store/workspace.store"
 import { FlashcardPanel } from "../flashcards/flashcard-panel"
+import { SlidingPanel } from "../ui/sliding-panel"
 
 interface Workspace {
     enc_id: string
@@ -34,6 +35,7 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
     const { workspaces, isFlashcardModalOpen, setIsFlashcardModalOpen, setSelectedFlashcardId, selectedFlashcardId, selectedFlashcards } = useWorkspaceStore()
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [isQuizPanelOpen, setIsQuizPanelOpen] = useState(false)
 
     useEffect(() => {
         const fetchWorkspaces = async () => {
@@ -51,6 +53,10 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
         fetchWorkspaces()
         console.log(workspaces)
     }, [])
+
+    const handleCloseQuizPanel = () => {
+        setIsQuizPanelOpen(false)
+    }
 
     return (
         <div className="flex h-full w-full">
@@ -98,15 +104,20 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
             <div className="w-full flex bg-[#1a1a1a] text-white">
                 {children}
                 {/* Flashcard Panel */}
-        <FlashcardPanel
-          isOpen={isFlashcardModalOpen} 
-          onClose={() => {
-            setIsFlashcardModalOpen(false);
-            setSelectedFlashcardId(null);
-          }} 
-          flashcards={selectedFlashcards}
-          flashcardId={selectedFlashcardId}
-        />
+                <FlashcardPanel
+                    isOpen={isFlashcardModalOpen}
+                    onClose={() => {
+                        setIsFlashcardModalOpen(false);
+                        setSelectedFlashcardId(null);
+                    }}
+                    flashcards={selectedFlashcards}
+                    flashcardId={selectedFlashcardId}
+                />
+                {/* <SlidingPanel
+                isOpen={isQuizPanelOpen}
+                onClose={handleCloseQuizPanel}
+                workspaceId={id.toString()}
+              /> */}
             </div>
         </div>
     )
@@ -129,7 +140,7 @@ const WorkspaceItem = ({ workspace }: { workspace: Workspace }) => {
             >
                 <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-2">
-                        <Globe width={19} height={19} color="#9747FF" />
+                        <Globe width={19} height={19} color={workspace.tag ? workspace.tag : "#99a1af"} />
                         {workspace.name}
                     </div>
                     {expanded ? <ChevronUp className="w-4 h-4 transition-transform duration-200" /> : <ChevronDown className="w-4 h-4 transition-transform duration-200" />}

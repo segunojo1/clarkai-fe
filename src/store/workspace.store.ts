@@ -133,10 +133,10 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
         }
     },
 
-    createWorkspace: async (name: string, description?: string) => {
+    createWorkspace: async (name: string, tag?: string, description?: string) => {
         set({ isLoading: true, error: null })
         try {
-            await workspaceService.createWorkspace(name, description)
+            await workspaceService.createWorkspace(name, tag, description)
             // Refresh workspaces after creation
             await get().getWorkspaces()
         } catch (error) {

@@ -21,7 +21,7 @@ const WorkspacesPage = () => {
     }, [])
 
     return (
-        <div className="flex flex-col h-full bg-[#1a1a1a] text-white">
+        <div className="flex flex-col h-full w-full bg-[#1a1a1a] text-white">
             {/* Top Header */}
             <div className="flex items-center justify-between px-6 py-3 border-b border-[#333]">
                 <div className="flex items-center gap-2">
@@ -168,7 +168,7 @@ const WorkspacesPage = () => {
                                                 height={138}
                                                 className="w-40 h-32"
                                             />
-                                            <Globe className="absolute left-[9.7px] bottom-[9.9px] w-[19px] h-[19px]" color="#99a1af"/>
+                                            <Globe className="absolute left-[9.7px] bottom-[9.9px] w-[19px] h-[19px]" color={workspace.tag ? workspace.tag : "#99a1af"}/>
                                         </div>
 
                                         <div className="flex flex-col items-center">

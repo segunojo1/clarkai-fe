@@ -41,7 +41,7 @@ export function WorkspaceCreationModal({ children }: WorkspaceCreationModalProps
 
     try {
       const workspaceService = workspaceServiceInstance;
-      await workspaceService.createWorkspace(workspaceName, note);
+      await workspaceService.createWorkspace(workspaceName, selectedTag, note);
       
       // Close modal and reset form
       setOpen(false);

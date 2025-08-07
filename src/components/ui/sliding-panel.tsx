@@ -698,7 +698,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
     }
 
     return (
-        <div className={`fixed top-0 right-0 h-full w-[540px] bg-[#2C2C2C] z-[9999999] border-l border-[#333] transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'
+        <div className={`h-full w-[540px] bg-[#2C2C2C] z-[9999999] border-l border-[#333] transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'
             }`}>
             <div className="flex flex-col h-full">
                 <div className="flex justify-between items-center p-4 border-b border-[#333]">

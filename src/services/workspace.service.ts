@@ -33,10 +33,11 @@ class WorkspaceService {
         return WorkspaceService.instance;
     }
 
-    public async createWorkspace(name: string, description?: string) {
+    public async createWorkspace(name: string, tag?: string, description?: string) {
         try {
             const response = await this.api.post(`/workspace`, {
                 name,
+                tag,
                 description
             });
 
@@ -157,6 +158,24 @@ class WorkspaceService {
             return response.data;
         } catch (error) {
             console.error("Failed to fetch flashcards:", error)
+            throw error;
+        }
+    }
+
+    public async generateMaterial(topic: string, words_range: string, is_tag: boolean, user_message: string, files?: File) {
+        try {
+            const response = await this.api.post('/generateMaterial', {
+                topic,
+                words_range,
+                files,
+                is_tag,
+                user_message
+            });
+            console.log(response.data);
+
+            return response.data;
+        } catch (error) {
+            console.error("Failed to generate material:", error);
             throw error;
         }
     }

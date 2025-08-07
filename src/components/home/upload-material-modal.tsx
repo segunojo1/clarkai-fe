@@ -7,9 +7,12 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
+    DialogDescription,
+    DialogFooter,
+    DialogClose
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { ChevronDown, Globe, Star, Link as LinkIcon, FileText, Scan, Loader2, X, Play } from "lucide-react"
+import { ChevronDown, Globe, Star, Link as LinkIcon, FileText, Scan, Loader2, X, Play, Sparkles } from "lucide-react"
 import Image from "next/image"
 import { useWorkspaceStore } from "@/store/workspace.store"
 import { toast } from "sonner"
@@ -18,6 +21,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useParams } from "next/navigation"
 import workspaceServiceInstance from "@/services/workspace.service"
 import Link from "next/link"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 
 
 interface UploadMaterialModalProps {
@@ -44,7 +50,23 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
     const [uploading, setUploading] = useState(false)
     const [uploadProgress, setUploadProgress] = useState(0)
     const [uploadedFile, setUploadedFile] = useState<File | null>(null)
+    const [isCreatingMaterial, setIsCreatingMaterial] = useState(false)
+    const [topic, setTopic] = useState("")
+    const [description, setDescription] = useState("")
+    const [isGenerating, setIsGenerating] = useState(false)
+    const [generationProgress, setGenerationProgress] = useState(0)
+    const [creationMode, setCreationMode] = useState<'topic' | 'pdf'>('topic')
+    const [selectedPdf, setSelectedPdf] = useState<string>('')
+    const [wordRange, setWordRange] = useState<string>('500-1000')
     const { selectedWorkspace } = useWorkspaceStore()
+    
+    const wordRanges = [
+        { value: '300-500', label: 'Short (300-500 words)' },
+        { value: '500-1000', label: 'Medium (500-1000 words)' },
+        { value: '1000-1500', label: 'Long (1000-1500 words)' },
+        { value: '1500-2000', label: 'Detailed (1500-2000 words)' },
+    ]
+
     // console.log(selectedWorkspace);
 
     // const { workspace } = selectedWorkspace
@@ -135,8 +157,8 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                         style={{ background: 'none' }}
                                                     />
                                                 </div>
-                                                <div className="text-center w-full">
-                                                    <p className="text-gray-300 text-xs font-medium leading-tight">{file.fileName}<br />{formatFileSize(file.size)}</p>
+                                                <div className="text-center w-full max-w-[130px]">
+                                                    <p className="text-gray-300 text-xs font-medium leading-tight break-words">{file.fileName}<br />{formatFileSize(file.size)}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -244,8 +266,243 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                         </CardContent>
                                     </Card>
                                 ) : (
-                                    <div className="flex justify-center  w-full">
+                                    <div className="flex flex-col gap-2 items-center justify-center  w-full">
                                         <FileUploadButton workspaceId={workspaceId} />
+                                        <p className="text-[17px] font-bold text-white">OR</p>
+                                        <Dialog open={isCreatingMaterial} onOpenChange={setIsCreatingMaterial}>
+                                            <DialogTrigger asChild>
+                                                <Button className="bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-medium text-lg px-[100px] py-[10px] cursor-pointer rounded-[5px] transition-colors ml-4 w-96">
+                                                    Create Material
+                                                </Button>
+                                            </DialogTrigger>
+                                            <DialogContent className="sm:max-w-[500px] bg-[#2A2A2A] border-[#444] text-white">
+                                                <DialogHeader>
+                                                    <DialogTitle className="text-2xl font-bold">Create New Material</DialogTitle>
+                                                    <DialogDescription className="text-gray-300">
+                                                        Choose how you'd like to create your study material.
+                                                    </DialogDescription>
+                                                </DialogHeader>
+                                                
+                                                <div className="grid gap-4 py-4">
+                                                    {/* Mode Selection */}
+                                                    <div className="grid grid-cols-2 gap-4 mb-4">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setCreationMode('topic')}
+                                                            className={`p-4 rounded-lg border-2 transition-all ${creationMode === 'topic' ? 'border-[#FF3D00] bg-[#FF3D00]/10' : 'border-[#444] hover:border-[#666]'}`}
+                                                        >
+                                                            <div className="flex flex-col items-center text-center">
+                                                                <FileText className="h-6 w-6 mb-2" />
+                                                                <span className="font-medium">From Topic</span>
+                                                                <p className="text-xs text-gray-400 mt-1">Generate from a topic and description</p>
+                                                            </div>
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setCreationMode('pdf')}
+                                                            className={`p-4 rounded-lg border-2 transition-all ${creationMode === 'pdf' ? 'border-[#FF3D00] bg-[#FF3D00]/10' : 'border-[#444] hover:border-[#666]'}`}
+                                                        >
+                                                            <div className="flex flex-col items-center text-center">
+                                                                <FileText className="h-6 w-6 mb-2" />
+                                                                <span className="font-medium">From PDF</span>
+                                                                <p className="text-xs text-gray-400 mt-1">Generate from an existing PDF</p>
+                                                            </div>
+                                                        </button>
+                                                    </div>
+
+                                                    {creationMode === 'topic' ? (
+                                                        <>
+                                                            <div className="space-y-2">
+                                                                <Label htmlFor="topic" className="text-white">
+                                                                    Topic *
+                                                                </Label>
+                                                                <Input
+                                                                    id="topic"
+                                                                    placeholder="Enter a topic (e.g., 'Introduction to Quantum Mechanics')"
+                                                                    value={topic}
+                                                                    onChange={(e) => setTopic(e.target.value)}
+                                                                    className="bg-[#333] border-[#444] text-white placeholder-gray-400"
+                                                                />
+                                                            </div>
+                                                            
+                                                            <div className="">
+                                                                <div className="space-y-2 min-w-full">
+                                                                    <Label htmlFor="word-range" className="text-white">
+                                                                        Length
+                                                                    </Label>
+                                                                    <select
+                                                                        id="word-range"
+                                                                        value={wordRange}
+                                                                        onChange={(e) => setWordRange(e.target.value)}
+                                                                        className="w-full p-2 bg-[#333] border border-[#444] rounded-md text-white"
+                                                                    >
+                                                                        {wordRanges.map((range) => (
+                                                                            <option key={range.value} value={range.value}>
+                                                                                {range.label}
+                                                                            </option>
+                                                                        ))}
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <Label htmlFor="description" className="text-white">
+                                                                    Additional Context (Optional)
+                                                                </Label>
+                                                                <Textarea
+                                                                    id="description"
+                                                                    placeholder="Provide more details about what you want to learn..."
+                                                                    rows={3}
+                                                                    value={description}
+                                                                    onChange={(e) => setDescription(e.target.value)}
+                                                                    className="bg-[#333] border-[#444] text-white placeholder-gray-400"
+                                                                />
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <div className="space-y-4">
+                                                            <div className="space-y-2">
+                                                                <Label className="text-white">
+                                                                    Select PDF from Workspace
+                                                                </Label>
+                                                                <select
+                                                                    value={selectedPdf}
+                                                                    onChange={(e) => setSelectedPdf(e.target.value)}
+                                                                    className="w-full p-2 bg-[#333] border border-[#444] rounded-md text-white"
+                                                                >
+                                                                    <option value="">Select a PDF</option>
+                                                                    {selectedWorkspace?.workspace?.files?.pdfFiles?.filter(m => m.fileName.endsWith('.pdf')).map((material) => (
+                                                                        <option key={material.id} value={material.id}>
+                                                                            {material.fileName}
+                                                                        </option>
+                                                                    ))}
+                                                                </select>
+                                                                <p className="text-xs text-gray-400 mt-1">
+                                                                    {selectedWorkspace?.workspace?.materials?.filter(m => m.fileName.endsWith('.pdf')).length === 0 
+                                                                        ? 'No PDFs found in your workspace. Please upload a PDF first.'
+                                                                        : 'Choose a PDF to generate material from.'}
+                                                                </p>
+                                                            </div>
+                                                            
+                                                            <div className="space-y-2">
+                                                                <Label htmlFor="pdf-description" className="text-white">
+                                                                    Additional Instructions (Optional)
+                                                                </Label>
+                                                                <Textarea
+                                                                    id="pdf-description"
+                                                                    placeholder="Any specific focus or requirements for the generated material..."
+                                                                    rows={2}
+                                                                    value={description}
+                                                                    onChange={(e) => setDescription(e.target.value)}
+                                                                    className="bg-[#333] border-[#444] text-white placeholder-gray-400"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {isGenerating && (
+                                                        <div className="space-y-2 pt-2">
+                                                            <div className="flex items-center gap-2 text-blue-400">
+                                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                                                <span>Generating your material...</span>
+                                                            </div>
+                                                            <Progress value={generationProgress} className="h-2" />
+                                                            <p className="text-xs text-gray-400 text-right">
+                                                                This may take a moment. Please don't close this window.
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                
+                                                <DialogFooter className="sm:justify-between">
+                                                    <DialogClose asChild>
+                                                        <Button 
+                                                            type="button" 
+                                                            variant="outline"
+                                                            className="border-gray-600 text-white hover:bg-gray-700"
+                                                            disabled={isGenerating}
+                                                        >
+                                                            Cancel
+                                                        </Button> 
+                                                    </DialogClose>
+                                                    <Button 
+                                                        type="submit" 
+                                                        className="bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white"
+                                                        disabled={isGenerating || (creationMode === 'topic' ? !topic.trim() : !selectedPdf)}
+                                                        onClick={async () => {
+                                                            if ((creationMode === 'topic' && !topic.trim()) || 
+                                                                (creationMode === 'pdf' && !selectedPdf)) {
+                                                                return;
+                                                            }
+                                                            
+                                                            try {
+                                                                setIsGenerating(true);
+                                                                // Simulate generation progress
+                                                                const interval = setInterval(() => {
+                                                                    setGenerationProgress(prev => {
+                                                                        if (prev >= 90) {
+                                                                            clearInterval(interval);
+                                                                            return prev;
+                                                                        }
+                                                                        return prev + 10;
+                                                                    });
+                                                                }, 500);
+                                                                
+                                                                // TODO: Replace with actual API call to generate material
+                                                                // The API endpoint will be different based on the creation mode
+                                                                const payload = creationMode === 'topic' 
+                                                                    ? { 
+                                                                        topic, 
+                                                                        description, 
+                                                                        type: 'topic',
+                                                                        words_range: wordRange,
+                                                                        is_tag: true
+                                                                      }
+                                                                    : { 
+                                                                        pdfId: selectedPdf, 
+                                                                        instructions: description, 
+                                                                        type: 'pdf',
+                                                                        words_range: wordRange
+                                                                      };
+                                                                
+                                                                const workspace = await workspaceServiceInstance.generateMaterial(
+                                                                    creationMode === 'topic' ? topic : '',
+                                                                    wordRange,
+                                                                    true,
+                                                                    description,
+                                                                    creationMode === 'pdf' ? selectedPdf : undefined
+                                                                )
+                                                                
+                                                                console.log('Generating material with:', workspace);
+                                                                
+                                                                clearInterval(interval);
+                                                                setGenerationProgress(100);
+                                                                
+                                                                // Simulate completion
+                                                                await new Promise(resolve => setTimeout(resolve, 500));
+                                                                
+                                                                toast.success('Material generated successfully!');
+                                                                
+                                                                // Reset form
+                                                                setTopic('');
+                                                                setDescription('');
+                                                                setSelectedPdf('');
+                                                                setCreationMode('topic');
+                                                                setIsCreatingMaterial(false);
+                                                                setGenerationProgress(0);
+                                                            } catch (error) {
+                                                                console.error('Error generating material:', error);
+                                                                toast.error('Failed to generate material. Please try again.');
+                                                            } finally {
+                                                                setIsGenerating(false);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <Sparkles className="mr-2 h-4 w-4" />
+                                                        {isGenerating ? 'Generating...' : 'Generate Material'}
+                                                    </Button>
+                                                    </DialogFooter>
+                                            </DialogContent>
+                                        </Dialog>
                                     </div>
                                 )}
                             </div>
