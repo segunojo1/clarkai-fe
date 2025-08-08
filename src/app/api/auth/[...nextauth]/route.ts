@@ -1,5 +1,5 @@
 // app/api/auth/[...nextauth]/route.ts
-import authService from "@/services/auth.service";
+// import authService from "@/services/auth.service";
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
@@ -15,7 +15,7 @@ const handler = NextAuth({
       // Send user data to your backend on initial sign in
       if (account && user) {
         try {
-          const response = authService.verifyOathToken(account.access_token)
+          // const response = authService.verifyOathToken(account.access_token)
 
           // const backendUser = await response.json();
           
@@ -35,7 +35,7 @@ const handler = NextAuth({
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session }) {
       // Add backend user ID and onboarding status to session
       // session.user.backendUserId = token.backendUserId;
       // session.user.isOnboardingNeeded = token.isOnboardingNeeded;

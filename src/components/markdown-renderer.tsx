@@ -13,7 +13,6 @@ type MarkdownRendererProps = {
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
   return (
     <Markdown
-      children={content}
       remarkPlugins={[remarkGfm]}
       rehypePlugins={[rehypeRaw, rehypeHighlight]}
       components={{
@@ -24,7 +23,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
         td: ({ children }) => <td className="border border-gray-300 px-2 py-1">{children}</td>,
         
       }}
-    />
+    >{content}</Markdown>
   );
 };
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import ChatInputForm from '@/components/home/chat-input-form'
 import { WelcomeScreen } from '@/components/chat/welcome-screen'
@@ -17,22 +17,22 @@ import { SlidingPanel } from '@/components/ui/sliding-panel'
 import { Loader2 } from 'lucide-react'
 
 // Helper function to format flashcards as markdown
-const formatFlashcards = (flashcards: Array<{ question: string, answer: string, explanation?: string }>) => {
-  return flashcards.map((card, index) =>
-    `### Flashcard ${index + 1}\n` +
-    `**Q:** ${card.question}\n` +
-    `**A:** ${card.answer}\n` +
-    (card.explanation ? `*${card.explanation}*\n\n` : '\n')
-  ).join('\n');
-};
+// const formatFlashcards = (flashcards: Array<{ question: string, answer: string, explanation?: string }>) => {
+//   return flashcards.map((card, index) =>
+//     `### Flashcard ${index + 1}\n` +
+//     `**Q:** ${card.question}\n` +
+//     `**A:** ${card.answer}\n` +
+//     (card.explanation ? `*${card.explanation}*\n\n` : '\n')
+//   ).join('\n');
+// };
 
 export default function WorkspacePage() {
   const { setCurrentChatId, setChatDetails } = useChatStore()
-  const { messages, setMessages, isLoading, setIsLoading, askQuestion, generateFlashcards } = useWorkspaceStore()
+  const { messages, setMessages, isLoading, setIsLoading, askQuestion } = useWorkspaceStore()
   const [loadChats, setLoadChats] = useState(false);
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
-  const searchParams = useSearchParams()
+  // const searchParams = useSearchParams()
   const [isQuizPanelOpen, setIsQuizPanelOpen] = useState(false)
 
   useEffect(() => {
@@ -145,7 +145,9 @@ export default function WorkspacePage() {
         fromUser: false,
         isFile: false,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        isFlashcard: true,
+        
       };
 
       // Update messages with loading state
@@ -214,7 +216,8 @@ export default function WorkspacePage() {
     }
   }, [id, messages, setIsLoading, setMessages]);
 
-  const handleSend = async (text: string, files?: File) => {
+  //SEGUN COME HERE AND ADD FILES ARG HERE LATER 
+  const handleSend = async (text: string) => {
     if (!text.trim()) return
     if (id) {
       try {

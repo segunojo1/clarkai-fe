@@ -79,6 +79,7 @@ export const LatestChat = () => {
 
 export const LatestWorkspace = () => {
     const { workspaces, isLoading } = useWorkspaceStore();
+    const { state } = useSidebar();
 
     if (isLoading) {
         return (
@@ -103,7 +104,6 @@ export const LatestWorkspace = () => {
             </Card>
         )
     }
-    const { state } = useSidebar();
 
     // Show collapsed version when sidebar is collapsed
     if (state === "collapsed") {

@@ -12,7 +12,7 @@ import {
     DialogClose
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { ChevronDown, Globe, Star, Link as LinkIcon, FileText, Scan, Loader2, X, Play, Sparkles, Download } from "lucide-react"
+import { ChevronDown, Globe, Link as LinkIcon, FileText, Scan, Loader2, X, Sparkles, Download } from "lucide-react"
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import MaterialPdf from './MaterialPdf';
 import Image from "next/image"
@@ -20,7 +20,6 @@ import { useWorkspaceStore } from "@/store/workspace.store"
 import { toast } from "sonner"
 import { Progress } from "@/components/ui/progress"
 import { Card, CardContent } from "@/components/ui/card"
-import { useParams } from "next/navigation"
 import workspaceServiceInstance from "@/services/workspace.service"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
@@ -49,7 +48,7 @@ const formatTimeLeft = (progress: number): string => {
 export function UploadMaterialModal({ children, workspaceId }: UploadMaterialModalProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [activeTab, setActiveTab] = useState("Materials")
-    const [uploading, setUploading] = useState(false)
+    // const [uploading, setUploading] = useState(false)
     const [uploadProgress, setUploadProgress] = useState(0)
     const [uploadedFile, setUploadedFile] = useState<File | null>(null)
     const [isCreatingMaterial, setIsCreatingMaterial] = useState(false)
@@ -69,11 +68,6 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
         return () => setIsMounted(false)
     }, [])
 
-    const handleDownloadPdf = (content: string, filename: string) => {
-        // This will be handled by the PDFDownloadLink component
-        console.log('Preparing PDF download...');
-    };
-    
     const wordRanges = [
         { value: '300-500', label: 'Short (300-500 words)' },
         { value: '500-1000', label: 'Medium (500-1000 words)' },
@@ -200,7 +194,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                 </div>
                             )}
                             {/* File Preview */}
-                            {uploadedFile && !uploading && (
+                            {uploadedFile && (
                                 <div className="mt-4 p-4 bg-[#232323] rounded-lg">
                                     <div className="flex items-center justify-between">
                                         <div>
@@ -239,7 +233,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                             </p>
                                             <div className="border-l-2 border-[#5A5A5A] pl-4">
                                                 <p className="break-words whitespace-normal text-sm">
-                                                    You'll also be able to reference them in chats using the{' '}
+                                                    You&apos;ll also be able to reference them in chats using the{' '}
                                                     <span className="bg-[#FF3D00] text-white px-2 py-1 rounded text-xs font-medium">
                                                         @materials
                                                     </span>{' '}and{' '}
@@ -293,7 +287,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                 <DialogHeader>
                                                     <DialogTitle className="text-2xl font-bold">Create New Material</DialogTitle>
                                                     <DialogDescription className="text-gray-300">
-                                                        Choose how you'd like to create your study material.
+                                                        Choose how you&apos;d like to create your study material.
                                                     </DialogDescription>
                                                 </DialogHeader>
                                                 
@@ -435,7 +429,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                             </div>
                                                             <Progress value={generationProgress} className="h-2" />
                                                             <p className="text-xs text-gray-400 text-right">
-                                                                This may take a moment. Please don't close this window.
+                                                                This may take a moment. Please don&apos;t close this window.
                                                             </p>
                                                         </div>
                                                     )}
@@ -552,7 +546,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                                             fileName={`material-${new Date().toISOString().slice(0, 10)}.pdf`}
                                                                             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center"
                                                                         >
-                                                                            {({ blob, url, loading, error }) => (
+                                                                            {({  loading }) => (
                                                                                 <>
                                                                                     <Download className="mr-2 h-4 w-4" />
                                                                                     {loading ? 'Generating PDF...' : 'Download PDF'}
@@ -563,7 +557,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                                 </div>
                                                                 {generatedMaterial?.text && (
                                                                     <div className="text-xs text-gray-400">
-                                                                        If the download doesn't start automatically, click the button above.
+                                                                        If the download doesn&apos;t start automatically, click the button above.
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -624,11 +618,11 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                             Create quizzes from your uploaded materials, notes, or custom questions to start testing your knowledge.
                                         </p>
                                         <p className="text-sm">
-                                            Clark helps you generate questions in seconds—organized, trackable, and tailored to what you're learning. You'll be able to revisit them, share with friends, or build streaks by taking them daily.
+                                            Clark helps you generate questions in seconds—organized, trackable, and tailored to what you&apos;re learning. You&apos;ll be able to revisit them, share with friends, or build streaks by taking them daily.
                                         </p>
                                         <div className="border-l-2 border-[#5A5A5A] pl-4">
                                             <p className="break-words whitespace-normal text-sm">
-                                                Use the <span className="bg-[#FF3D00] text-white px-2 py-1 rounded text-xs font-medium">@quiz</span> tag or "create" button in chat to generate one instantly.
+                                                Use the <span className="bg-[#FF3D00] text-white px-2 py-1 rounded text-xs font-medium">@quiz</span> tag or &quot;create&quot; button in chat to generate one instantly.
                                             </p>
                                         </div>
                                     </div>
@@ -702,6 +696,8 @@ export function FileUploadButton({ workspaceId }: { workspaceId: string }) {
         } catch (err) {
             setUploading(false)
             setUploadProgress(0)
+            console.log(err);
+            
             toast.error("Failed to upload file")
         }
     }

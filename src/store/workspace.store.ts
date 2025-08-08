@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import workspaceService from '@/services/workspace.service'
-import { ChatMessage, FileAttachment, FlashcardData } from '@/lib/types'
+import { ChatMessage, FlashcardData } from '@/lib/types'
 
 interface Workspace {
     workspace: {
@@ -70,7 +70,7 @@ interface WorkspaceStore {
     uploadFile: (file: File, workspaceId: string) => Promise<void>
     getWorkspace: (id: string) => Workspace | undefined
     generateFlashcards: (mode: 'workspace' | 'file', workspaceId: string, size: number, is_context: boolean, context: string, file_id?: string) => Promise<void>
-    fetchFlashcard: (id: string) => any
+    fetchFlashcard: (id: string) => Promise<FlashcardData[] | null>
     selectedFlashcards: FlashcardData[]
     setSelectedFlashcards: (flashcards: FlashcardData[]) => void
     isFlashcardModalOpen: boolean

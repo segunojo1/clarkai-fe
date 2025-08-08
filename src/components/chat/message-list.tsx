@@ -10,8 +10,6 @@ import UserAvatar from '../user-avatar';
 import { cn } from '@/lib/utils';
 import { useSidebar } from '../ui/sidebar';
 import MarkdownRenderer from '../markdown-renderer';
-import { FlashcardData } from '@/lib/types';
-import { FlashcardPanel } from '@/components/flashcards/flashcard-panel';
 import { useWorkspaceStore } from '@/store/workspace.store';
 
 // const isFile = (obj: unknown): obj is File => {
@@ -154,60 +152,60 @@ export function ChatMessageList({
   className?: string
 }) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const {selectedFlashcards, setSelectedFlashcards, isFlashcardModalOpen, setIsFlashcardModalOpen, selectedFlashcardId, setSelectedFlashcardId} = useWorkspaceStore()
+  const {setSelectedFlashcards, setIsFlashcardModalOpen, setSelectedFlashcardId} = useWorkspaceStore()
   // const [selectedFlashcards, setSelectedFlashcards] = useState<FlashcardData[]>([]);
   // const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
   // const [selectedFlashcardId, setSelectedFlashcardId] = useState<string | null>(null);
 
-  const handleFlashcardClick = async (message: ChatMessage) => {
-    if (message.metadata?.type === 'flashcards') {
-      setSelectedFlashcards(message.metadata.data);
-      setIsFlashcardModalOpen(true);
-    } else if (message.fromUser && message.text.includes('@flashcard')) {
-      // Show loading state
-      const context = message.text.replace(/@flashcard\s*/g, '').trim();
-      setSelectedFlashcards([{
-        question: `Loading flashcards...`,
-        answer: 'Please wait while we fetch your flashcards',
-        explanation: 'This may take a moment'
-      }]);
-      setIsFlashcardModalOpen(true);
+  // const handleFlashcardClick = async (message: ChatMessage) => {
+  //   if (message.metadata?.type === 'flashcards') {
+  //     setSelectedFlashcards(message.metadata.data);
+  //     setIsFlashcardModalOpen(true);
+  //   } else if (message.fromUser && message.text.includes('@flashcard')) {
+  //     // Show loading state
+  //     const context = message.text.replace(/@flashcard\s*/g, '').trim();
+  //     setSelectedFlashcards([{
+  //       question: `Loading flashcards...`,
+  //       answer: 'Please wait while we fetch your flashcards',
+  //       explanation: 'This may take a moment'
+  //     }]);
+  //     setIsFlashcardModalOpen(true);
 
-      try {
-        // Get workspace ID from the URL
-        const workspaceId = window.location.pathname.split('/').pop();
-        if (!workspaceId) throw new Error('Workspace ID not found');
+  //     try {
+  //       // Get workspace ID from the URL
+  //       const workspaceId = window.location.pathname.split('/').pop();
+  //       if (!workspaceId) throw new Error('Workspace ID not found');
 
-        // Fetch flashcards from the workspace
-        const workspaceService = (await import('@/services/workspace.service')).default;
-        const flashcards = await workspaceService.fetchWorkspaceFlashcards(workspaceId);
+  //       // Fetch flashcards from the workspace
+  //       const workspaceService = (await import('@/services/workspace.service')).default;
+  //       const flashcards = await workspaceService.fetchWorkspaceFlashcards(workspaceId);
         
-        if (flashcards && flashcards.length > 0) {
-          // Transform the API response to match the FlashcardData format
-          const formattedFlashcards = flashcards.map((card: any) => ({
-            question: `Flashcard ${card.id.substring(0, 8)}`,
-            answer: `Created on: ${new Date(card.createdAt).toLocaleDateString()}`,
-            explanation: `Workspace: ${card.workspaceId}`
-          }));
+  //       if (flashcards && flashcards.length > 0) {
+  //         // Transform the API response to match the FlashcardData format
+  //         const formattedFlashcards = flashcards.map((card: any) => ({
+  //           question: `Flashcard ${card.id.substring(0, 8)}`,
+  //           answer: `Created on: ${new Date(card.createdAt).toLocaleDateString()}`,
+  //           explanation: `Workspace: ${card.workspaceId}`
+  //         }));
           
-          setSelectedFlashcards(formattedFlashcards);
-        } else {
-          setSelectedFlashcards([{
-            question: 'No Flashcards Found',
-            answer: 'There are no flashcards available for this workspace yet.',
-            explanation: 'Try generating some flashcards first!'
-          }]);
-        }
-      } catch (error) {
-        console.error('Error fetching flashcards:', error);
-        setSelectedFlashcards([{
-          question: 'Error Loading Flashcards',
-          answer: 'Failed to load flashcards. Please try again later.',
-          explanation: error instanceof Error ? error.message : 'Unknown error occurred'
-        }]);
-      }
-    }
-  };
+  //         setSelectedFlashcards(formattedFlashcards);
+  //       } else {
+  //         setSelectedFlashcards([{
+  //           question: 'No Flashcards Found',
+  //           answer: 'There are no flashcards available for this workspace yet.',
+  //           explanation: 'Try generating some flashcards first!'
+  //         }]);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching flashcards:', error);
+  //       setSelectedFlashcards([{
+  //         question: 'Error Loading Flashcards',
+  //         answer: 'Failed to load flashcards. Please try again later.',
+  //         explanation: error instanceof Error ? error.message : 'Unknown error occurred'
+  //       }]);
+  //     }
+  //   }
+  // };
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {

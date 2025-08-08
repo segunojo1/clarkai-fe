@@ -38,28 +38,28 @@ interface QuizData {
   updatedAt: string;
 }
 
-interface SubmitQuizAnswersParams {
-  answers: Array<{
-    questionId: number;
-    answerId: string;
-  }>;
-}
+// interface SubmitQuizAnswersParams {
+//   answers: Array<{
+//     questionId: number;
+//     answerId: string;
+//   }>;
+// }
 
-interface SubmitQuizResponse {
-  success: boolean;
-  score: number;
-  total: number;
-  correctAnswers: number;
-  incorrectAnswers: number;
-  percentage: number;
-  results: Array<{
-    questionId: number;
-    question: string;
-    userAnswer: string;
-    correctAnswer: string;
-    isCorrect: boolean;
-  }>;
-}
+// interface SubmitQuizResponse {
+//   success: boolean;
+//   score: number;
+//   total: number;
+//   correctAnswers: number;
+//   incorrectAnswers: number;
+//   percentage: number;
+//   results: Array<{
+//     questionId: number;
+//     question: string;
+//     userAnswer: string;
+//     correctAnswer: string;
+//     isCorrect: boolean;
+//   }>;
+// }
 
 interface GetQuizResponse {
   success: boolean;

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle2, XCircle, Clock, BookOpen, Calendar, BarChart2, Loader2, Medal, Trophy, Award, FileText } from 'lucide-react';
+import { CheckCircle2, XCircle, Clock, Calendar, BarChart2, Loader2, Medal, Trophy, Award, FileText } from 'lucide-react';
 import quizService from '@/services/quiz.service';
 import { toast } from 'sonner';
 
@@ -87,13 +87,13 @@ const Overview = () => {
   const [activeTab, setActiveTab] = useState('breakdown');
   const [loading, setLoading] = useState(true);
   const [quizDetails, setQuizDetails] = useState<QuizDetails | null>(null);
-  const [quizMetadata, setQuizMetadata] = useState<{
-    id: string;
-    name: string;
-    creator: string;
-    createdAt: string;
-    duration: number;
-  } | null>(null);
+  // const [quizMetadata, setQuizMetadata] = useState<{
+  //   id: string;
+  //   name: string;
+  //   creator: string;
+  //   createdAt: string;
+  //   duration: number;
+  // } | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -137,13 +137,13 @@ const Overview = () => {
         
         if (response.success && response.userScore && response.quiz) {
           // Set quiz metadata
-          setQuizMetadata({
-            id: response.quiz.id,
-            name: response.quiz.name,
-            creator: response.quiz.creator,
-            createdAt: response.quiz.createdAt,
-            duration: response.quiz.duration
-          });
+          // setQuizMetadata({
+          //   id: response.quiz.id,
+          //   name: response.quiz.name,
+          //   creator: response.quiz.creator,
+          //   createdAt: response.quiz.createdAt,
+          //   duration: response.quiz.duration
+          // });
           
           // Transform the response to match our QuizDetails interface
           setQuizDetails({

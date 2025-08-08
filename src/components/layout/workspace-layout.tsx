@@ -2,15 +2,12 @@
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PlusIcon, Globe, File, FileText, ChevronDown, Edit, ChevronUp } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
-import Image from "next/image"
 import workspaceServiceInstance from "@/services/workspace.service"
 import Link from "next/link"
 import { Input } from "../ui/input"
 import { useWorkspaceStore } from "@/store/workspace.store"
 import { FlashcardPanel } from "../flashcards/flashcard-panel"
-import { SlidingPanel } from "../ui/sliding-panel"
 
 interface Workspace {
     enc_id: string
@@ -31,11 +28,9 @@ interface WorkspaceLayoutProps {
 }
 
 const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
-    const router = useRouter()
     const { workspaces, isFlashcardModalOpen, setIsFlashcardModalOpen, setSelectedFlashcardId, selectedFlashcardId, selectedFlashcards } = useWorkspaceStore()
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-    const [isQuizPanelOpen, setIsQuizPanelOpen] = useState(false)
 
     useEffect(() => {
         const fetchWorkspaces = async () => {
@@ -54,9 +49,6 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
         console.log(workspaces)
     }, [])
 
-    const handleCloseQuizPanel = () => {
-        setIsQuizPanelOpen(false)
-    }
 
     return (
         <div className="flex h-full w-full">

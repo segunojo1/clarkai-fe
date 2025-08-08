@@ -1,12 +1,13 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+
 import ChatInputForm from '@/components/home/chat-input-form'
 import { WelcomeScreen } from '@/components/chat/welcome-screen'
 import { ChatMessageList } from '@/components/chat/message-list'
 import { useChatStore } from '@/store/chat.store'
 import { toast } from 'sonner'
+import { useEffect } from 'react'
 // import ChatInputForm from '@/components/home/ChatInputForm'
 
 export default function ChatPage() {

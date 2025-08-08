@@ -15,7 +15,7 @@ import StudyVibe from '@/components/auth/study-vibe';
 import AddProfile from '@/components/auth/add-profile';
 import useAuthStore from '@/store/auth.store';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react'; 
 
 const variants = {
   enter: (direction: number) => ({

@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
 import "./globals.css";
 // import "github-markdown.css";
 import { sfProRounded } from "./fonts";
 import { Providers } from "@/components/providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
 
 export const metadata: Metadata = {
@@ -24,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${sfProRounded.className} antialiased`}
+        className={`${sfProRounded.className} antialiased`}
       >
         <Providers>
           {children}

@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Cookies from 'js-cookie'
 import quizService from '@/services/quiz.service'
 import { GuestInfoModal } from '@/components/quiz/guest-info-modal'
+import { SubmitModal } from '@/components/quiz/submit-modal'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 
@@ -33,6 +34,7 @@ const Quiz = () => {
   } | null>(null)
   const [timeLeft, setTimeLeft] = useState(0)
   const [timerStarted, setTimerStarted] = useState(false)
+  const [submitModalLoading, setSubmitModalLoading] = useState(false);
 
   // Format time in MM:SS
   const formatTime = (totalSeconds: number) => {
@@ -177,7 +179,14 @@ const Quiz = () => {
         }
       });
 
-      const submitData: any = {
+      interface SubmitQuizData {
+        answers: string[];
+        timeRemaining: string;
+        name?: string;
+        email?: string;
+      }
+      
+      const submitData: SubmitQuizData = {
         answers,
         timeRemaining: timeLeft.toString(),
         ...(guestData && {
@@ -196,8 +205,9 @@ const Quiz = () => {
       }
     } catch (error) {
       console.error('Failed to submit quiz:', error);
-      toast.error(error.message || 'Failed to submit quiz. Please try again.');
-      return { success: false, error };
+      const errorMessage = error instanceof Error ? error.message : 'Failed to submit quiz. Please try again.';
+      toast.error(errorMessage);
+      return { success: false, error: error instanceof Error ? error : new Error('Unknown error occurred') };
     } finally {
       setIsSubmitting(false);
       setIsSubmitModalOpen(false);
@@ -332,10 +342,7 @@ const Quiz = () => {
         isOpen={isSubmitModalOpen}
         onClose={handleCloseSubmitModal}
         onSubmit={handleQuizSubmit}
-        timeLeft={timeLeft}
-        selectedAnswers={selectedAnswers}
-        questions={questions}
-        isAuthenticated={isAuthenticated}
+        loading={submitModalLoading}
       />
       <GuestInfoModal
         isOpen={showGuestModal}
@@ -348,101 +355,3 @@ const Quiz = () => {
 }
 
 export default Quiz
-
-
-interface SubmitModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: () => void;
-  timeLeft: number;
-  selectedAnswers: Record<number, string>;
-  questions: Question[];
-  isAuthenticated: boolean;
-}
-
-export const SubmitModal: React.FC<SubmitModalProps> = ({
-  isOpen,
-  onClose,
-  onSubmit,
-  timeLeft,
-  selectedAnswers,
-  questions,
-  isAuthenticated
-}) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter();
-  const { id } = useParams();
-
-  if (!isOpen) return null;
-
-  const timeInMinutes = Math.floor(timeLeft / 60);
-  const timeInSeconds = timeLeft % 60;
-  const timeFormatted = `${timeInMinutes.toString().padStart(2, '0')}:${timeInSeconds.toString().padStart(2, '0')}`;
-
-  const handleConfirmSubmit = async () => {
-    try {
-      setIsSubmitting(true);
-      if (!isAuthenticated) {
-        onClose();
-        return;
-      }
-      await onSubmit();
-    } catch (error) {
-      console.error('Error submitting quiz:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 bg-[#000000bd] bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#2C2C2C] rounded-lg p-6 w-full max-w-xl">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold">Submit Quiz</h2>
-          <button 
-            onClick={onClose}
-            className="text-gray-400 hover:text-white text-2xl"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div className="space-y-6">
-          <div className="bg-[#3a3a3a] p-4 rounded-lg">
-            <h3 className="font-semibold mb-4">Are you sure you want to submit your quiz?</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-400">Questions Answered:</span>
-                <span>{Object.keys(selectedAnswers).length} of {questions.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Time Remaining:</span>
-                <span>{timeFormatted}</span>
-              </div>
-            </div>
-            <p className="mt-4 text-sm text-gray-300">
-              Once submitted, you'll be redirected to view your results.
-            </p>
-          </div>
-
-          <div className="flex justify-end space-x-4">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 border border-gray-600 rounded-md hover:bg-gray-700"
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleConfirmSubmit}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Submitting...' : isAuthenticated ? 'Submit' : 'Submit as Guest'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};

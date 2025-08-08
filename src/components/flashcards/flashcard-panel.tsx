@@ -1,10 +1,9 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { X, ArrowLeft, ArrowRight, AlertCircle, RefreshCw } from 'lucide-react'
+import { X, AlertCircle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 // Remove unused Flashcard import since we're not using it anymore
-import workspaceService from '@/services/workspace.service'
 import { useWorkspaceStore } from '@/store/workspace.store'
 import { Flashcard } from './flashcard'
 
@@ -56,6 +55,7 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
         setLoading(true);
         setError(null);
         const response = (await fetchFlashcard(flashcardId)) as unknown as FlashcardResponse;
+        console.log(showingAnswer);
         
         if (response?.success && response.flashcard) {
           setFlashcardData({
@@ -134,9 +134,9 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
     });
   }, [flashcardData?.questions]);
 
-  const toggleAnswer = useCallback(() => {
-    setShowingAnswer(prev => !prev);
-  }, []);
+  // const toggleAnswer = useCallback(() => {
+  //   setShowingAnswer(prev => !prev);
+  // }, []);
 
   if (!isMounted || !flashcardId) return null;
 

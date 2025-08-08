@@ -15,7 +15,6 @@ import { Tabs, TabsList, TabsTrigger } from "../ui/tabs"
 import Image from "next/image"
 import { ArrowUp, Loader } from "lucide-react"
 import { FormMessage } from "../ui/form"
-import { cn } from "@/lib/utils"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "../ui/command"
 
 declare global {
@@ -37,23 +36,23 @@ declare global {
     interimResults: boolean;
     lang: string;
     maxAlternatives: number;
-    onaudioend: ((this: SpeechRecognition, ev: Event) => any) | null;
-    onaudiostart: ((this: SpeechRecognition, ev: Event) => any) | null;
-    onend: ((this: SpeechRecognition, ev: Event) => any) | null;
-    onerror: ((this: SpeechRecognition, ev: Event) => any) | null;
-    onnomatch: ((this: SpeechRecognition, ev: Event) => any) | null;
-    onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => any) | null;
-    onsoundend: ((this: SpeechRecognition, ev: Event) => any) | null;
-    onsoundstart: ((this: SpeechRecognition, ev: Event) => any) | null;
-    onspeechend: ((this: SpeechRecognition, ev: Event) => any) | null;
-    onspeechstart: ((this: SpeechRecognition, ev: Event) => any) | null;
-    onstart: ((this: SpeechRecognition, ev: Event) => any) | null;
+    onaudioend: ((this: SpeechRecognition, ev: Event) => void) | null;
+    onaudiostart: ((this: SpeechRecognition, ev: Event) => void) | null;
+    onend: ((this: SpeechRecognition, ev: Event) => void) | null;
+    onerror: ((this: SpeechRecognition, ev: Event) => void) | null;
+    onnomatch: ((this: SpeechRecognition, ev: Event) => void) | null;
+    onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => void) | null;
+    onsoundend: ((this: SpeechRecognition, ev: Event) => void) | null;
+    onsoundstart: ((this: SpeechRecognition, ev: Event) => void) | null;
+    onspeechend: ((this: SpeechRecognition, ev: Event) => void) | null;
+    onspeechstart: ((this: SpeechRecognition, ev: Event) => void) | null;
+    onstart: ((this: SpeechRecognition, ev: Event) => void) | null;
     abort(): void;
     start(): void;
     stop(): void;
   }
 
-  declare var webkitSpeechRecognition: {
+  let webkitSpeechRecognition: {
     prototype: SpeechRecognition;
     new (): SpeechRecognition;
   };
@@ -84,15 +83,14 @@ const ChatInputForm = ({
   onGenerateFlashcards
 }: ChatInputFormProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [isCLoading, setIsCLoading] = useState(false)
+  // const [isCLoading, setIsCLoading] = useState(false)
   const [mode, setMode] = useState<'ask' | 'create' | 'research'>('ask')
-  const [caretPosition, setCaretPosition] = useState(0)
-  const caretRef = useRef<HTMLSpanElement>(null)
+  // const [caretPosition, setCaretPosition] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isSpeechSupported, setIsSpeechSupported] = useState<boolean>(false)
   const [isListening, setIsListening] = useState<boolean>(false)
   const [volume, setVolume] = useState<number>(0)
-  const [interimTranscript, setInterimTranscript] = useState<string>('')
+  // const [interimTranscript, setInterimTranscript] = useState<string>('')
   const [previewUrl, setPreviewUrl] = useState<string>('')
   const recognitionRef = useRef<SpeechRecognition | null>(null)
   const [showTagSuggestions, setShowTagSuggestions] = useState(false)
@@ -162,7 +160,7 @@ const ChatInputForm = ({
       // Stop listening
       if (recognitionRef.current) {
         recognitionRef.current.stop()
-        setInterimTranscript('')
+        // setInterimTranscript('')
       }
       setIsListening(false)
     } else {
@@ -220,14 +218,14 @@ const ChatInputForm = ({
         if (finalTranscript) {
           form.setValue('chat', form.getValues('chat') + finalTranscript, { shouldValidate: true });
         }
-        setInterimTranscript(interimTranscript);
+        // setInterimTranscript(interimTranscript);
       }
 
-      recognition.onerror = (event: any) => {
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         console.error('Speech recognition error', event.error)
         toast.error('Error occurred in speech recognition')
         setIsListening(false)
-        setInterimTranscript('')
+        // setInterimTranscript('')
       }
 
       recognition.onend = () => {
@@ -354,48 +352,48 @@ const ChatInputForm = ({
     }
   };
 
-  const renderTextWithTags = (text: string) => {
-    if (!text) return null
+  // const renderTextWithTags = (text: string) => {
+  //   if (!text) return null
     
-    const parts: JSX.Element[] = []
-    let lastIndex = 0
-    const regex = /@(\w+)/g
-    let match
+  //   const parts: JSX.Element[] = []
+  //   let lastIndex = 0
+  //   const regex = /@(\w+)/g
+  //   let match
     
-    // If there's no @ symbol, return null to use the default text
-    if (text.indexOf('@') === -1) return null
+  //   // If there's no @ symbol, return null to use the default text
+  //   if (text.indexOf('@') === -1) return null
     
-    while ((match = regex.exec(text)) !== null) {
-      // Add text before the tag
-      if (match.index > lastIndex) {
-        parts.push(<span key={lastIndex}>{text.substring(lastIndex, match.index)}</span>)
-      }
+  //   while ((match = regex.exec(text)) !== null) {
+  //     // Add text before the tag
+  //     if (match.index > lastIndex) {
+  //       parts.push(<span key={lastIndex}>{text.substring(lastIndex, match.index)}</span>)
+  //     }
       
-      // Add the tag with special styling
-      const tag = match[1]
-      const isTagValid = TAGS.some(t => t.value === tag)
-      parts.push(
-        <span 
-          key={match.index} 
-          className={cn(
-            'font-medium',
-            isTagValid ? 'text-blue-500' : 'text-red-500'
-          )}
-        >
-          @{tag}
-        </span>
-      )
+  //     // Add the tag with special styling
+  //     const tag = match[1]
+  //     const isTagValid = TAGS.some(t => t.value === tag)
+  //     parts.push(
+  //       <span 
+  //         key={match.index} 
+  //         className={cn(
+  //           'font-medium',
+  //           isTagValid ? 'text-blue-500' : 'text-red-500'
+  //         )}
+  //       >
+  //         @{tag}
+  //       </span>
+  //     )
       
-      lastIndex = match.index + match[0].length
-    }
+  //     lastIndex = match.index + match[0].length
+  //   }
     
-    // Add remaining text
-    if (lastIndex < text.length) {
-      parts.push(<span key={lastIndex}>{text.substring(lastIndex)}</span>)
-    }
+  //   // Add remaining text
+  //   if (lastIndex < text.length) {
+  //     parts.push(<span key={lastIndex}>{text.substring(lastIndex)}</span>)
+  //   }
     
-    return parts
-  }
+  //   return parts
+  // }
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4">
@@ -468,7 +466,7 @@ const ChatInputForm = ({
                           className="min-h-[100px] max-h-[180px] text-[16px] max-w-[750px] font-medium p-3 w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none resize-none relative z-20"
                           {...field}
                           onKeyDown={handleKeyDown}
-                          disabled={disabled || isCLoading}
+                          disabled={disabled}
                           ref={textareaRef}
                           style={{
                             caretColor: 'white'

@@ -72,7 +72,7 @@ const { currentStep: _, confirmPassword: __, otp: ___, emailVerified: ____, ...s
         user_image: selectedFile
       };
       
-      const result = await authService.register(payload);
+      await authService.register(payload);
       
       // Clean up OAuth session storage after successful registration
       sessionStorage.removeItem("is_oauth_signup");

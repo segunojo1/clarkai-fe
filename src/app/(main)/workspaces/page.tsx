@@ -1,19 +1,18 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ChevronDown, Globe, Star, X, Moon, PlusIcon, File, FileText } from "lucide-react"
+import { ChevronDown, Globe, Star, X, Moon } from "lucide-react"
 import { WorkspaceCreationModal } from "@/components/home/workspace-creation-modal"
 import { useWorkspaceStore } from "@/store/workspace.store"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { UploadMaterialModal } from "@/components/home/upload-material-modal"
 
 const WorkspacesPage = () => {
-    const router = useRouter()
+    // const router = useRouter()
     const [activeTab, setActiveTab] = useState("Recently Viewed")
-    const { workspaces, isLoading, error } = useWorkspaceStore()
+    const { workspaces } = useWorkspaceStore()
 
     useEffect(() => {
         // Fetch workspaces when component mounts
@@ -136,7 +135,7 @@ const WorkspacesPage = () => {
                             
                             {/* Description */}
                             <p className="text-gray-400 text-base leading-relaxed mb-8 max-w-lg">
-                                Workspaces help you organize everything you're learning—
+                                Workspaces help you organize everything you&apos;re learning—
                                 from subjects to side projects—into custom spaces built for 
                                 deep focus, collaboration, and creativity.
                             </p>
@@ -177,7 +176,7 @@ const WorkspacesPage = () => {
                                                 <p className="text-gray-400 text-sm mt-1">{workspace.description}</p>
                                             )}
                                         </div>
-                                    </div>
+                                    </div>          
                                 </Link>
 
                             ))}

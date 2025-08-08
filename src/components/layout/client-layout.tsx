@@ -16,7 +16,7 @@ export default function ClientLayout({
 }: {
     children: React.ReactNode;
 }) { 
-    const { getAllChats, setChats } = useChatStore()
+    const { getAllChats } = useChatStore()
     const { getWorkspaces } = useWorkspaceStore()
     const {
     open

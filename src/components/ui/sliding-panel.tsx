@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { X, CheckCircle, Edit } from "lucide-react"
+import { X, Edit } from "lucide-react"
 import { useWorkspaceStore } from "@/store/workspace.store"
 import quizService from "@/services/quiz.service"
 import { toast } from "sonner"
@@ -39,7 +39,6 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
     const [currentStep, setCurrentStep] = useState(1)
     const [isGenerating, setIsGenerating] = useState(false)
     const [generatedQuiz, setGeneratedQuiz] = useState<{ id: string } | null>(null)
-    const [error, setError] = useState<string | null>(null)
     const [formData, setFormData] = useState<QuizFormData>({
         step1: {
             topic: '',
@@ -64,9 +63,24 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
 
     const { selectedWorkspace } = useWorkspaceStore()
 
+    interface WorkspaceFile {
+        id: string;
+        filePath: string;
+        fileName: string;
+        size: string;
+    }
+
+    interface WorkspaceWithFiles {
+        workspace: {
+            files: {
+                pdfFiles: WorkspaceFile[];
+            };
+        };
+    }
+
     const materials = [
         { id: 'all', name: 'All Materials' },
-        ...((selectedWorkspace as any)?.workspace?.files?.pdfFiles?.map((file: any) => ({
+        ...((selectedWorkspace as WorkspaceWithFiles)?.workspace?.files?.pdfFiles?.map((file: WorkspaceFile) => ({
             id: file.id,
             name: file.fileName
         })) || [])
@@ -142,7 +156,6 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(null);
         
         // Move to loading state (case 4) immediately
         setCurrentStep(4);
@@ -185,9 +198,9 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
             console.log('Quiz generated successfully:', response);
             setGeneratedQuiz({ id: response.quiz_id });
             setCurrentStep(5); // Move to success step (case 5)
-        } catch (err: any) {
-            console.error('Error generating quiz:', err);
-            setError(err.message || 'Failed to generate quiz. Please try again.');
+        } catch (err: unknown) {
+            const error = err instanceof Error ? err : new Error('An unknown error occurred');
+            console.error('Error generating quiz:', error);
             setCurrentStep(3); // Go back to the form if there's an error
         } finally {
             setIsGenerating(false);
@@ -199,7 +212,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
             case 1:
                 return (
                     <div className="p-4">
-                        <h3 className="text-3xl font-bold text-white mb-6">Let's Build a Quiz!</h3>
+                        <h3 className="text-3xl font-bold text-white mb-6">Let&apos;s Build a Quiz!</h3>
                         <form onSubmit={handleSubmit} className="space-y-3 w-[341px]">
                             {/* Step 1 form content remains unchanged */}
                             <div>
@@ -472,7 +485,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                     </div>
 
                                     <div className="text-sm text-gray-400 text-center py-2">
-                                        Review your quiz settings. Click "Generate Quiz" to create your quiz.
+                                        Review your quiz settings. Click &quot;Generate Quiz&quot; to create your quiz.
                                     </div>
                                 </div>
 
