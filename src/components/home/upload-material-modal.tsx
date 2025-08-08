@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import {
     Dialog,
     DialogContent,
@@ -12,7 +12,9 @@ import {
     DialogClose
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { ChevronDown, Globe, Star, Link as LinkIcon, FileText, Scan, Loader2, X, Play, Sparkles } from "lucide-react"
+import { ChevronDown, Globe, Star, Link as LinkIcon, FileText, Scan, Loader2, X, Play, Sparkles, Download } from "lucide-react"
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import MaterialPdf from './MaterialPdf';
 import Image from "next/image"
 import { useWorkspaceStore } from "@/store/workspace.store"
 import { toast } from "sonner"
@@ -56,9 +58,21 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
     const [isGenerating, setIsGenerating] = useState(false)
     const [generationProgress, setGenerationProgress] = useState(0)
     const [creationMode, setCreationMode] = useState<'topic' | 'pdf'>('topic')
-    const [selectedPdf, setSelectedPdf] = useState<string>('')
+    const [isMounted, setIsMounted] = useState(false)
+    const [selectedPdfs, setSelectedPdfs] = useState<string[]>([])
     const [wordRange, setWordRange] = useState<string>('500-1000')
+    const [generatedMaterial, setGeneratedMaterial] = useState<{text: string} | null>(null)
     const { selectedWorkspace } = useWorkspaceStore()
+
+    useEffect(() => {
+        setIsMounted(true)
+        return () => setIsMounted(false)
+    }, [])
+
+    const handleDownloadPdf = (content: string, filename: string) => {
+        // This will be handled by the PDFDownloadLink component
+        console.log('Preparing PDF download...');
+    };
     
     const wordRanges = [
         { value: '300-500', label: 'Short (300-500 words)' },
@@ -178,7 +192,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                 style={{ background: 'none' }}
                                             />
                                         </div>
-                                        {/* Text */}
+                                        
                                         <div className="text-left w-full pl-4">
                                             <p className="text-gray-300 text-xs font-medium leading-tight">Your Material<br />goes here</p>
                                         </div>
@@ -362,24 +376,38 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                         <div className="space-y-4">
                                                             <div className="space-y-2">
                                                                 <Label className="text-white">
-                                                                    Select PDF from Workspace
+                                                                    Select PDFs from Workspace
                                                                 </Label>
-                                                                <select
-                                                                    value={selectedPdf}
-                                                                    onChange={(e) => setSelectedPdf(e.target.value)}
-                                                                    className="w-full p-2 bg-[#333] border border-[#444] rounded-md text-white"
-                                                                >
-                                                                    <option value="">Select a PDF</option>
-                                                                    {selectedWorkspace?.workspace?.files?.pdfFiles?.filter(m => m.fileName.endsWith('.pdf')).map((material) => (
-                                                                        <option key={material.id} value={material.id}>
-                                                                            {material.fileName}
-                                                                        </option>
+                                                                <div className="space-y-2 max-h-40 overflow-y-auto p-2 bg-[#2a2a2a] rounded-md">
+                                                                {isMounted && selectedWorkspace?.workspace?.files?.pdfFiles
+                                                                    ?.filter(m => m.fileName.endsWith('.pdf'))
+                                                                    .map((material) => (
+                                                                        <div key={material.id} className="flex items-center space-x-2">
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                id={`pdf-${material.id}`}
+                                                                                checked={selectedPdfs.includes(material.id)}
+                                                                                onChange={(e) => {
+                                                                                    if (e.target.checked) {
+                                                                                        setSelectedPdfs([...selectedPdfs, material.id]);
+                                                                                    } else {
+                                                                                        setSelectedPdfs(selectedPdfs.filter(id => id !== material.id));
+                                                                                    }
+                                                                                }}
+                                                                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                                            />
+                                                                            <label htmlFor={`pdf-${material.id}`} className="text-sm text-gray-300 cursor-pointer">
+                                                                                {material.fileName}
+                                                                            </label>
+                                                                        </div>
                                                                     ))}
-                                                                </select>
+                                                                </div>
                                                                 <p className="text-xs text-gray-400 mt-1">
-                                                                    {selectedWorkspace?.workspace?.materials?.filter(m => m.fileName.endsWith('.pdf')).length === 0 
+                                                                    {selectedWorkspace?.workspace?.files?.pdfFiles?.filter(m => m.fileName.endsWith('.pdf')).length === 0 
                                                                         ? 'No PDFs found in your workspace. Please upload a PDF first.'
-                                                                        : 'Choose a PDF to generate material from.'}
+                                                                        : selectedPdfs.length > 0 
+                                                                            ? `${selectedPdfs.length} PDF${selectedPdfs.length > 1 ? 's' : ''} selected`
+                                                                            : 'Select one or more PDFs to generate material from.'}
                                                                 </p>
                                                             </div>
                                                             
@@ -427,10 +455,10 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                     <Button 
                                                         type="submit" 
                                                         className="bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white"
-                                                        disabled={isGenerating || (creationMode === 'topic' ? !topic.trim() : !selectedPdf)}
+                                                        disabled={isGenerating || (creationMode === 'topic' ? !topic.trim() : selectedPdfs.length === 0)}
                                                         onClick={async () => {
                                                             if ((creationMode === 'topic' && !topic.trim()) || 
-                                                                (creationMode === 'pdf' && !selectedPdf)) {
+                                                                (creationMode === 'pdf' && selectedPdfs.length === 0)) {
                                                                 return;
                                                             }
                                                             
@@ -449,27 +477,27 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                                 
                                                                 // TODO: Replace with actual API call to generate material
                                                                 // The API endpoint will be different based on the creation mode
-                                                                const payload = creationMode === 'topic' 
-                                                                    ? { 
-                                                                        topic, 
-                                                                        description, 
-                                                                        type: 'topic',
-                                                                        words_range: wordRange,
-                                                                        is_tag: true
-                                                                      }
-                                                                    : { 
-                                                                        pdfId: selectedPdf, 
-                                                                        instructions: description, 
-                                                                        type: 'pdf',
-                                                                        words_range: wordRange
-                                                                      };
+                                                                // const payload = creationMode === 'topic' 
+                                                                //     ? { 
+                                                                //         topic, 
+                                                                //         description, 
+                                                                //         type: 'topic',
+                                                                //         words_range: wordRange,
+                                                                //         is_tag: true
+                                                                //       }
+                                                                //     : { 
+                                                                //         pdfId: selectedPdf, 
+                                                                //         instructions: description, 
+                                                                //         type: 'pdf',
+                                                                //         words_range: wordRange
+                                                                //       };
                                                                 
                                                                 const workspace = await workspaceServiceInstance.generateMaterial(
                                                                     creationMode === 'topic' ? topic : '',
                                                                     wordRange,
                                                                     true,
                                                                     description,
-                                                                    creationMode === 'pdf' ? selectedPdf : undefined
+                                                                    creationMode === 'pdf' ? selectedPdfs : undefined
                                                                 )
                                                                 
                                                                 console.log('Generating material with:', workspace);
@@ -480,15 +508,22 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                                 // Simulate completion
                                                                 await new Promise(resolve => setTimeout(resolve, 500));
                                                                 
-                                                                toast.success('Material generated successfully!');
+                                                                if (workspace?.pdfGenerated && workspace?.text) {
+                                                                    setGeneratedMaterial({ text: workspace.text });
+                                                                    // Auto-download the markdown
+                                                                    // PDF download will be handled by the PDFDownloadLink component
+                                                                    toast.success('Material generated and downloaded successfully!');
+                                                                } else {
+                                                                    toast.error('Failed to generate material. Please try again.');
+                                                                }
                                                                 
-                                                                // Reset form
+                                                                // setShowCreateDialog(false);
                                                                 setTopic('');
                                                                 setDescription('');
-                                                                setSelectedPdf('');
-                                                                setCreationMode('topic');
-                                                                setIsCreatingMaterial(false);
+                                                                setSelectedPdfs([]);
                                                                 setGenerationProgress(0);
+                                                                setIsGenerating(false);
+                                                                setCreationMode('topic');
                                                             } catch (error) {
                                                                 console.error('Error generating material:', error);
                                                                 toast.error('Failed to generate material. Please try again.');
@@ -501,6 +536,39 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                         {isGenerating ? 'Generating...' : 'Generate Material'}
                                                     </Button>
                                                     </DialogFooter>
+                                                    {generatedMaterial && (
+                                                        <div className="p-4 mt-4 bg-gray-800 rounded-md">
+                                                            <div className="flex flex-col space-y-4">
+                                                                <div className="flex justify-between items-center">
+                                                                    <span className="text-white">Material Ready!</span>
+                                                                    {generatedMaterial?.text && (
+                                                                        <PDFDownloadLink
+                                                                            document={
+                                                                                <MaterialPdf 
+                                                                                    content={generatedMaterial.text} 
+                                                                                    title={`Material - ${new Date().toISOString().slice(0, 10)}`}
+                                                                                />
+                                                                            }
+                                                                            fileName={`material-${new Date().toISOString().slice(0, 10)}.pdf`}
+                                                                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center"
+                                                                        >
+                                                                            {({ blob, url, loading, error }) => (
+                                                                                <>
+                                                                                    <Download className="mr-2 h-4 w-4" />
+                                                                                    {loading ? 'Generating PDF...' : 'Download PDF'}
+                                                                                </>
+                                                                            )}
+                                                                        </PDFDownloadLink>
+                                                                    )}
+                                                                </div>
+                                                                {generatedMaterial?.text && (
+                                                                    <div className="text-xs text-gray-400">
+                                                                        If the download doesn't start automatically, click the button above.
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                             </DialogContent>
                                         </Dialog>
                                     </div>
