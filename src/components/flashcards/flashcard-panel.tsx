@@ -6,12 +6,8 @@ import { Button } from '@/components/ui/button'
 // Remove unused Flashcard import since we're not using it anymore
 import { useWorkspaceStore } from '@/store/workspace.store'
 import { Flashcard } from './flashcard'
+import { FlashcardData } from '@/lib/types'
 
-interface FlashcardQuestion {
-  question: string;
-  answer: string;
-  explanation: string;
-}
 
 interface FlashcardResponse {
   success: boolean;
@@ -22,13 +18,13 @@ interface FlashcardResponse {
     createdAt: string;
     updatedAt: string;
   };
-  questions: FlashcardQuestion[];
+  questions: FlashcardData[];
 }
 
 interface FlashcardPanelProps {
   isOpen: boolean;
   onClose: () => void;
-  flashcards?: FlashcardQuestion[];
+  flashcards?: FlashcardData[];
   flashcardId: string | null;
 }
 
@@ -40,7 +36,8 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
   const [flashcardData, setFlashcardData] = useState<{
     id: string;
     workspaceId: string;
-    questions: FlashcardQuestion[];
+    
+    questions: FlashcardData[];
     createdAt: string;
     updatedAt: string;
   } | null>(null);

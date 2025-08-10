@@ -1,5 +1,5 @@
 import { useUserStore } from '@/store/user.store';
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 import Cookies from 'js-cookie';
 // import { toast } from 'sonner';
 
@@ -30,12 +30,13 @@ export interface SignupPayload {
   name: string;
   email: string;
   nickname: string;
+  password: string;
   role?: string;
   school?: string;
   department?: string;
   interests?: string;
   study_vibe?: string[];
-  image_url?: string;
+  user_image?: string;
   oauth?: boolean;
   oauth_model?: "google";
   oauth_token?: string;
@@ -151,7 +152,7 @@ class AuthService {
     }
   }
 
-  public async register(data: SignupPayload): Promise<{ user: User; token: string }> {
+  public async register(data: SignupPayload) {
     console.log("Starting registration process");
     
     // Check if it's an OAuth signup
@@ -219,21 +220,18 @@ class AuthService {
       console.error('Registration error details:', {
         error,
         message: error instanceof Error ? error.message : String(error),
-        response: error instanceof Error ? error.response?.data : undefined
+        response: error instanceof AxiosError ? error.response?.data : undefined
       });
+      
       let errorMessage = 'Registration failed';
-
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as { response?: { data?: { message?: string } } };
-        errorMessage = axiosError.response?.data?.message || errorMessage;
-      }
+    
+      if (error instanceof AxiosError) {
+        errorMessage = error.response?.data?.message || errorMessage;
+      } 
       // Handle standard Error
       else if (error instanceof Error) {
         errorMessage = error.message || errorMessage;
       }
-
-      console.error('Registration failed:', errorMessage);
-      throw new Error(errorMessage);
     }
   }
 

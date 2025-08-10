@@ -13,6 +13,7 @@ interface Workspace {
     enc_id: string
     name: string
     description?: string
+    tag?: string
     files?: {
         pdfFiles?: { id: string | number; fileName: string }[]
     }

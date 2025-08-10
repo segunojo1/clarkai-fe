@@ -7,7 +7,7 @@ import { useWorkspaceStore } from "@/store/workspace.store"
 import Image from "next/image"
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { UploadMaterialModal } from "@/components/home/upload-material-modal"
+// import { UploadMaterialModal } from "@/components/home/upload-material-modal"
 
 const WorkspacesPage = () => {
     // const router = useRouter()
@@ -39,7 +39,7 @@ const WorkspacesPage = () => {
                             <ChevronDown className="w-4 h-4" />
                         </Button>
                     </WorkspaceCreationModal>
-                    <UploadMaterialModal>
+                    {/* <UploadMaterialModal >
                         <button className="p-2 hover:bg-gray-700 rounded-md transition-colors">
                             <Image 
                                 src="/globe.svg" 
@@ -49,7 +49,7 @@ const WorkspacesPage = () => {
                                 className="w-5 h-5"
                             />
                         </button>
-                    </UploadMaterialModal>
+                    </UploadMaterialModal> */}
                     <Moon className="w-5 h-5 text-gray-400 cursor-pointer hover:text-white transition-colors" />
                 </div>
             </div>

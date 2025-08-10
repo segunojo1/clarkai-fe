@@ -684,9 +684,9 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                                 await navigator.clipboard.writeText(quizUrl);
                                                 toast.success('Quiz link copied to clipboard!');
                                             }
-                                        } catch (error) {
+                                        } catch (error: unknown) {
                                             console.error('Error sharing:', error);
-                                            if (error.name !== 'AbortError') {
+                                            if (!(error instanceof DOMException && error.name === 'AbortError')) {
                                                 await navigator.clipboard.writeText(quizUrl);
                                                 toast.success('Link copied to clipboard!');
                                             }

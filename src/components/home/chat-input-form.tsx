@@ -18,6 +18,11 @@ import { FormMessage } from "../ui/form"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "../ui/command"
 
 declare global {
+  interface SpeechRecognitionErrorEvent extends Event {
+    error: string;
+    message: string;
+  }
+
   interface SpeechRecognitionEvent extends Event {
     results: {
       [index: number]: {
@@ -39,7 +44,7 @@ declare global {
     onaudioend: ((this: SpeechRecognition, ev: Event) => void) | null;
     onaudiostart: ((this: SpeechRecognition, ev: Event) => void) | null;
     onend: ((this: SpeechRecognition, ev: Event) => void) | null;
-    onerror: ((this: SpeechRecognition, ev: Event) => void) | null;
+    onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => void) | null;
     onnomatch: ((this: SpeechRecognition, ev: Event) => void) | null;
     onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => void) | null;
     onsoundend: ((this: SpeechRecognition, ev: Event) => void) | null;
@@ -221,12 +226,13 @@ const ChatInputForm = ({
         // setInterimTranscript(interimTranscript);
       }
 
-      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        console.error('Speech recognition error', event.error)
-        toast.error('Error occurred in speech recognition')
-        setIsListening(false)
-        // setInterimTranscript('')
-      }
+      recognition.onerror = (event: Event) => {
+        const errorEvent = event as unknown as SpeechRecognitionErrorEvent;
+        console.error('Speech recognition error', errorEvent.error);
+        toast.error('Error occurred in speech recognition');
+        setIsListening(false);
+        // setInterimTranscript('');
+      };
 
       recognition.onend = () => {
         setIsListening(false)

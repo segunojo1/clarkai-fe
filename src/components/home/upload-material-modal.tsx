@@ -32,11 +32,7 @@ interface UploadMaterialModalProps {
     workspaceId: string
 }
 
-const formatFileSize = (size: string): string => {
-    // The size comes from the API as a formatted string (e.g., "288.32 KB")
-    // So we can just return it directly
-    return size
-}
+
 
 const formatTimeLeft = (progress: number): string => {
     if (progress === 0) return 'Starting...'
@@ -149,7 +145,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                     {activeTab === "Materials" && (
                         <>
                             {/* Files List */}
-                            {selectedWorkspace?.workspace?.files?.pdfFiles?.length > 0 ? (
+                            {selectedWorkspace && selectedWorkspace?.workspace?.files?.pdfFiles?.length > 0 ? (
                                 <div className="flex justify-between flex-wrap gap-2 mx-auto">
                                     {selectedWorkspace?.workspace.files.pdfFiles.map((file: { id: string; filePath: string; fileName: string; size: string }) => (
                                         <div key={file.id} className="flex flex-col items-center w-fit max-w-[130px] justify-start mb-8 cursor-pointer hover:bg-[#232323] rounded-2xl p-2" onClick={() => window.open(file.filePath, '_blank')}>
@@ -166,7 +162,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                     />
                                                 </div>
                                                 <div className="text-center w-full max-w-[130px]">
-                                                    <p className="text-gray-300 text-xs font-medium leading-tight break-words">{file.fileName}<br />{formatFileSize(file.size)}</p>
+                                                    <p className="text-gray-300 text-xs font-medium leading-tight break-words">{file.fileName}<br />{file.size}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -199,7 +195,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <h3 className="text-sm font-medium text-white">{uploadedFile.name}</h3>
-                                            <p className="text-xs text-gray-400">{formatFileSize(uploadedFile.size)}</p>
+                                            <p className="text-xs text-gray-400">{uploadedFile.size}</p>
                                         </div>
                                         <Button
                                             variant="ghost"
@@ -252,7 +248,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                             <div className="flex items-center justify-between mb-4">
                                                 <div>
                                                     <h3 className="text-lg font-medium text-white mb-1">{uploadedFile.name}</h3>
-                                                    <p className="text-sm text-gray-400">{formatFileSize(uploadedFile.size)}</p>
+                                                    <p className="text-sm text-gray-400">{uploadedFile.size}</p>
                                                 </div>
                                                 <Button
                                                     variant="ghost"
@@ -572,7 +568,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                     )}
                     {activeTab === "Quizzes" && (
                         <>
-                            {selectedWorkspace?.workspace?.quizzes?.length > 0 ? (
+                            { selectedWorkspace && selectedWorkspace?.workspace?.quizzes?.length > 0 ? (
                                 <div className="w-full space-y-4">
                                     <h3 className="text-lg font-medium text-white mb-4">Available Quizzes</h3>
                                     <div className="grid gap-4">

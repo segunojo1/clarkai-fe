@@ -147,7 +147,8 @@ export default function WorkspacePage() {
         createdAt: new Date(),
         updatedAt: new Date(),
         isFlashcard: true,
-        
+        flashcardId: '',
+        size: 10
       };
 
       // Update messages with loading state

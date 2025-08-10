@@ -162,7 +162,7 @@ class WorkspaceService {
         }
     }
 
-    public async generateMaterial(topic: string, words_range: string, is_tag: boolean, user_message: string, files?: File) {
+    public async generateMaterial(topic: string, words_range: string, is_tag: boolean, user_message: string, files?: string[]) {
         try {
             const response = await this.api.post('/generateMaterial', {
                 topic,

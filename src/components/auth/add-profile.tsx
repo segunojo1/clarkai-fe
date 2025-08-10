@@ -3,6 +3,16 @@
 import { useState, useRef, ChangeEvent } from 'react';
 import { PictureInPicture2, UploadCloud } from "lucide-react";
 import { Button } from "../ui/button";
+
+// Utility function to convert file to data URL
+const fileToDataUrl = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
 import authService, { SignupPayload } from "@/services/auth.service";
 import { toast } from "sonner";
 import { useRouter } from 'next/navigation';
@@ -49,13 +59,19 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
     try {
       setIsLoading(true);
       
-const { currentStep: _, confirmPassword: __, otp: ___, emailVerified: ____, ...signupDataWithoutStep } = signupData;      
+      const { currentStep: _, confirmPassword: __, otp: ___, emailVerified: ____, ...signupDataWithoutStep } = signupData;      
       // Ensure all required fields are present
       console.log(_, __, ___, ____);
       console.log(signupDataWithoutStep);
       
       if (!signupDataWithoutStep.name || !signupDataWithoutStep.email) {
         throw new Error('Missing required fields');
+      }
+
+      // Convert file to data URL if a file is selected
+      let userImageUrl = '';
+      if (selectedFile) {
+        userImageUrl = await fileToDataUrl(selectedFile);
       }
 
       // Create the payload with all required fields
@@ -69,7 +85,7 @@ const { currentStep: _, confirmPassword: __, otp: ___, emailVerified: ____, ...s
         department: signupDataWithoutStep.department || '',
         interests: signupDataWithoutStep.interests || '',
         study_vibe: signupDataWithoutStep.study_vibe || [],
-        user_image: selectedFile
+        user_image: userImageUrl
       };
       
       await authService.register(payload);

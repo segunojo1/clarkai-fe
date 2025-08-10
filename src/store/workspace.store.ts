@@ -51,9 +51,16 @@ interface Workspace {
     }
 }
 
+type Workspaces = Array<{
+    name: string
+    enc_id: string
+    description: string
+    tag: string
+}>
+
 interface WorkspaceStore {
-    workspaces: Workspace[]
-    selectedWorkspace: Workspace
+    workspaces: Workspaces
+    selectedWorkspace: Workspace | null
     workspaceId: string | null
     messages: ChatMessage[]
     isLoading: boolean
@@ -68,7 +75,6 @@ interface WorkspaceStore {
     setMessages: (messages: ChatMessage[]) => void
     askQuestion: (workspaceId: string, question: string, thinking: boolean, mode: 'workspace' | 'file', previous_messages: ChatMessage[], fileId?: string) => Promise<void>
     uploadFile: (file: File, workspaceId: string) => Promise<void>
-    getWorkspace: (id: string) => Workspace | undefined
     generateFlashcards: (mode: 'workspace' | 'file', workspaceId: string, size: number, is_context: boolean, context: string, file_id?: string) => Promise<void>
     fetchFlashcard: (id: string) => Promise<FlashcardData[] | null>
     selectedFlashcards: FlashcardData[]
@@ -107,7 +113,8 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     },
 
     selectWorkspace: (workspace: Workspace) => {
-        set({ selectedWorkspace: workspace, workspaceId: workspace.enc_id })
+        //SEGUN CHECK I CHANGED workspace.enc_id TO workspace.workspace.enc_id
+        set({ selectedWorkspace: workspace, workspaceId: workspace.workspace.enc_id })
     },
 
     addMessage: (message: ChatMessage) => {
@@ -157,7 +164,10 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
             
             fromUser: true,
             createdAt: new Date(),
-            updatedAt: new Date()
+            updatedAt: new Date(),
+            isFlashcard: false,
+            flashcardId: null,
+            size: null
         }
         get().addMessage(userMessage)
 
@@ -172,7 +182,10 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
                     isFile: false,
                     fromUser: false,
                     createdAt: new Date(),
-                    updatedAt: new Date()
+                    updatedAt: new Date(),
+                    isFlashcard: false,
+                    flashcardId: null,
+                    size: null
                 }
                 get().addMessage(assistantMessage)
           
@@ -185,7 +198,10 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
                 isFile: false,
                 fromUser: false,
                 createdAt: new Date(),
-                updatedAt: new Date()
+                updatedAt: new Date(),
+                isFlashcard: false,
+                flashcardId: null,
+                size: null
             }
             get().addMessage(errorMessage)
         } finally {
@@ -230,5 +246,8 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
             set({ error: 'Failed to fetch flashcards' });
             return null;
         }
-    }
+    },
+    // getWorkspace: (id: string) => {
+    //     return get().workspaces.workspaces.find((workspace) => workspace.enc_id === id)
+    // }
 }))

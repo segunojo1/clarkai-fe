@@ -68,7 +68,10 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       fromUser: true,
       createdAt: new Date(),
       updatedAt: new Date(),
-      attachments: files ? [files] : []
+      attachments: files ? [files] : [],
+      isFlashcard: false,
+      flashcardId: null,
+      size: null
     }
     addMessage(userMessage)
 
@@ -94,6 +97,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         fromUser: false,
         createdAt: new Date(),
         updatedAt: new Date(),
+        isFlashcard: false,
+        flashcardId: null,
+        size: null
       }
       addMessage(assistantMessage)
     } catch (error) {
@@ -105,7 +111,10 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         fromUser: false,
         createdAt: new Date(),
         updatedAt: new Date(),
-        text: 'Sorry, there was an error processing your message.'
+        text: 'Sorry, there was an error processing your message.',
+        isFlashcard: false,
+        flashcardId: null,
+        size: null
       }
       addMessage(errorMessage)
     } finally {
