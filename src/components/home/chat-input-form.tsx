@@ -306,8 +306,10 @@ const ChatInputForm = ({
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     const textarea = e.target as HTMLTextAreaElement
     const cursorPosition = textarea.selectionStart ?? 0
-    const textBeforeCursor = textarea.value.substring(0, cursorPosition)
+    const currentValue = textarea.value;
+    const textBeforeCursor = currentValue.substring(0, cursorPosition)
     const lastAtPos = textBeforeCursor.lastIndexOf('@')
+    console.log(currentValue);
     
     // Close suggestions when backspacing past @
     if (e.key === 'Backspace' && textBeforeCursor.endsWith('@') && showTagSuggestions) {
@@ -471,7 +473,7 @@ const ChatInputForm = ({
                           }
                           className="min-h-[100px] max-h-[180px] text-[16px] max-w-[750px] font-medium p-3 w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none resize-none relative z-20"
                           {...field}
-                          onKeyDown={handleKeyDown}
+                          onKeyUp={handleKeyDown}
                           disabled={disabled}
                           ref={textareaRef}
                           style={{
