@@ -80,7 +80,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
             <DialogTrigger asChild>
                 {children}
             </DialogTrigger>
-            <DialogContent className="bg-[#18191A] border border-[#333] text-white md:max-w-[500px] max-h-[80vh] p-0 rounded-2xl shadow-2xl overflow-y-auto !top-[30%] !left-[80%] mt-0 ml-0" style={{ transform: 'none' }}>
+            <DialogContent className="bg-[#18191A] border border-[#333] text-white md:max-w-[500px] max-h-[80vh] p-0 rounded-2xl shadow-2xl overflow-y-auto !top-[40%] !left-[80%] mt-0 ml-0" style={{ transform: 'none' }}>
                 {/* Nav Tabs */}
                 <div className="flex items-center justify-center gap-2 px-8 pt-4 pb-2">
                     <button
@@ -111,7 +111,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                     >
                         Quizzes
                     </button>
-                    <button
+                    {/* <button
                         onClick={() => setActiveTab("Courses")}
                         className={`font-medium text-base transition-colors px-4 py-2 rounded-lg ${activeTab === "Courses"
                             ? "bg-[#232323] text-white"
@@ -119,13 +119,13 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                             }`}
                     >
                         Courses
-                    </button>
+                    </button> */}
                 </div>
                 {/* Stats Row - conditional positioning based on active tab */}
                 <div className={`flex items-center justify-between  px-8 pb-2 text-[14px] text-gray-400 w-full ${activeTab === "Quizzes" ? "pt-0" : "pt-1"
                     }`}>
                     <div className="flex items-center gap-2 bg-[#232323] px-4 py-2 rounded-full font-medium">
-                        <span>0 Mat. Uploaded</span>
+                        <span>{selectedWorkspace?.workspace?.files?.pdfFiles?.length} Mat. Uploaded</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <LinkIcon className="w-5 h-5" />
@@ -568,6 +568,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                     )}
                     {activeTab === "Quizzes" && (
                         <>
+                        {}
                             { selectedWorkspace && selectedWorkspace?.workspace?.quizzes?.length > 0 ? (
                                 <div className="w-full space-y-4">
                                     <h3 className="text-lg font-medium text-white mb-4">Available Quizzes</h3>
@@ -609,7 +610,9 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                             </svg>
                                         </DialogTitle>
                                     </DialogHeader>
-                                    <div className="space-y-6 text-gray-300 leading-relaxed mb-8 w-full max-w-xl text-left break-words">
+                                    {selectedWorkspace?.workspace?.files?.pdfFiles?.length !== 0 ? (
+                                        <>
+                                        <div className="space-y-6 text-gray-300 leading-relaxed mb-8 w-full max-w-xl text-left break-words">
                                         <p className="text-sm">
                                             Create quizzes from your uploaded materials, notes, or custom questions to start testing your knowledge.
                                         </p>
@@ -635,11 +638,18 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                             Create a Quiz
                                         </Button>
                                     </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                        <h1>Ensure you upload a material before creating a quiz</h1>
+                                        </>
+                                    )}
+                                    
                                 </div>
                             )}
                         </>
                     )}
-                    {activeTab === "Courses" && (
+                    {/* {activeTab === "Courses" && (
                         <div className="w-full flex flex-col items-start justify-start" style={{ minHeight: 400 }}>
                             <div className="rounded-2xl w-[29rem] h-28 flex flex-col items-center justify-center relative ml-0 border-2 border-dashed border-[#A3A3A3]/40 bg-[#232323]/40" style={{ minHeight: 96, marginLeft: '-6%' }}>
                                 <div className="text-center w-full px-2">
@@ -647,7 +657,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                 </div>
                             </div>
                         </div>
-                    )}
+                    )} */}
                 </div>
             </DialogContent>
         </Dialog>

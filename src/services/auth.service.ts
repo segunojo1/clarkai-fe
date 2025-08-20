@@ -30,16 +30,20 @@ export interface SignupPayload {
   name: string;
   email: string;
   nickname: string;
-  password: string;
-  role?: string;
-  school?: string;
-  department?: string;
-  interests?: string;
-  study_vibe?: string[];
+  password?: string;
+  oauth ?: boolean;
+  oauth_method?: string;
+}
+
+export interface CompleteSignupPayload {
+  email: string;
+  role: string;
+  school: string;
+  department: string;
+  interests: string;
+  study_vibe: string[];
   user_image?: string;
-  oauth?: boolean;
-  oauth_model?: "google";
-  oauth_token?: string;
+  is_google?: boolean;
 }
 
 
@@ -110,6 +114,33 @@ class AuthService {
     }
   }
 
+  public async signup(data: SignupPayload) {
+    try {
+      const response = await this.api.post('/signup', data);
+
+      if (response.data?.token) {
+        Cookies.set('token', response.data.token, this.COOKIE_OPTIONS);
+        Cookies.set('user', JSON.stringify(response.data.user), this.COOKIE_OPTIONS);
+        this.api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      }
+      return response.data;
+    } catch (error: unknown) {
+      let errorMessage = 'Failed to signup';
+
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const axiosError = error as { response?: { data?: { error?: string } } };
+        errorMessage = axiosError.response?.data?.error || errorMessage;
+      }
+      // Handle standard Error
+      else if (error instanceof Error) {
+        errorMessage = error.message || errorMessage;
+      }
+
+      console.error('Signup failed:', errorMessage);
+      throw new Error(errorMessage);
+    }
+  }
+
   public async sendOtp(email: string, name: string): Promise<OtpResponse> {
     try {
       const response = await this.api.post<OtpResponse>('/otp', { email, name });
@@ -152,9 +183,9 @@ class AuthService {
     }
   }
 
-  public async register(data: SignupPayload) {
+  public async register(data: CompleteSignupPayload) {
     console.log("Starting registration process");
-    
+     
     // Check if it's an OAuth signup
     const isOauth = sessionStorage.getItem("is_oauth_signup") === "true";
     const googleToken = sessionStorage.getItem("google_oauth_token");
@@ -168,16 +199,16 @@ class AuthService {
       const formData = new FormData();
 
       // Inject oauth-specific values into the data object first
-      if (isOauth && googleToken) {
-        data.oauth = true;
-        data.oauth_model = "google";
-        data.oauth_token = googleToken;
-        console.log("Setting OAuth data:", {
-          oauth: true,
-          oauth_model: "google",
-          oauth_token: "[TOKEN_PRESENT]"
-        });
-      }
+      // if (isOauth && googleToken) {
+      //   data.oauth = true;
+      //   data.oauth_model = "google";
+      //   data.oauth_token = googleToken;
+      //   console.log("Setting OAuth data:", {
+      //     oauth: true,
+      //     oauth_model: "google",
+      //     oauth_token: "[TOKEN_PRESENT]"
+      //   });
+      // }
 
       // Append all fields to formData
       Object.entries(data).forEach(([key, value]) => {
@@ -191,12 +222,12 @@ class AuthService {
         }
       });
 
-      console.log("Sending registration request with data:", {
-        ...data,
-        oauth_token: data.oauth_token ? "[TOKEN_PRESENT]" : "[NO_TOKEN]"
-      });
+      // console.log("Sending registration request with data:", {
+      //   ...data,
+      //   oauth_token: data.oauth_token ? "[TOKEN_PRESENT]" : "[NO_TOKEN]"
+      // });
 
-      const response = await this.api.post<{ user: User; token: string }>('/signup', formData, {
+      const response = await this.api.post<{ user: User; token: string }>('/completeSignup', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -214,6 +245,7 @@ class AuthService {
         this.api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
         console.log("Stored auth token in cookies:", "[TOKEN_PRESENT]");
       }
+
 
       return response.data;
     } catch (error: unknown) {
@@ -235,7 +267,7 @@ class AuthService {
     }
   }
 
-  public async login(email: string, password: string): Promise<{ user: User; token: string }> {
+  public async login({email, password, oauth, oauth_method}: {email: string, password?: string, oauth?: boolean, oauth_method?: string}): Promise<{ user: User; token: string }> {
     try {
       const response = await this.api.post<{ user: User; token: string }>('/login', { email, password });
 
@@ -270,8 +302,8 @@ class AuthService {
       let errorMessage = 'Token verification failed';
 
       if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as { response?: { data?: { message?: string } } };
-        errorMessage = axiosError.response?.data?.message || errorMessage;
+        const axiosError = error as { response?: { data?: { error?: string } } };
+        errorMessage = axiosError.response?.data?.error || errorMessage;
       }
       else if (error instanceof Error) {
         errorMessage = error.message || errorMessage;

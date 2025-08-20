@@ -15,7 +15,7 @@ interface Workspace {
     description?: string
     tag?: string
     files?: {
-        pdfFiles?: { id: string | number; fileName: string }[]
+        pdfFiles?: { id: string | number; fileName: string; filePath: string; }[]
     }
     materials?: { id: string | number; name: string }[]
     quizzes?: { id: string | number; name: string }[]
@@ -191,11 +191,11 @@ const WorkspaceItem = ({ workspace }: { workspace: Workspace }) => {
                                                     PDF Files
                                                 </div>
                                                 {(workspaceData?.files?.pdfFiles || []).map((material) => (
-                                                    <div key={material.id} className="relative pl-6 flex items-center gap-2">
+                                                    <Link target="_blank" href={material.filePath} key={material.id} className="cursor-pointer relative pl-6 flex items-center gap-2">
                                                         <div className="absolute left-3 top-0 h-full w-px bg-gray-200 dark:bg-[#E5E5E5]" />
                                                         <File color="#D4D4D4" fill="#D4D4D4" height={12} width={9.6} />
                                                         <div>{material.fileName.length > 10 ? `${material.fileName.slice(0, 10)}...pdf` : material.fileName}</div>
-                                                    </div>
+                                                    </Link>
                                                 ))}
                                             </div>
                                         )}

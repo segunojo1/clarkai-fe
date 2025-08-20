@@ -210,7 +210,6 @@ export function AppSidebar() {
     const items = [
         { title: "Search", url: "/search", icon: Search },
         { title: "Home", url: "/home", icon: Home },
-        { title: "Inbox", url: "/home", icon: Inbox },
         { title: "Chat", url: "/chat", icon: Inbox },
         { title: "Workspaces", url: "/workspaces", icon: Globe },
     ]
@@ -233,7 +232,13 @@ export function AppSidebar() {
                 <SidebarGroup>
                     <SidebarGroupContent className="flex items-center justify-between">
                         <div className="flex items-center gap-[10px] group-data-[collapsible=icon]:justify-center">
-                            <Image src="/assets/orange.png" alt="" width={24} height={24} />
+                            <Image
+                                src={user?.image_url && user.image_url !== "" ? user.image_url : "/assets/orange.png"}
+                                alt="user avatar"
+                                width={24}
+                                height={24}
+                            />
+
                             <p className="text-[14px] font-bold group-data-[collapsible=icon]:hidden">{user?.name || 'User'}</p>
                         </div>
                         <div className="flex items-center gap-1 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2">
@@ -254,7 +259,7 @@ export function AppSidebar() {
                 <SidebarGroup className="mx-auto">
                     <LatestWorkspace />
                 </SidebarGroup>
-                <SidebarGroupCustom items={workspaceItems} label="Workspace Hub" />
+                {/* <SidebarGroupCustom items={workspaceItems} label="Workspace Hub" /> */}
             </SidebarContent>
 
             <SidebarRail />

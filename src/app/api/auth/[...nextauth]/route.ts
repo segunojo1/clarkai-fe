@@ -1,5 +1,6 @@
 // app/api/auth/[...nextauth]/route.ts
 // import authService from "@/services/auth.service";
+import authService from "@/services/auth.service";
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
@@ -12,41 +13,86 @@ const handler = NextAuth({
   ],
   callbacks: {
     async jwt({ token, account, user }) {
-      // Send user data to your backend on initial sign in
       if (account && user) {
         try {
-          // const response = authService.verifyOathToken(account.access_token)
+          console.log("=== OAuth Verification Debug ===");
+          console.log("Access Token:", account.access_token);
 
-          // const backendUser = await response.json();
+          // For Google OAuth, we need to verify the token and handle signup if new user
+          // const response = await authService.verifyOathToken(account.access_token);
+          const response = process.env.NEXT_PUBLIC_ACCESS_TOKEN || '';
+          // Only attempt to sign up if this is a new user (indicated by isNewUser flag)
+          if (user) {
+            try {
+              await authService.signup({
+                email: user.email || '', 
+                name: user.name || '', 
+                nickname: user.name || '', 
+                oauth: true, 
+                oauth_method: "google"
+              });
+              console.log("Google OAuth signup successful");
+            } catch (signupError) {
+              console.log("Signup error:", signupError);
+              
+              // Check if it's a duplicate user error (status 409)
+              const isDuplicateUser = 
+                (signupError as any)?.response?.status === 409 || 
+                (signupError as any)?.status === 409 ||
+                (signupError as any)?.message?.includes('User already exists.') ||
+                (signupError as any)?.error === 'User already exists.';
+
+              if (isDuplicateUser) {
+                console.log("User already exists, attempting login...");
+                try {
+                  await authService.login({
+                    email: user.email || '', 
+                    oauth: true, 
+                    oauth_method: "google"
+                  });
+                  console.log("Google OAuth login successful");
+                } catch (loginError) {
+                  console.error("Error during Google OAuth login:", loginError);
+                  throw new Error(`Google OAuth login failed: ${(loginError as any)?.error || (loginError as any)?.message}`);
+                }
+              } else {
+                // For other errors, rethrow with more context
+                console.error("Error during Google OAuth signup:", signupError);
+                const errorMessage = (signupError as any)?.error || 
+                (signupError as any)?.message || 
+                                  'Unknown error during Google OAuth signup';
+                throw new Error(`Google OAuth signup failed: ${errorMessage}`);
+              }
+            }
+          }
           
-          // Add backend user ID to token
-          // token.backendUserId = backendUser.id;
-          // token.backendAccessToken = backendUser.accessToken;
-          
-          // // Check if user exists in our database
-          // const userResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${backendUser.id}`);
-          // const existingUser = await userResponse.json();
-          
-          // Set onboarding status
-          // token.isOnboardingNeeded = !existingUser.data;
+          console.log("Verify Token Response:", JSON.stringify(response, null, 2));
+
+          const backendUser = response;
+
+          // attach stuff to the token
+          token.backendUserId = (backendUser as any).id;
+          token.backendAccessToken = (backendUser as any).accessToken;
+          token.googleAccessToken = account.access_token; 
         } catch (error) {
           console.error("Backend auth failed:", error);
         }
       }
       return token;
     },
-    async session({ session }) {
-      // Add backend user ID and onboarding status to session
-      // session.user.backendUserId = token.backendUserId;
-      // session.user.isOnboardingNeeded = token.isOnboardingNeeded;
-      
+    async session({ session, token }: any) {  // ✅ include token
+      session.user.backendUserId = token.backendUserId as string;
+      session.user.isOnboardingNeeded = token.isOnboardingNeeded as boolean;
+      session.user.googleAccessToken = token.googleAccessToken as string; 
+
       return session;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
   session: {
-    strategy: "jwt", // Recommended when not using a database
+    strategy: "jwt",
   },
 });
+
 
 export { handler as GET, handler as POST };

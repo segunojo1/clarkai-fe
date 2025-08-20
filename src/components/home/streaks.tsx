@@ -1,34 +1,42 @@
-import React from 'react'
+import streakService from '@/services/streak.service'
+import React, { useEffect, useState } from 'react'
 
 interface StreakBoxProps {
   active: boolean
 }
 
 const StreakBox = ({ active }: StreakBoxProps) => (
-  <div 
-    className={`w-[26px] h-[26px] rounded-[7.6px] shadow-md ${active 
-      ? 'bg-gradient-to-br from-[#FF3D00] via-[#FF3D00] to-[#FE8228]' 
-      : 'bg-[#F5F5F5] dark:bg-[#262626]'}`} 
+  <div
+    className={`w-[26px] h-[26px] rounded-[7.6px] shadow-md ${active
+      ? 'bg-gradient-to-br from-[#FF3D00] via-[#FF3D00] to-[#FE8228]'
+      : 'bg-[#F5F5F5] dark:bg-[#262626]'}`}
   />
 )
 
 const Streaks = () => {
-  // Example: 15 day streak
-  const streakCount: number = 15
+  const [streakCount, setStreakCount] = useState(0);
   const totalDays = 30
-  
+
   // Create an array of 30 days
   const days = Array.from({ length: totalDays }, (_, i) => i + 1)
+  useEffect(() => {
+    const getStreak = async () => {
+      const response = await streakService.getAndAddStreak()
+      
+    }
+
+    getStreak()
+  }, [])
 
   return (
     <section>
-      
+
 
       <div className='flex flex-col justify-between gap-4 max-w-[342px] h-[245px] p-[14px] bg-[#F0F0EF] dark:bg-[#404040] rounded-[6px]'>
         <div className='flex flex-wrap gap-1'>
           {days.map((day) => (
-            <StreakBox 
-              key={day} 
+            <StreakBox
+              key={day}
               active={day <= streakCount}
             />
           ))}

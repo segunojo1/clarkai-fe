@@ -60,6 +60,7 @@ console.log(session, status);
         ...values,
         emailVerified: false
       })
+      await authService.signup({email: values.email, name: values.name, nickname: values.nickname, password: values.password})
       await authService.sendOtp(values.email, values.name)
       updateSignupData({
         ...values,

@@ -3,6 +3,7 @@
 import { useState, useRef, ChangeEvent } from 'react';
 import { PictureInPicture2, UploadCloud } from "lucide-react";
 import { Button } from "../ui/button";
+import Cookies from "js-cookie"
 
 // Utility function to convert file to data URL
 const fileToDataUrl = (file: File): Promise<string> => {
@@ -13,10 +14,12 @@ const fileToDataUrl = (file: File): Promise<string> => {
     reader.readAsDataURL(file);
   });
 };
-import authService, { SignupPayload } from "@/services/auth.service";
+import authService, { CompleteSignupPayload, SignupPayload } from "@/services/auth.service";
 import { toast } from "sonner";
 import { useRouter } from 'next/navigation';
 import useAuthStore from '@/store/auth.store';
+import { useUserStore } from '@/store/user.store';
+import { getSession, useSession } from 'next-auth/react';
 
 interface AddProfileProps {
   onSuccess: () => void;
@@ -30,6 +33,9 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
   const signupData = useAuthStore(state => state.signupData);
   const resetSignup = useAuthStore(state => state.resetSignup);
   const router = useRouter();
+    const { data: session, status } = useSession();
+        const { user } = useUserStore()
+    
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,10 +57,10 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
   };
 
   const handleSubmit = async () => {
-    if (!selectedFile) {
-      toast.error('Please select a profile picture');
-      return;
-    }
+    // if (!selectedFile) {
+    //   toast.error('Please select a profile picture');
+    //   return;
+    // }
 
     try {
       setIsLoading(true);
@@ -73,31 +79,36 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
       if (selectedFile) {
         userImageUrl = await fileToDataUrl(selectedFile);
       }
+      console.log(status);
 
       // Create the payload with all required fields
-      const payload: SignupPayload = {
-        name: signupDataWithoutStep.name || '',
+      const payload: CompleteSignupPayload = {
         email: signupDataWithoutStep.email || '',
-        nickname: signupDataWithoutStep.nickname || '',
-        password: signupDataWithoutStep.password || '',
         role: signupDataWithoutStep.role || 'student',
         school: signupDataWithoutStep.school || '',
         department: signupDataWithoutStep.department || '',
         interests: signupDataWithoutStep.interests || '',
         study_vibe: signupDataWithoutStep.study_vibe || [],
-        user_image: userImageUrl
+        user_image: userImageUrl,
+        is_google: status == 'authenticated' ? true : false
       };
       
-      await authService.register(payload);
+      
+      const response = await authService.register(payload);
+      const userStr = Cookies.get('user')
+      
+        useUserStore.getState().setUser(JSON.parse(userStr as string));
+      console.log(user);
+      
       
       // Clean up OAuth session storage after successful registration
       sessionStorage.removeItem("is_oauth_signup");
-      sessionStorage.removeItem("google_oauth_token");
       
+      // Call the success callback which should handle navigation
+      onSuccess();
       resetSignup();
       router.push('/home');
       toast.success('Account created successfully!');
-      onSuccess();
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create account'
       toast.error(errorMessage)
@@ -171,7 +182,7 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
           type="button" 
           variant="outline" 
           className="w-full py-3 h-12 text-base font-medium text-gray-700 border-gray-300"
-          onClick={onSuccess}
+          onClick={handleSubmit}
           disabled={isLoading}
         >
           Skip for now

@@ -7,6 +7,11 @@ export interface SignupState extends Omit<SignupPayload, 'password' | 'confirmPa
   currentStep: number;
   emailVerified: boolean;
   otp?: string;
+  role?: string;
+  school?: string;
+  department?: string;
+  interests?: string;
+  study_vibe?: string[];
 }
 
 interface AuthStore {

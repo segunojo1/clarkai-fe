@@ -45,7 +45,7 @@ const HomePageContent = () => {
     // await sendMessage(message)
   }
   return (
-    <div className='w-full flex flex-col items-center bg-[#FAFAFA] dark:bg-[#262626]'>
+    <div className='w-full flex flex-col h-full items-center bg-[#FAFAFA] dark:bg-[#262626]'>
       <Image src='/assets/logo.svg' alt='' width={103} height={90} className='mx-auto mb-[55px]' />
       <div className='flex items-center gap-5 mb-[51px]'>
         {theme === 'dark' ? (

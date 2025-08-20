@@ -100,6 +100,7 @@ const SignUpPage = () => {
   });
 
   const { data: session, status } = useSession();
+  console.log(session, status);
   useEffect(() => {
 
   if (status === "authenticated" && session.googleIdToken) {
