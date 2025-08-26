@@ -207,6 +207,9 @@ const SidebarGroupCustom = ({ items, label }: SidebarGroupCustomProps) => {
 }
 
 export function AppSidebar() {
+    const pathname = usePathname()
+    const isWorkspaceDetailPage = pathname?.startsWith('/workspaces/')
+
     const items = [
         { title: "Search", url: "/search", icon: Search },
         { title: "Home", url: "/home", icon: Home },

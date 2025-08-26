@@ -72,7 +72,7 @@ class WorkspaceService {
         }
     }
 
-    public async askQuestion(question: string, workspaceId: string, thinking: boolean, mode: 'workspace' | 'file', previous_messages: ChatMessage[], fileId?: string) {
+    public async askQuestion(question: string, workspaceId: string, thinking: boolean, mode: 'workspace' | 'file' | 'internet', previous_messages: ChatMessage[], fileId?: string) {
         try {
             const response = await this.api.post('/askQuestion', {
                 question,
@@ -112,17 +112,21 @@ class WorkspaceService {
     }
 
 
-    public async uploadFile(file: File, workspaceId: string) {
+    public async  uploadFile(files: File[], workspaceId: string) {
         try {
             const formData = new FormData();
-            formData.append('files', file);
+            console.log(files);
+            
+            files.forEach(file => {
+                formData.append('files', file);
+            })
             formData.append('workspace_id', workspaceId);
 
             const response = await this.api.post('/files', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
-            });
+            }); 
 
             if (!response.data.success) {
                 throw new Error(response.data.message || 'Failed to upload file');

@@ -15,6 +15,7 @@ import { UploadMaterialModal } from '@/components/home/upload-material-modal'
 import Image from 'next/image'
 import { SlidingPanel } from '@/components/ui/sliding-panel'
 import { Loader2 } from 'lucide-react'
+import quizService from '@/services/quiz.service'
 
 // Helper function to format flashcards as markdown
 // const formatFlashcards = (flashcards: Array<{ question: string, answer: string, explanation?: string }>) => {
@@ -28,12 +29,14 @@ import { Loader2 } from 'lucide-react'
 
 export default function WorkspacePage() {
   const { setCurrentChatId, setChatDetails } = useChatStore()
-  const { messages, setMessages, isLoading, setIsLoading, askQuestion } = useWorkspaceStore()
+  const { messages, setMessages, askQuestion } = useWorkspaceStore()
+  const [isLoading, setIsLoading] = useState(false)
   const [loadChats, setLoadChats] = useState(false);
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
   // const searchParams = useSearchParams()
   const [isQuizPanelOpen, setIsQuizPanelOpen] = useState(false)
+  const [askSource, setAskSource] = useState<'ai' | 'materials'>('ai')
 
   useEffect(() => {
     const handleQuizPanelEvent = (event: Event) => {
@@ -217,6 +220,181 @@ export default function WorkspacePage() {
     }
   }, [id, messages, setIsLoading, setMessages]);
 
+  const handleGenerateMaterials = useCallback(async (context: string) => {
+    if (!context.trim() || !id) return Promise.resolve();
+  
+    const loadingMessageId = `loading-${Date.now()}`;
+    let updatedMessages = [...messages];
+  
+    try {
+      setIsLoading(true);
+  
+      // Add user message to chat
+      const userMessage: ChatMessage = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        text: context,
+        fromUser: true,
+        isFile: false,
+        isFlashcard: false,
+        flashcardId: null,
+        size: null
+      };
+  
+      updatedMessages = [...messages, userMessage];
+      setMessages(updatedMessages);
+  
+      // Add placeholder "loading" assistant message
+      const loadingMessage: ChatMessage = {
+        id: loadingMessageId,
+        role: 'assistant',
+        text: 'Generating study material...',
+        fromUser: false,
+        isFile: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        flashcardId: '',
+        size: 0,
+        isFlashcard: false
+      };
+  
+      updatedMessages = [...updatedMessages, loadingMessage];
+      setMessages(updatedMessages);
+  
+      // Call your API to generate material
+      // Example: call workspaceServiceInstance.generateMaterial with defaults (topic mode)
+      const response = await workspaceServiceInstance.generateMaterial(
+        context,      
+        '500-1000',
+        true,
+        context,            
+        undefined
+      );
+
+      if (response?.text) {
+        // Add assistant message with generated material
+        const assistantMessage: ChatMessage = {
+          createdAt: new Date(),
+          role: 'assistant',
+          text: response.text,
+          fromUser: false,
+          isFile: false,
+          updatedAt: new Date(),
+          flashcardId: '',
+        size: 0,
+        isFlashcard: false
+        };
+  
+        updatedMessages = [
+          ...updatedMessages.filter(msg => msg.id !== loadingMessageId),
+          assistantMessage,
+        ];
+        setMessages(updatedMessages);
+      } else {
+        toast.error('Failed to generate material');
+        updatedMessages = updatedMessages.filter(msg => msg.id !== loadingMessageId);
+        setMessages(updatedMessages);
+      }
+  
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Error generating materials:', error);
+      toast.error('Failed to generate materials');
+      updatedMessages = updatedMessages.filter(msg => msg.id !== loadingMessageId);
+      setMessages(updatedMessages);
+      return Promise.reject(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id, messages, setIsLoading, setMessages]);
+  
+  const handleGenerateQuiz = async (messageText: string) => {
+    const loadingMessageId = `loading-${Date.now()}`;
+    let updatedMessages = [...messages];
+    try {
+  
+      // Default or parsed parameters (you could parse quizName, numQuestions, etc. from the message)
+      const quizName = 'New Quiz';
+      const numQuestions = 5;
+      const difficulty: 'easy' | 'medium' | 'hard' = 'medium';
+      const mode: 'workspace' | 'file' = 'workspace';
+
+      setIsLoading(true);
+  
+      // Add user message to chat
+      const userMessage: ChatMessage = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        text: messageText,
+        fromUser: true,
+        isFile: false,
+        isFlashcard: false,
+        flashcardId: null,
+        size: null
+      };
+  
+      updatedMessages = [...messages, userMessage];
+      setMessages(updatedMessages);
+  
+      // Add placeholder "loading" assistant message
+      const loadingMessage: ChatMessage = {
+        id: loadingMessageId,
+        role: 'assistant',
+        text: 'Generating quiz...',
+        fromUser: false,
+        isFile: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        flashcardId: '',
+        size: 0,
+        isFlashcard: false
+      };
+  
+      updatedMessages = [...updatedMessages, loadingMessage];
+      setMessages(updatedMessages);
+  
+  
+      const response = await quizService.generateQuiz({
+        workspace_id: id.toString(),
+        size: numQuestions,
+        name: messageText,
+        mode,
+        file_id: undefined,
+        difficulty,
+        duration: 10,
+      });
+
+      if (response?.quiz_id) {
+        // Add assistant message with generated material
+        const assistantMessage: ChatMessage = {
+          createdAt: new Date(),
+          role: 'assistant',
+          text: response.quiz_id,
+          fromUser: false,
+          isFile: false,
+          updatedAt: new Date(),
+          flashcardId: '',
+        size: 0,
+        isFlashcard: false
+        };
+  
+        updatedMessages = [
+          ...updatedMessages.filter(msg => msg.id !== loadingMessageId),
+          assistantMessage,
+        ];
+        setMessages(updatedMessages);
+      }
+      toast.success('Quiz generated successfully!');
+    } catch (err) {
+      console.error('Failed to generate quiz:', err);
+      updatedMessages = updatedMessages.filter(msg => msg.id !== loadingMessageId);
+      setMessages(updatedMessages);
+      toast.error('Failed to generate quiz');
+    } finally{
+      setIsLoading(false);
+    }
+  };
+  
   //SEGUN COME HERE AND ADD FILES ARG HERE LATER 
   const handleSend = async (text: string) => {
     if (!text.trim()) return
@@ -228,7 +406,7 @@ export default function WorkspacePage() {
           id.toString(),
           text,
           true,
-          'workspace',
+          askSource == 'ai' ? 'internet' : 'workspace',
           recentMessages,
           undefined
         )
@@ -242,8 +420,8 @@ export default function WorkspacePage() {
   }
 
   return (
-    <div className="flex  h-full w-full overflow-hidden">
-      <div className={`flex flex-col h-full w-full justify-between pb-10 ${isQuizPanelOpen ? '' : 'min-w-full'}`}>
+    <div className="flex h-full w-fit overflow-hidden">
+      <div className={`flex flex-col h-full  justify-between pb-10 ${isQuizPanelOpen ? '' : 'min-w-full'}`}>
         <div className='absolute top-10 right-10 '>
           <UploadMaterialModal workspaceId={id.toString()}>
             <button className="p-1 border-2 rounded-full border-[#ffffff] transition-colors">
@@ -280,9 +458,13 @@ export default function WorkspacePage() {
           )
         }
         <ChatInputForm
+        askSource={askSource}
+        setAskSource={setAskSource}
           onSend={handleSend}
           onGenerateFlashcards={handleGenerateFlashcards}
           disabled={isLoading}
+          onGenerateMaterial={handleGenerateMaterials}
+         onGenerateQuiz={handleGenerateQuiz}
         />
       </div>
       <SlidingPanel

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import "../globals.css";
 import ClientLayout from "@/components/layout/client-layout";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { SidebarWrapper } from "@/components/sidebar-wrapper";
 
 export const metadata: Metadata = {
   title: "Clark",
@@ -10,12 +11,12 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  children,
+  children, 
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarWrapper>
       <div className="flex h-screen w-full">
         <AppSidebar />
         <SidebarInset className="flex-1">
@@ -24,6 +25,6 @@ export default function RootLayout({
           </ClientLayout>
         </SidebarInset>
       </div>
-    </SidebarProvider>
+    </SidebarWrapper>
   );
 }

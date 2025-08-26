@@ -217,14 +217,14 @@ export function ChatMessageList({
   };
 
   return (
-    <div className={cn("flex w-full flex-col space-y-4 p-4 overflow-y-auto h-[calc(100vh-200px)]", className)}>
+    <div className={cn("flex flex-col space-y-4 p-4 overflow-y-auto h-[calc(100vh-200px)]", className)}>
       <div className='absolute left-5'>
         <UserAvatar />
       </div>
       {messages.length > 0 && (
         <div className="h-[140px]"></div>
       )}
-      <div className='max-w-[750px] w-full mx-auto'>
+      <div className='max-w-[750px]  mx-auto'>
         {messages.map((message) => {
           const isFlashcardMessage = message.metadata?.type === 'flashcards' || 
             (message.fromUser && message.text.includes('@flashcard')) || 

@@ -73,8 +73,8 @@ interface WorkspaceStore {
     setIsLoading: (isLoading: boolean) => void
     addMessage: (message: ChatMessage) => void
     setMessages: (messages: ChatMessage[]) => void
-    askQuestion: (workspaceId: string, question: string, thinking: boolean, mode: 'workspace' | 'file', previous_messages: ChatMessage[], fileId?: string) => Promise<void>
-    uploadFile: (file: File, workspaceId: string) => Promise<void>
+    askQuestion: (workspaceId: string, question: string, thinking: boolean, mode: 'workspace' | 'file' | 'internet', previous_messages: ChatMessage[], fileId?: string) => Promise<void>
+    uploadFile: (files: File[], workspaceId: string) => Promise<void>
     generateFlashcards: (mode: 'workspace' | 'file', workspaceId: string, size: number, is_context: boolean, context: string, file_id?: string) => Promise<void>
     fetchFlashcard: (id: string) => Promise<FlashcardData[] | null>
     selectedFlashcards: FlashcardData[]
@@ -153,7 +153,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
         }
     },
 
-    askQuestion: async (workspaceId: string, question: string, thinking: boolean, mode: 'workspace' | 'file', previous_messages: ChatMessage[], fileId?: string) => {
+    askQuestion: async (workspaceId: string, question: string, thinking: boolean, mode: 'workspace' | 'file' | 'internet', previous_messages: ChatMessage[], fileId?: string) => {
         if (!question.trim()) return
         const { setIsLoading } = get()
         // Add user message
@@ -170,6 +170,8 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
             size: null
         }
         get().addMessage(userMessage)
+        console.log(get().messages);
+        
 
         try {
             setIsLoading(true)
@@ -188,7 +190,8 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
                     size: null
                 }
                 get().addMessage(assistantMessage)
-          
+                console.log(get().messages);
+        
         } catch (error) {
             console.error('Error asking question:', error)
             // Add error message
@@ -224,11 +227,11 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
         }
     },
 
-    uploadFile: async (file: File, workspaceId: string) => {
-        if (!file || !workspaceId) return
+    uploadFile: async (files: File[], workspaceId: string) => {
+        if (!files.length || !workspaceId) return
 
         try {
-            await workspaceService.uploadFile(file, workspaceId)
+            await workspaceService.uploadFile(files, workspaceId)
             // Refresh workspaces to update the list
             await get().getWorkspaces()
         } catch (error) {

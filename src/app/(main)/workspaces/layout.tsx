@@ -13,7 +13,7 @@ export default function WorkspacesLayout({
   children: React.ReactNode
 }>) {
   return (
-    <div className="flex h-screen w-full">
+    <div className="flex h-screen max-w-screen">
       <WorkspaceLayout>
         {children}
       </WorkspaceLayout>

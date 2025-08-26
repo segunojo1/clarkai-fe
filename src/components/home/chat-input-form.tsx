@@ -1,6 +1,7 @@
 "use client"
 
 import { FormField, FormItem, FormControl, Form } from "@/components/ui/form"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { chatSchema } from "@/models/validations/chat.validation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from "react"
@@ -8,14 +9,14 @@ import { useForm } from 'react-hook-form';
 import { z } from "zod"
 import { Button } from "../ui/button"
 import { Textarea } from "../ui/textarea"
-import { X, FileText, MicOff } from "lucide-react"
+import { X, FileText, MicOff, ChevronDown, ArrowUp, Loader } from "lucide-react"
 import { useChatStore } from "@/store/chat.store"
 import { toast } from "sonner"
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs"
 import Image from "next/image"
-import { ArrowUp, Loader } from "lucide-react"
 import { FormMessage } from "../ui/form"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "../ui/command"
+import { PopoverClose } from "@radix-ui/react-popover"
 
 declare global {
   interface SpeechRecognitionErrorEvent extends Event {
@@ -71,21 +72,27 @@ declare global {
 const TAGS = [
   { value: 'flashcard', label: 'flashcard' },
   { value: 'material', label: 'material' },
-  { value: 'summary', label: 'summary' },
   { value: 'quiz', label: 'quiz' },
-  { value: 'important', label: 'important' },
 ]
 
 interface ChatInputFormProps {
   onSend: (message: string, file?: File) => void;
   disabled?: boolean;
   onGenerateFlashcards?: (context: string) => Promise<void>;
+  onGenerateMaterial?: (context: string) => Promise<void>;
+  onGenerateQuiz?: (context: string) => Promise<void>;
+  askSource?: string;
+  setAskSource?: (source: string) => void;
 }
 
 const ChatInputForm = ({
   onSend,
   disabled,
-  onGenerateFlashcards
+  onGenerateFlashcards,
+  onGenerateMaterial,
+  onGenerateQuiz,
+  askSource,
+  setAskSource
 }: ChatInputFormProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   // const [isCLoading, setIsCLoading] = useState(false)
@@ -252,18 +259,21 @@ const ChatInputForm = ({
 
   const handleSubmit = async (values: z.infer<typeof chatSchema>) => {
     setTagPosition(prev => ({ ...prev, show: false }));
-    if (!values.chat.trim() && !selectedFile) return;
+    const messageText = values.chat.trim();
+    if (!messageText && !selectedFile) return;
 
     try {
-      const messageText = values.chat.trim();
-      const hasFlashcardTag = messageText.includes('@flashcard');
-      
-      if (hasFlashcardTag && onGenerateFlashcards) {
-        // For flashcard generation, only call onGenerateFlashcards
-        // The message will be added to the chat in the page component
-        await onGenerateFlashcards(messageText);
-      } else {
-        // For regular messages, send to the backend
+      const tagActions: Record<string, ((msg: string) => Promise<void>) | undefined> = {
+        '@flashcard' : onGenerateFlashcards,
+        '@material': onGenerateMaterial ,
+        '@quiz': onGenerateQuiz,
+      }
+
+      const tagExists = Object.keys(tagActions).find(tag => messageText.includes(tag))
+
+      if (tagExists && tagActions[tagExists] ) {
+        await tagActions[tagExists]!(messageText)
+      } else{
         onSend(messageText, selectedFile || undefined);
       }
       
@@ -274,6 +284,14 @@ const ChatInputForm = ({
       console.error('Error sending message:', error);
       toast.error('Failed to send message');
     }
+  }
+
+  const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false)
+  
+  const handleTagSelectt = (tag: string) => {
+    const currentValue = form.getValues('chat') || ''
+    form.setValue('chat', `${currentValue} @${tag} `)
+    setIsTagPopoverOpen(false)
   }
 
   const triggerFileInput = () => {
@@ -503,12 +521,45 @@ const ChatInputForm = ({
                           className="flex-1"
                         >
                           <TabsList className="bg-[#F5F5F5] dark:bg-[#262626] rounded-[8px] p-0 py-5 px-2 h-8 justify-start gap-1 text-[12px]">
-                            <TabsTrigger
-                              value="ask"
-                              className="data-[state=active]:bg-white border-none py-4 data-[state=active]:shadow-none rounded-md px-4 h-full text-sm font-medium text-gray-600 data-[state=active]:text-[#FF3D00]"
-                            >
-                              Ask
-                            </TabsTrigger>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <TabsTrigger
+                                  value="ask"
+                                  className="data-[state=active]:bg-white border-none data-[state=active]:shadow-none rounded-md h-full text-sm font-medium text-gray-600 data-[state=active]:text-[#FF3D00]"
+                                >
+                                  <div className="flex items-center px-4 py-4">
+                                    <span>Ask {askSource === 'ai' ? 'AI' : 'Materials'}</span>
+                                    <ChevronDown className="ml-1 h-4 w-4" />
+                                  </div>
+                                </TabsTrigger>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-48 p-0 gap-2 flex flex-col" align="start">
+                                <div className="grid">
+                                  <PopoverClose asChild>
+                                    <Button
+                                      type="button"
+                                      className={`w-full text-left px-4 py-2 text-sm ${
+                                        askSource === 'ai' ? 'bg-gray-100 text-[#FF3D00]' : 'text-gray-700 hover:bg-gray-50'
+                                      }`}
+                                      onClick={() => setAskSource('ai')}
+                                    >
+                                      Ask AI
+                                    </Button>
+                                  </PopoverClose>
+                                  <PopoverClose asChild>
+                                    <Button
+                                      type="button"
+                                      className={`w-full text-left px-4 py-2 text-sm ${
+                                        askSource === 'materials' ? 'bg-gray-100 text-[#FF3D00]' : 'text-white bg-[#4a4848] hover:cursor-pointer hover:bg-[#484646]'
+                                      }`}
+                                      onClick={() => setAskSource('materials')}
+                                    >
+                                      Ask Materials
+                                    </Button>
+                                  </PopoverClose>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
                             <TabsTrigger
                               value="research"
                               className="data-[state=active]:bg-white border-none data-[state=active]:shadow-none rounded-md px-4 py-4 h-full text-sm font-medium text-gray-600 data-[state=active]:text-[#FF3D00]"
@@ -581,14 +632,34 @@ const ChatInputForm = ({
                               />
                             )}
                           </button>
-                          <Image 
-                            src="/assets/at.svg" 
-                            alt="" 
-                            width={21} 
-                            height={30} 
-                            className="text-gray-500"
-                            aria-hidden="true"
-                          />
+                          <Popover open={isTagPopoverOpen} onOpenChange={setIsTagPopoverOpen}>
+                            <PopoverTrigger asChild>
+                              <Button type="button" variant="ghost" size="icon">
+                                <Image 
+                                  src="/assets/at.svg" 
+                                  alt="Mention tag" 
+                                  width={21} 
+                                  height={30} 
+                                  className="text-gray-500"
+                                  aria-hidden="true"
+                                />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-48 p-0" align="start">
+                              <div className="grid gap-1 p-2">
+                                {TAGS.map((tag) => (
+                                  <Button
+                                    key={tag.value}
+                                    variant="ghost"
+                                    className="justify-start"
+                                    onClick={() => handleTagSelectt(tag.value)}
+                                  >
+                                    {tag.label}
+                                  </Button>
+                                ))}
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                           <Button
                             type="submit"
                             size="icon"

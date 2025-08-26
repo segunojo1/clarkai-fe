@@ -56,7 +56,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
     const [isMounted, setIsMounted] = useState(false)
     const [selectedPdfs, setSelectedPdfs] = useState<string[]>([])
     const [wordRange, setWordRange] = useState<string>('500-1000')
-    const [generatedMaterial, setGeneratedMaterial] = useState<{text: string} | null>(null)
+    const [generatedMaterial, setGeneratedMaterial] = useState<{ text: string } | null>(null)
     const { selectedWorkspace } = useWorkspaceStore()
 
     useEffect(() => {
@@ -70,6 +70,8 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
         { value: '1000-1500', label: 'Long (1000-1500 words)' },
         { value: '1500-2000', label: 'Detailed (1500-2000 words)' },
     ]
+
+    const materialLength = selectedWorkspace && selectedWorkspace?.workspace?.files?.pdfFiles.length + selectedWorkspace?.workspace?.files?.imageFiles?.length
 
     // console.log(selectedWorkspace);
 
@@ -125,7 +127,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                 <div className={`flex items-center justify-between  px-8 pb-2 text-[14px] text-gray-400 w-full ${activeTab === "Quizzes" ? "pt-0" : "pt-1"
                     }`}>
                     <div className="flex items-center gap-2 bg-[#232323] px-4 py-2 rounded-full font-medium">
-                        <span>{selectedWorkspace?.workspace?.files?.pdfFiles?.length} Mat. Uploaded</span>
+                        <span>{materialLength} Mat. Uploaded</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <LinkIcon className="w-5 h-5" />
@@ -146,9 +148,9 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                         <>
                             {/* Files List */}
                             {selectedWorkspace && selectedWorkspace?.workspace?.files?.pdfFiles?.length > 0 ? (
-                                <div className="flex justify-between flex-wrap gap-2 mx-auto">
+                                <div className="flex justify-center items-center flex-wrap gap-2 mx-auto max-h-[500px] overflow-y-scroll mb-5">
                                     {selectedWorkspace?.workspace.files.pdfFiles.map((file: { id: string; filePath: string; fileName: string; size: string }) => (
-                                        <div key={file.id} className="flex flex-col items-center w-fit max-w-[130px] justify-start mb-8 cursor-pointer hover:bg-[#232323] rounded-2xl p-2" onClick={() => window.open(file.filePath, '_blank')}>
+                                        <div key={file.id} className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer hover:bg-[#232323] rounded-2xl p-2" onClick={() => window.open(file.filePath, '_blank')}>
                                             <div className="rounded-2xl p-0 flex flex-col items-center justify-center relative" style={{ minHeight: 96 }}>
                                                 {/* File icon - no background, no border */}
                                                 <div className="flex justify-center mb-2 mt-4">
@@ -161,7 +163,27 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                         style={{ background: 'none' }}
                                                     />
                                                 </div>
-                                                <div className="text-center w-full max-w-[130px]">
+                                                <div className="text-center max-w-[130px] w-[130px] h-[50px]">
+                                                    <p className="text-gray-300 text-xs font-medium leading-tight break-words">{file.fileName}<br />{file.size}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {selectedWorkspace?.workspace.files.imageFiles.map((file: { id: string; filePath: string; fileName: string; size: string }) => (
+                                        <div key={file.id} className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer hover:bg-[#232323] rounded-2xl p-2" onClick={() => window.open(file.filePath, '_blank')}>
+                                            <div className="rounded-2xl p-0 flex flex-col items-center justify-center relative" style={{ minHeight: 96 }}>
+                                                {/* File icon - no background, no border */}
+                                                <div className="flex justify-center mb-2 mt-4">
+                                                    <Image
+                                                        src="/assets/fileIcon.png"
+                                                        alt="File icon"
+                                                        width={56}
+                                                        height={56}
+                                                        className="w-14 h-14 bg-transparent"
+                                                        style={{ background: 'none' }}
+                                                    />
+                                                </div>
+                                                <div className="text-center max-w-[130px] w-[130px] h-[50px]">
                                                     <p className="text-gray-300 text-xs font-medium leading-tight break-words">{file.fileName}<br />{file.size}</p>
                                                 </div>
                                             </div>
@@ -182,7 +204,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                 style={{ background: 'none' }}
                                             />
                                         </div>
-                                        
+
                                         <div className="text-left w-full pl-4">
                                             <p className="text-gray-300 text-xs font-medium leading-tight">Your Material<br />goes here</p>
                                         </div>
@@ -286,7 +308,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                         Choose how you&apos;d like to create your study material.
                                                     </DialogDescription>
                                                 </DialogHeader>
-                                                
+
                                                 <div className="grid gap-4 py-4">
                                                     {/* Mode Selection */}
                                                     <div className="grid grid-cols-2 gap-4 mb-4">
@@ -328,7 +350,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                                     className="bg-[#333] border-[#444] text-white placeholder-gray-400"
                                                                 />
                                                             </div>
-                                                            
+
                                                             <div className="">
                                                                 <div className="space-y-2 min-w-full">
                                                                     <Label htmlFor="word-range" className="text-white">
@@ -369,38 +391,38 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                                     Select PDFs from Workspace
                                                                 </Label>
                                                                 <div className="space-y-2 max-h-40 overflow-y-auto p-2 bg-[#2a2a2a] rounded-md">
-                                                                {isMounted && selectedWorkspace?.workspace?.files?.pdfFiles
-                                                                    ?.filter(m => m.fileName.endsWith('.pdf'))
-                                                                    .map((material) => (
-                                                                        <div key={material.id} className="flex items-center space-x-2">
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                id={`pdf-${material.id}`}
-                                                                                checked={selectedPdfs.includes(material.id)}
-                                                                                onChange={(e) => {
-                                                                                    if (e.target.checked) {
-                                                                                        setSelectedPdfs([...selectedPdfs, material.id]);
-                                                                                    } else {
-                                                                                        setSelectedPdfs(selectedPdfs.filter(id => id !== material.id));
-                                                                                    }
-                                                                                }}
-                                                                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                                                            />
-                                                                            <label htmlFor={`pdf-${material.id}`} className="text-sm text-gray-300 cursor-pointer">
-                                                                                {material.fileName}
-                                                                            </label>
-                                                                        </div>
-                                                                    ))}
+                                                                    {isMounted && selectedWorkspace?.workspace?.files?.pdfFiles
+                                                                        ?.filter(m => m.fileName.endsWith('.pdf'))
+                                                                        .map((material) => (
+                                                                            <div key={material.id} className="flex items-center space-x-2">
+                                                                                <input
+                                                                                    type="checkbox"
+                                                                                    id={`pdf-${material.id}`}
+                                                                                    checked={selectedPdfs.includes(material.id)}
+                                                                                    onChange={(e) => {
+                                                                                        if (e.target.checked) {
+                                                                                            setSelectedPdfs([...selectedPdfs, material.id]);
+                                                                                        } else {
+                                                                                            setSelectedPdfs(selectedPdfs.filter(id => id !== material.id));
+                                                                                        }
+                                                                                    }}
+                                                                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                                                />
+                                                                                <label htmlFor={`pdf-${material.id}`} className="text-sm text-gray-300 cursor-pointer">
+                                                                                    {material.fileName}
+                                                                                </label>
+                                                                            </div>
+                                                                        ))}
                                                                 </div>
                                                                 <p className="text-xs text-gray-400 mt-1">
-                                                                    {selectedWorkspace?.workspace?.files?.pdfFiles?.filter(m => m.fileName.endsWith('.pdf')).length === 0 
+                                                                    {selectedWorkspace?.workspace?.files?.pdfFiles?.filter(m => m.fileName.endsWith('.pdf')).length === 0
                                                                         ? 'No PDFs found in your workspace. Please upload a PDF first.'
-                                                                        : selectedPdfs.length > 0 
+                                                                        : selectedPdfs.length > 0
                                                                             ? `${selectedPdfs.length} PDF${selectedPdfs.length > 1 ? 's' : ''} selected`
                                                                             : 'Select one or more PDFs to generate material from.'}
                                                                 </p>
                                                             </div>
-                                                            
+
                                                             <div className="space-y-2">
                                                                 <Label htmlFor="pdf-description" className="text-white">
                                                                     Additional Instructions (Optional)
@@ -416,7 +438,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                             </div>
                                                         </div>
                                                     )}
-                                                    
+
                                                     {isGenerating && (
                                                         <div className="space-y-2 pt-2">
                                                             <div className="flex items-center gap-2 text-blue-400">
@@ -430,28 +452,28 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                         </div>
                                                     )}
                                                 </div>
-                                                
+
                                                 <DialogFooter className="sm:justify-between">
                                                     <DialogClose asChild>
-                                                        <Button 
-                                                            type="button" 
+                                                        <Button
+                                                            type="button"
                                                             variant="outline"
                                                             className="border-gray-600 text-white hover:bg-gray-700"
                                                             disabled={isGenerating}
                                                         >
                                                             Cancel
-                                                        </Button> 
+                                                        </Button>
                                                     </DialogClose>
-                                                    <Button 
-                                                        type="submit" 
+                                                    <Button
+                                                        type="submit"
                                                         className="bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white"
                                                         disabled={isGenerating || (creationMode === 'topic' ? !topic.trim() : selectedPdfs.length === 0)}
                                                         onClick={async () => {
-                                                            if ((creationMode === 'topic' && !topic.trim()) || 
+                                                            if ((creationMode === 'topic' && !topic.trim()) ||
                                                                 (creationMode === 'pdf' && selectedPdfs.length === 0)) {
                                                                 return;
                                                             }
-                                                            
+
                                                             try {
                                                                 setIsGenerating(true);
                                                                 // Simulate generation progress
@@ -464,7 +486,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                                         return prev + 10;
                                                                     });
                                                                 }, 500);
-                                                                
+
                                                                 // TODO: Replace with actual API call to generate material
                                                                 // The API endpoint will be different based on the creation mode
                                                                 // const payload = creationMode === 'topic' 
@@ -481,7 +503,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                                 //         type: 'pdf',
                                                                 //         words_range: wordRange
                                                                 //       };
-                                                                
+
                                                                 const workspace = await workspaceServiceInstance.generateMaterial(
                                                                     creationMode === 'topic' ? topic : '',
                                                                     wordRange,
@@ -489,15 +511,15 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                                     description,
                                                                     creationMode === 'pdf' ? selectedPdfs : undefined
                                                                 )
-                                                                
+
                                                                 console.log('Generating material with:', workspace);
-                                                                
+
                                                                 clearInterval(interval);
                                                                 setGenerationProgress(100);
-                                                                
+
                                                                 // Simulate completion
                                                                 await new Promise(resolve => setTimeout(resolve, 500));
-                                                                
+
                                                                 if (workspace?.pdfGenerated && workspace?.text) {
                                                                     setGeneratedMaterial({ text: workspace.text });
                                                                     // Auto-download the markdown
@@ -506,7 +528,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                                 } else {
                                                                     toast.error('Failed to generate material. Please try again.');
                                                                 }
-                                                                
+
                                                                 // setShowCreateDialog(false);
                                                                 setTopic('');
                                                                 setDescription('');
@@ -525,40 +547,40 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                         <Sparkles className="mr-2 h-4 w-4" />
                                                         {isGenerating ? 'Generating...' : 'Generate Material'}
                                                     </Button>
-                                                    </DialogFooter>
-                                                    {generatedMaterial && (
-                                                        <div className="p-4 mt-4 bg-gray-800 rounded-md">
-                                                            <div className="flex flex-col space-y-4">
-                                                                <div className="flex justify-between items-center">
-                                                                    <span className="text-white">Material Ready!</span>
-                                                                    {generatedMaterial?.text && (
-                                                                        <PDFDownloadLink
-                                                                            document={
-                                                                                <MaterialPdf 
-                                                                                    content={generatedMaterial.text} 
-                                                                                    title={`Material - ${new Date().toISOString().slice(0, 10)}`}
-                                                                                />
-                                                                            }
-                                                                            fileName={`material-${new Date().toISOString().slice(0, 10)}.pdf`}
-                                                                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center"
-                                                                        >
-                                                                            {({  loading }) => (
-                                                                                <>
-                                                                                    <Download className="mr-2 h-4 w-4" />
-                                                                                    {loading ? 'Generating PDF...' : 'Download PDF'}
-                                                                                </>
-                                                                            )}
-                                                                        </PDFDownloadLink>
-                                                                    )}
-                                                                </div>
+                                                </DialogFooter>
+                                                {generatedMaterial && (
+                                                    <div className="p-4 mt-4 bg-gray-800 rounded-md">
+                                                        <div className="flex flex-col space-y-4">
+                                                            <div className="flex justify-between items-center">
+                                                                <span className="text-white">Material Ready!</span>
                                                                 {generatedMaterial?.text && (
-                                                                    <div className="text-xs text-gray-400">
-                                                                        If the download doesn&apos;t start automatically, click the button above.
-                                                                    </div>
+                                                                    <PDFDownloadLink
+                                                                        document={
+                                                                            <MaterialPdf
+                                                                                content={generatedMaterial.text}
+                                                                                title={`Material - ${new Date().toISOString().slice(0, 10)}`}
+                                                                            />
+                                                                        }
+                                                                        fileName={`material-${new Date().toISOString().slice(0, 10)}.pdf`}
+                                                                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center"
+                                                                    >
+                                                                        {({ loading }) => (
+                                                                            <>
+                                                                                <Download className="mr-2 h-4 w-4" />
+                                                                                {loading ? 'Generating PDF...' : 'Download PDF'}
+                                                                            </>
+                                                                        )}
+                                                                    </PDFDownloadLink>
                                                                 )}
                                                             </div>
+                                                            {generatedMaterial?.text && (
+                                                                <div className="text-xs text-gray-400">
+                                                                    If the download doesn&apos;t start automatically, click the button above.
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                    )}
+                                                    </div>
+                                                )}
                                             </DialogContent>
                                         </Dialog>
                                     </div>
@@ -568,8 +590,8 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                     )}
                     {activeTab === "Quizzes" && (
                         <>
-                        {}
-                            { selectedWorkspace && selectedWorkspace?.workspace?.quizzes?.length > 0 ? (
+                            { }
+                            {selectedWorkspace && selectedWorkspace?.workspace?.quizzes?.length > 0 ? (
                                 <div className="w-full space-y-4">
                                     <h3 className="text-lg font-medium text-white mb-4">Available Quizzes</h3>
                                     <div className="grid gap-4">
@@ -595,6 +617,20 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                 )}
                                             </div>
                                         ))}
+
+                                        <div className="flex justify-start w-full">
+                                            <Button
+                                                className="bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-medium text-lg px-32 py-4 rounded-md transition-colors ml-4 w-96"
+                                                onClick={() => {
+                                                    window.dispatchEvent(new CustomEvent('openQuizPanel', {
+                                                        detail: { workspaceId: workspaceId }
+                                                    }))
+                                                    setIsOpen(false)
+                                                }}
+                                            >
+                                                Create a Quiz
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
                             ) : (
@@ -612,39 +648,39 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                     </DialogHeader>
                                     {selectedWorkspace?.workspace?.files?.pdfFiles?.length !== 0 ? (
                                         <>
-                                        <div className="space-y-6 text-gray-300 leading-relaxed mb-8 w-full max-w-xl text-left break-words">
-                                        <p className="text-sm">
-                                            Create quizzes from your uploaded materials, notes, or custom questions to start testing your knowledge.
-                                        </p>
-                                        <p className="text-sm">
-                                            Clark helps you generate questions in seconds—organized, trackable, and tailored to what you&apos;re learning. You&apos;ll be able to revisit them, share with friends, or build streaks by taking them daily.
-                                        </p>
-                                        <div className="border-l-2 border-[#5A5A5A] pl-4">
-                                            <p className="break-words whitespace-normal text-sm">
-                                                Use the <span className="bg-[#FF3D00] text-white px-2 py-1 rounded text-xs font-medium">@quiz</span> tag or &quot;create&quot; button in chat to generate one instantly.
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-start w-full">
-                                        <Button
-                                            className="bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-medium text-lg px-32 py-4 rounded-md transition-colors ml-4 w-96"
-                                            onClick={() => {
-                                                window.dispatchEvent(new CustomEvent('openQuizPanel', {
-                                                    detail: { workspaceId: workspaceId }
-                                                }))
-                                                setIsOpen(false)
-                                            }}
-                                        >
-                                            Create a Quiz
-                                        </Button>
-                                    </div>
+                                            <div className="space-y-6 text-gray-300 leading-relaxed mb-8 w-full max-w-xl text-left break-words">
+                                                <p className="text-sm">
+                                                    Create quizzes from your uploaded materials, notes, or custom questions to start testing your knowledge.
+                                                </p>
+                                                <p className="text-sm">
+                                                    Clark helps you generate questions in seconds—organized, trackable, and tailored to what you&apos;re learning. You&apos;ll be able to revisit them, share with friends, or build streaks by taking them daily.
+                                                </p>
+                                                <div className="border-l-2 border-[#5A5A5A] pl-4">
+                                                    <p className="break-words whitespace-normal text-sm">
+                                                        Use the <span className="bg-[#FF3D00] text-white px-2 py-1 rounded text-xs font-medium">@quiz</span> tag or &quot;create&quot; button in chat to generate one instantly.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex justify-start w-full">
+                                                <Button
+                                                    className="bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-medium text-lg px-32 py-4 rounded-md transition-colors ml-4 w-96"
+                                                    onClick={() => {
+                                                        window.dispatchEvent(new CustomEvent('openQuizPanel', {
+                                                            detail: { workspaceId: workspaceId }
+                                                        }))
+                                                        setIsOpen(false)
+                                                    }}
+                                                >
+                                                    Create a Quiz
+                                                </Button>
+                                            </div>
                                         </>
                                     ) : (
                                         <>
-                                        <h1>Ensure you upload a material before creating a quiz</h1>
+                                            <h1>Ensure you upload a material before creating a quiz</h1>
                                         </>
                                     )}
-                                    
+
                                 </div>
                             )}
                         </>
@@ -671,8 +707,14 @@ export function FileUploadButton({ workspaceId }: { workspaceId: string }) {
     const [uploadProgress, setUploadProgress] = useState(0)
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (!file) return
+        const files = e.target.files
+        console.log(files);
+        if (!files || files.length == 0) return
+
+        const fileArray = Array.from(files)
+
+        // const file = e.target.files?.[0]
+        // if (!file) return
 
         setUploading(true)
         setUploadProgress(0)
@@ -690,7 +732,7 @@ export function FileUploadButton({ workspaceId }: { workspaceId: string }) {
                 })
             }, 500)
 
-            await useWorkspaceStore.getState().uploadFile(file, workspaceId)
+            await useWorkspaceStore.getState().uploadFile(fileArray, workspaceId)
             console.log("heyyy");
 
             const workspace = await workspaceServiceInstance.getWorkspaces(workspaceId)
@@ -703,7 +745,7 @@ export function FileUploadButton({ workspaceId }: { workspaceId: string }) {
             setUploading(false)
             setUploadProgress(0)
             console.log(err);
-            
+
             toast.error("Failed to upload file")
         }
     }
@@ -720,7 +762,7 @@ export function FileUploadButton({ workspaceId }: { workspaceId: string }) {
                         Uploading... {uploadProgress}%
                     </>
                 ) : (
-                    "Upload a Material"
+                    "Upload Materials"
                 )}
                 <input
                     type="file"
@@ -728,6 +770,7 @@ export function FileUploadButton({ workspaceId }: { workspaceId: string }) {
                     onChange={handleFileChange}
                     className="hidden"
                     accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.mp4,.webm"
+                    multiple
                 />
             </button>
         </>

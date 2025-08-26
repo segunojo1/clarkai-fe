@@ -52,7 +52,7 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
 
 
     return (
-        <div className="flex h-full w-full">
+        <div className="flex h-full !max-w-[calc(100vw-235px)] w-full"> 
             {/* Sidebar */}
             <div className="min-w-[235px] bg-gray-100 dark:bg-[#2c2c2c] pt-6 p-4">
                 <div className="flex items-center justify-between mb-[18px]">
@@ -94,7 +94,7 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
             </div>
 
             {/* Main Content */}
-            <div className="w-full flex bg-[#1a1a1a] text-white">
+            <div className=" flex bg-[#1a1a1a] text-white w-full !max-w-[calc(100vw)]">
                 {children}
                 {/* Flashcard Panel */}
                 <FlashcardPanel
@@ -199,7 +199,21 @@ const WorkspaceItem = ({ workspace }: { workspace: Workspace }) => {
                                                 ))}
                                             </div>
                                         )}
-
+                                        {(workspaceData?.files?.imageFiles || []).length > 0 && (
+                                            <div className="space-y-1">
+                                                <div className="pl-2 flex items-center">
+                                                    <File className="w-4 h-4 mr-2" />
+                                                    Image Files
+                                                </div>
+                                                {(workspaceData?.files?.imageFiles || []).map((material) => (
+                                                    <Link target="_blank" href={material.filePath} key={material.id} className="cursor-pointer relative pl-6 flex items-center gap-2">
+                                                        <div className="absolute left-3 top-0 h-full w-px bg-gray-200 dark:bg-[#E5E5E5]" />
+                                                        <File color="#D4D4D4" fill="#D4D4D4" height={12} width={9.6} />
+                                                        <div>{material.fileName.length > 10 ? `${material.fileName.slice(0, 10)}...pdf` : material.fileName}</div>
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        )}
 
                                     </>
                                 )}
@@ -249,10 +263,10 @@ const WorkspaceItem = ({ workspace }: { workspace: Workspace }) => {
                                         {(workspaceData?.quizzes || []).length > 0 && (
                                             <div className="space-y-1">
                                                 {(workspaceData?.quizzes || []).map((quiz) => (
-                                                    <div key={quiz.id} className="relative pl-3 flex items-center gap-2">
+                                                    <Link href={`/quiz/${quiz.id}`} key={quiz.id} className="relative pl-3 flex items-center gap-2">
                                                         <div className="absolute -left-2 top-0 h-full w-px bg-gray-200 dark:bg-[#E5E5E5]" />
                                                         <div>{quiz.name}</div>
-                                                    </div>
+                                                    </Link>
                                                 ))}
                                             </div>
                                         )}
