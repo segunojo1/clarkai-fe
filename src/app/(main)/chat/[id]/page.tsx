@@ -50,7 +50,7 @@ export default function ChatPage() {
 
   }, [messages])
 
-  const handleSend = async (text: string, files?: File) => {
+  const handleSend = async (text: string, files?: File[]) => {
     if (!text.trim()) return
     if (id) {
 

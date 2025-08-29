@@ -12,7 +12,7 @@ interface ChatStore {
   clearMessages: () => void
   setIsLoading: (isLoading: boolean) => void
   setCurrentChatId: (chatId: string | null) => void
-  sendMessage: (chat_id: string, text: string, previous_messages: ChatMessage[], strict_mode: boolean, files?: File) => Promise<void>
+  sendMessage: (chat_id: string, text: string, previous_messages: ChatMessage[], strict_mode: boolean, files?: File[]) => Promise<void>
   getMessages: (page: number, chat_id: string) => Promise<ChatResponse>
   setMessages: (messages: ChatMessage[]) => void
   setChatDetails: (chatDetails: ChatResponse) => void
@@ -55,7 +55,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     set({ currentChatId: chatId })
   },
 
-  sendMessage: async (chat_id: string, text: string, previous_messages: ChatMessage[], strict_mode: boolean, files?: File) => {
+  sendMessage: async (chat_id: string, text: string, previous_messages: ChatMessage[], strict_mode: boolean, files?: File[]) => {
     if (!text.trim() && !files) return
 
     const { addMessage, setIsLoading } = get()
@@ -68,7 +68,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       fromUser: true,
       createdAt: new Date(),
       updatedAt: new Date(),
-      attachments: files ? [files] : [],
+      attachments: files,
       isFlashcard: false,
       flashcardId: null,
       size: null
@@ -84,7 +84,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       formData.append('previous_messages', JSON.stringify(previous_messages));
       formData.append('strict_mode', strict_mode.toString())
       if (files) {
-        formData.append('files', files);
+        files.forEach(file => {
+          formData.append('files', file);
+        })
       }
 
       const aiResponse = await chatService.sendChatMessage(formData)
@@ -93,7 +95,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       const assistantMessage: ChatMessage = {
         role: 'assistant',
         text: aiResponse.answer,
-        isFile: files ? true : false,
+        isFile: false,
         fromUser: false,
         createdAt: new Date(),
         updatedAt: new Date(),

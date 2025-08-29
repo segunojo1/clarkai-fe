@@ -52,7 +52,7 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
 
 
     return (
-        <div className="flex h-full !max-w-[calc(100vw-235px)] w-full"> 
+        <div className="flex h-full w-full"> 
             {/* Sidebar */}
             <div className="min-w-[235px] bg-gray-100 dark:bg-[#2c2c2c] pt-6 p-4">
                 <div className="flex items-center justify-between mb-[18px]">
@@ -94,7 +94,7 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
             </div>
 
             {/* Main Content */}
-            <div className=" flex bg-[#1a1a1a] text-white w-full !max-w-[calc(100vw)]">
+            <div className=" flex dark:bg-[#1a1a1a] bg-[#FAFAFA] text-white w-full !max-w-[calc(100vw)]">
                 {children}
                 {/* Flashcard Panel */}
                 <FlashcardPanel

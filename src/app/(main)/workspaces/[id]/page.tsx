@@ -28,9 +28,9 @@ import quizService from '@/services/quiz.service'
 // };
 
 export default function WorkspacePage() {
-  const { setCurrentChatId, setChatDetails } = useChatStore()
+  const { setCurrentChatId, setChatDetails, setIsLoading, isLoading } = useChatStore()
   const { messages, setMessages, askQuestion } = useWorkspaceStore()
-  const [isLoading, setIsLoading] = useState(false)
+  // const [isLoading, setIsLoading] = useState(false)
   const [loadChats, setLoadChats] = useState(false);
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
@@ -400,6 +400,7 @@ export default function WorkspacePage() {
     if (!text.trim()) return
     if (id) {
       try {
+        setIsLoading(true);
         // Trim messages to the last 10 messages to limit context length
         const recentMessages = messages.slice(-10);
         const resp = await useWorkspaceStore.getState().askQuestion(
@@ -415,12 +416,14 @@ export default function WorkspacePage() {
       } catch (error) {
         console.error('Error sending message:', error)
         toast('Error: Failed to send message')
+      } finally {
+        setIsLoading(false);
       }
     }
   }
 
   return (
-    <div className="flex h-full w-fit overflow-hidden">
+    <div className="flex h-full w-fit !max-w-[calc(100vw-235px)] overflow-hidden">
       <div className={`flex flex-col h-full  justify-between pb-10 ${isQuizPanelOpen ? '' : 'min-w-full'}`}>
         <div className='absolute top-10 right-10 '>
           <UploadMaterialModal workspaceId={id.toString()}>

@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { useSidebar } from '../ui/sidebar';
 import MarkdownRenderer from '../markdown-renderer';
 import { useWorkspaceStore } from '@/store/workspace.store';
+import chatService from '@/services/chat.service';
 
 // const isFile = (obj: unknown): obj is File => {
 //   if (obj instanceof File) return true;
@@ -28,6 +29,7 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
   const [showPdfViewer, setShowPdfViewer] = useState(false);
   const fileUrlRef = useRef<string>('');
   const { setOpen } = useSidebar()
+  
 
   // Create object URL for the file
   useEffect(() => {
@@ -73,7 +75,12 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
 
   if (!file) return null;
 
-  const getFileUrl = () => {
+  const getFileUrl = async () => {
+    // if (file.url) {
+    //   const resp = await chatService.getObjectUrlFromLink(file.url)
+    //   console.log(resp);
+      
+    // }
     if (file instanceof File) {
       return fileUrlRef.current || URL.createObjectURL(file);
     }
@@ -86,6 +93,8 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
   return (
     <>
       <div className="mt-2 flex flex-col items-start gap-2">
+        {
+           (
         <div className="flex gap-2">
           <Button
             variant="ghost"
@@ -97,6 +106,8 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
             <ChevronRight />
           </Button>
         </div>
+          )
+        }
         <div className="bg-gray-50 p-3 rounded-lg dark:bg-[#404040] flex flex-col items-center gap-2">
           <div className="flex-1 flex gap-2 min-w-0">
             <FileText className="text-[#FF3D00]" size={20} />
@@ -217,14 +228,14 @@ export function ChatMessageList({
   };
 
   return (
-    <div className={cn("flex flex-col space-y-4 p-4 overflow-y-auto h-[calc(100vh-200px)]", className)}>
+    <div className={cn("flex w-full flex-col space-y-4 p-4 overflow-y-auto h-[calc(100vh-200px)]", className)}>
       <div className='absolute left-5'>
         <UserAvatar />
       </div>
       {messages.length > 0 && (
         <div className="h-[140px]"></div>
       )}
-      <div className='max-w-[750px]  mx-auto'>
+      <div className='max-w-[750px] w-full mx-auto'>
         {messages.map((message) => {
           const isFlashcardMessage = message.metadata?.type === 'flashcards' || 
             (message.fromUser && message.text.includes('@flashcard')) || 
@@ -248,7 +259,16 @@ export function ChatMessageList({
                     </div>
                   ))}
 
-                  {message.text && (
+                  {
+                    message.isFile && message.fromUser && !message.attachments && (
+                      <FileAttachmentPreview file={{name: message.text,
+                        type: message.filePath,
+                        url:message.filePath,
+                        size: message.size}} />
+                    )
+                  }
+
+                  {message.text && !message.filePath && (
                     <div className={`relative group rounded-[69px] p-4 ${message.fromUser ? 'bg-[#F0F0EF] dark:bg-[#404040] dark:text-white text-black' : 'bg-transparent'}`}>
                       {message.fromUser ? (
                         <p className="whitespace-pre-wrap break-words">

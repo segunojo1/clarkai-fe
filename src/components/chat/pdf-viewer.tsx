@@ -27,7 +27,7 @@ interface PDFViewerProps {
 export function PDFViewer({ file, onClose }: PDFViewerProps) {
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(1);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isPDFLoading, setIsPDFLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [zoomLevel, setZoomLevel] = useState(100);
   const fileRef = useRef<PDFFile>(null);
@@ -38,28 +38,28 @@ export function PDFViewer({ file, onClose }: PDFViewerProps) {
   useEffect(() => {
     if (file === fileRef.current) return;
     fileRef.current = file;
-    setIsLoading(true);
+    setIsPDFLoading(true);
     setError(null);
 
     if (!file) {
-      setIsLoading(false);
+      setIsPDFLoading(false);
       return;
     }
 
     setFileKey(prev => prev + 1);
-    setIsLoading(false);
+    setIsPDFLoading(false);
   }, [file]);
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
-    setIsLoading(false);
+    setIsPDFLoading(false);
     setError(null);
   };
 
   const onDocumentLoadError = (error: Error) => {
     console.error('PDF load error:', error);
     setError('Failed to load PDF. Please try again.');
-    setIsLoading(false);
+    setIsPDFLoading(false);
   };
 
   const goToPrevPage = () => setPageNumber(prev => Math.max(prev - 1, 1));
@@ -79,7 +79,7 @@ export function PDFViewer({ file, onClose }: PDFViewerProps) {
     }
   };
 
-  const { messages, sendMessage, chatDetails } = useChatStore()
+  const { messages, sendMessage, chatDetails, setIsLoading, isLoading } = useChatStore()
   console.log(chatDetails);
 
   const handleSend = async (text: string, files?: File) => {
@@ -92,7 +92,7 @@ export function PDFViewer({ file, onClose }: PDFViewerProps) {
 
   if (!file) return null;
 
-  if (isLoading) {
+  if (isPDFLoading) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl">

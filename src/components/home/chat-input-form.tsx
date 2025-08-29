@@ -94,7 +94,7 @@ const ChatInputForm = ({
   askSource,
   setAskSource
 }: ChatInputFormProps) => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [selectedFiles, setSelectedFiles] = useState<Array<{ file: File; previewUrl: string }>>([])
   // const [isCLoading, setIsCLoading] = useState(false)
   const [mode, setMode] = useState<'ask' | 'create' | 'research'>('ask')
   // const [caretPosition, setCaretPosition] = useState(0)
@@ -103,7 +103,6 @@ const ChatInputForm = ({
   const [isListening, setIsListening] = useState<boolean>(false)
   const [volume, setVolume] = useState<number>(0)
   // const [interimTranscript, setInterimTranscript] = useState<string>('')
-  const [previewUrl, setPreviewUrl] = useState<string>('')
   const recognitionRef = useRef<SpeechRecognition | null>(null)
   const [showTagSuggestions, setShowTagSuggestions] = useState(false)
   const [tagSearch, setTagSearch] = useState('')
@@ -260,7 +259,7 @@ const ChatInputForm = ({
   const handleSubmit = async (values: z.infer<typeof chatSchema>) => {
     setTagPosition(prev => ({ ...prev, show: false }));
     const messageText = values.chat.trim();
-    if (!messageText && !selectedFile) return;
+    if (!messageText) return;
 
     try {
       const tagActions: Record<string, ((msg: string) => Promise<void>) | undefined> = {
@@ -274,12 +273,14 @@ const ChatInputForm = ({
       if (tagExists && tagActions[tagExists] ) {
         await tagActions[tagExists]!(messageText)
       } else{
-        onSend(messageText, selectedFile || undefined);
+        const filesOnly = selectedFiles.map(item => item.file);
+        console.log(filesOnly);
+        onSend(messageText, filesOnly);
       }
       
       form.reset();
-      setSelectedFile(null);
-      setPreviewUrl('');
+      setSelectedFiles([]);
+      // setPreviewUrl('');
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to send message');
@@ -299,23 +300,26 @@ const ChatInputForm = ({
   }
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    // Check if file is PDF
-    if (file.type !== 'application/pdf') {
-      toast.error('Only PDF files are supported')
-      return
-    }
-
-    setSelectedFile(file)
-
-    setPreviewUrl(URL.createObjectURL(file))
+    const files = e.target.files
+    if (!files || files.length === 0) return
+    
+    const newFiles = Array.from(files).map(file => ({
+      file,
+      previewUrl: URL.createObjectURL(file)
+    }))
+    
+    setSelectedFiles(prev => [...prev, ...newFiles])
   }
 
-  const removeFile = () => {
-    setSelectedFile(null)
-    setPreviewUrl('')
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => {
+      // Revoke the object URL to prevent memory leaks
+      URL.revokeObjectURL(prev[index].previewUrl)
+      const newFiles = [...prev]
+      newFiles.splice(index, 1)
+      return newFiles
+    })
+    
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -426,48 +430,62 @@ const ChatInputForm = ({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-3 w-full relative">
           {/* File preview section */}
-          {(selectedFile || previewUrl) && (
-            <div className="absolute -top-25 left-0 w-full max-w-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#2C2C2C] rounded-lg p-3">
-              <div className="flex justify-between items-start gap-3">
-                <div className="flex items-start gap-3 flex-1 min-w-0">
-                  <div className="flex-shrink-0 bg-red-50 dark:bg-red-900/20 p-2 rounded-lg">
-                    <FileText className="w-5 h-5 text-red-500" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                      {selectedFile?.name}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                      {selectedFile?.size ? `${(selectedFile.size / 1024).toFixed(1)} KB` : ''}
-                    </p>
-                    <div className="mt-2">
-                      <button
-                        type="button"
-                        className="text-xs text-blue-500 hover:underline flex items-center gap-1"
-                        onClick={() => {
-                          if (selectedFile && typeof window !== 'undefined') {
-                            window.open(previewUrl, '_blank')
-                          }
-                        }}
-                      >
-                        <span>Open in new tab</span>
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                      </button>
+          {selectedFiles.length > 0 && (
+            <div className="absolute -top-25 flex items-center gap-2 left-0 w-full max-w-md space-y-2">
+              {selectedFiles.map((fileData, index) => (
+                <div key={index} className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#2C2C2C] rounded-lg p-3">
+                  <div className="flex justify-between items-start gap-3">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      {fileData.file.type.startsWith('image/') ? (
+                        <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden">
+                          <img 
+                            src={fileData.previewUrl} 
+                            alt="Preview" 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex-shrink-0 bg-red-50 dark:bg-red-900/20 p-2 rounded-lg">
+                          <FileText className="w-5 h-5 text-red-500" />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          {fileData.file.name}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          {(fileData.file.size / 1024).toFixed(1)} KB
+                        </p>
+                        <div className="mt-2">
+                          <button
+                            type="button"
+                            className="text-xs text-blue-500 hover:underline flex items-center gap-1"
+                            onClick={() => {
+                              if (typeof window !== 'undefined') {
+                                window.open(fileData.previewUrl, '_blank')
+                              }
+                            }}
+                          >
+                            <span>Open in new tab</span>
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
                     </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-gray-400 hover:text-red-500 hover:bg-transparent"
+                      onClick={() => removeFile(index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-gray-400 hover:text-red-500 hover:bg-transparent"
-                  onClick={removeFile}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
+              ))}
             </div>
           )}
 
@@ -595,6 +613,7 @@ const ChatInputForm = ({
                               ref={fileInputRef}
                               onChange={handleFileChange}
                               accept="image/*,.pdf"
+                              multiple
                               className="hidden"
                               aria-label="File input"
                             />

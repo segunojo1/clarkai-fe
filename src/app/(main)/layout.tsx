@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <SidebarWrapper>
-      <div className="flex h-screen w-full">
+      <div className="flex min-h-screen h-full w-full">
         <AppSidebar />
         <SidebarInset className="flex-1">
           <ClientLayout>
