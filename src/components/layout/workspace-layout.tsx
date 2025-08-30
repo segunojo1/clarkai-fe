@@ -8,6 +8,8 @@ import Link from "next/link"
 import { Input } from "../ui/input"
 import { useWorkspaceStore } from "@/store/workspace.store"
 import { FlashcardPanel } from "../flashcards/flashcard-panel"
+import Image from "next/image"
+import { useUserStore } from "@/store/user.store"
 
 interface Workspace {
     enc_id: string
@@ -32,6 +34,7 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
     const { workspaces, isFlashcardModalOpen, setIsFlashcardModalOpen, setSelectedFlashcardId, selectedFlashcardId, selectedFlashcards } = useWorkspaceStore()
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const { user } = useUserStore()
 
     useEffect(() => {
         const fetchWorkspaces = async () => {
@@ -51,14 +54,22 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
     }, [])
 
 
+
     return (
-        <div className="flex h-full w-full"> 
+        <div className="flex h-full w-full">
             {/* Sidebar */}
             <div className="min-w-[235px] bg-gray-100 dark:bg-[#2c2c2c] pt-6 p-4">
                 <div className="flex items-center justify-between mb-[18px]">
                     <div className="flex items-center gap-[7px]">
-                        <div className="w-[24px] h-[24px] bg-orange-400 mr-1 rounded-full"></div>
-                        <p className="text-[14px] font-bold">Segun </p>
+                        <Image
+                            src={user?.image_url && user.image_url !== "" ? user.image_url : "/assets/orange.png"}
+                            alt="user avatar"
+                            width={24}
+                            height={24}
+                            className="rounded-full w-[24px] h-[24px]"
+                        />
+                        <p className="text-[14px] font-bold group-data-[collapsible=icon]:hidden">{user?.name?.split(" ")[0] || 'User'}</p>
+
                         <ChevronDown color="#A3A3A3" className="w-[14px] h-[20px]" />
                     </div>
                     <Link href="/chat" className="group-data-[collapsible=icon]:hidden">
@@ -66,7 +77,7 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
                     </Link>
                 </div>
                 <div className="border-y-[2px] mb-[11px]">
-                    <Input placeholder="Search" className="border-0 !bg-[#2c2c2c]" />
+                    <Input placeholder="Search" className="border-0 dark:bg-[#2c2c2c] bg-[#F0F0EF]" />
                 </div>
                 <Tabs defaultValue="folders" className="w-full">
                     <TabsList className="w-full">
@@ -129,7 +140,7 @@ const WorkspaceItem = ({ workspace }: { workspace: Workspace }) => {
         <div className="space-y-2">
             <div
                 onClick={() => setExpanded(!expanded)}
-                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-[#262626] bg-[#262626] p-2 rounded-[5px]"
+                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-[#262626] dark:bg-[#262626] bg-[#FAFAFA] p-2 rounded-[5px]"
             >
                 <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-2">

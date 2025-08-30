@@ -69,7 +69,7 @@ export const LatestChat = () => {
                                 </Link>
                             ))}
                         </div>
-                        <Button className="w-full text-[14px] font-bold text-white bg-[#404040] mt-1">View all chat</Button>
+                        <Button className="w-full text-[14px] font-bold dark:text-white hover:bg-[#F0F0EF] text-black dark:bg-[#404040] bg-[#F0F0EF] mt-1">View all chat</Button>
                     </div>
                 )
             }
@@ -80,6 +80,7 @@ export const LatestChat = () => {
 export const LatestWorkspace = () => {
     const { workspaces, isLoading } = useWorkspaceStore();
     const { state } = useSidebar();
+    const pathname = usePathname()
 
     if (isLoading) {
         return (
@@ -135,7 +136,7 @@ export const LatestWorkspace = () => {
                     </div>
                     <div className="flex flex-col overflow-y-scroll gap-1 h-[132px]">
                         {workspaces.map((workspace) => (
-                            <Link href={`/workspaces/${workspace.enc_id}`} key={workspace.enc_id} className="flex items-center justify-between bg-[#262626] gap-1 px-[10px] py-[5px] rounded-[5px]">
+                            <Link href={`/workspaces/${workspace.enc_id}`} key={workspace.enc_id} className={`${pathname === workspace.enc_id ? "bg-[#ffffff]" : ""} flex items-center justify-between dark:bg-[#262626] gap-1 px-[10px] py-[5px] rounded-[5px]`}>
                                 <div className="flex items-center gap-2">
                                     <Globe width={20} height={20} />
                                     <p className="text-sm font-medium">{workspace.name}</p>
@@ -170,7 +171,7 @@ const SidebarGroupCustom = ({ items, label }: SidebarGroupCustomProps) => {
             <SidebarGroupContent>
                 <SidebarMenu className="text-[11px]/[22px] font-medium">
                     {items.map(item => (
-                        <SidebarMenuItem key={item.title} className={`transition-all duration-200 rounded-[5px] ${pathname === item.url ? 'bg-[#F0F0EF] dark:bg-[#404040]' : ''
+                        <SidebarMenuItem key={item.title} className={`transition-all duration-200 rounded-[5px] ${pathname === item.url ? 'bg-[#F0F0EF] dark:bg-[#404040]' : 'bg-[#F8F8F7] dark:bg-[#2C2C2C]'
                             }`}>
                             <SidebarMenuButton
                                 asChild
@@ -227,7 +228,7 @@ export function AppSidebar() {
 
     return (
         <Sidebar
-            className="dark:bg-[#2c2c2c] transition-none"
+            className="dark:bg-[#2c2c2c] bg-[#F8F8F7] transition-none"
             collapsible="icon"
             variant="sidebar"
         >
@@ -240,6 +241,7 @@ export function AppSidebar() {
                                 alt="user avatar"
                                 width={24}
                                 height={24}
+                                className="rounded-full w-[24px] h-[24px]"
                             />
 
                             <p className="text-[14px] font-bold group-data-[collapsible=icon]:hidden">{user?.name || 'User'}</p>

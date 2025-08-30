@@ -45,7 +45,7 @@ export default function ClientLayout({
         <main className="w-full h-full relative flex-1">
             {(
                 <>
-                    {!open && (
+                    {/* {!open && (
 
                         <div className="flex items-center gap-1 absolute left-[20px] top-[20px] z-[999999]">
                             <SidebarTrigger />
@@ -53,10 +53,22 @@ export default function ClientLayout({
                                 <Edit width={20} height={20} />
                             </Link>
                         </div>
-                    )}
+                    )} */}
+                    <div className=" absolute right-[20px] top-[20px] z-10">
+                        {
+                            !isWorkspacePage && (
+                                <div className="flex items-center gap-3">
+                                    <Button
+                                        variant="outline"
+                                        onClick={logout}
+                                    >
+                                        Logout
+                                    </Button>
 
-                    <div className="flex items-center gap-3 absolute right-[20px] top-[20px] z-10">
-                        
+                                    <ThemeSwitcher />
+                                </div>
+                            )
+                        }
 
                         {/* <WorkspaceCreationModal>
                             <Button className="bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-medium px-4 py-2 rounded-md text-sm flex items-center gap-2">

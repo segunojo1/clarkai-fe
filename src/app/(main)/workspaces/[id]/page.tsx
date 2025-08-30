@@ -424,7 +424,7 @@ export default function WorkspacePage() {
 
   return (
     <div className="flex h-full w-fit !max-w-[calc(100vw-235px)] overflow-hidden">
-      <div className={`flex flex-col h-full  justify-between pb-10 ${isQuizPanelOpen ? '' : 'min-w-full'}`}>
+      <div className={`flex flex-col h-full  justify-between pb-12 ${isQuizPanelOpen ? '' : 'min-w-full'}`}>
         <div className='absolute top-10 right-10 '>
           <UploadMaterialModal workspaceId={id.toString()}>
             <button className="p-1 border-2 rounded-full border-[#ffffff] transition-colors">

@@ -66,7 +66,7 @@ export function WorkspaceCreationModal({ children }: WorkspaceCreationModalProps
         {children}
       </DialogTrigger>
       <DialogContent 
-        className="bg-[#2C2C2C] border-[#525252] text-white p-6 w-[400px] max-w-[90vw] rounded-lg transform -translate-x-20"
+        className="dark:bg-[#2C2C2C] bg-[#F8F8F7] dark:border-[#525252] border-[#A3A3A3] text-white p-6 w-[400px] max-w-[90vw] rounded-lg transform -translate-x-20"
         showCloseButton={false}
       >
         {/* Custom Close Button */}
@@ -78,7 +78,7 @@ export function WorkspaceCreationModal({ children }: WorkspaceCreationModalProps
         </button>
 
         <DialogHeader className="text-center pt-1">
-          <DialogTitle className="text-lg font-medium text-white">
+          <DialogTitle className="text-lg font-medium dark:text-white text-black">
             Create a New Workspace
           </DialogTitle>
         </DialogHeader>
@@ -87,18 +87,18 @@ export function WorkspaceCreationModal({ children }: WorkspaceCreationModalProps
 
           {/* Workspace Name */}
           <div className="space-y-2">
-            <label className="text-sm text-gray-300">Workspace Name</label>
+            <label className="text-sm dark:text-gray-300 text-black">Workspace Name</label>
             <Input
               value={workspaceName}
               onChange={(e) => setWorkspaceName(e.target.value)}
               placeholder="you@example.com"
-              className="bg-[#1a1a1a] border-[#333] text-white placeholder:text-gray-500 h-11 px-3 rounded-md focus:border-[#555] focus:ring-0"
+              className="dark:bg-[#1a1a1a] dark:border-[#333] border-[#D4D4D4] dark:text-white text-black placeholder:text-gray-500 h-11 px-3 rounded-md focus:border-[#555] focus:ring-0"
             />
           </div>
 
           {/* Select Workspace Tag */}
           <div className="space-y-2">
-            <label className="text-sm text-gray-300">Select Workspace tag</label>
+            <label className="text-sm dark:text-gray-300 text-black">Select Workspace tag</label>
             <div className="flex gap-2 justify-start">
               {workspaceTags.map((tag) => (
                 <button
@@ -117,13 +117,13 @@ export function WorkspaceCreationModal({ children }: WorkspaceCreationModalProps
           </div>
 
           {/* Add Note */}
-          <div className="space-y-2 pb-4 border-b border-[#444]">
-            <label className="text-sm text-gray-300">Add a Note (optional)</label>
+          <div className="space-y-2 pb-4 border-b dark:border-[#444] border-[#D4D4D4]">
+            <label className="text-sm dark:text-gray-300 text-black">Add a Note (optional)</label>
             <Textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="What's this workspace for?"
-              className="bg-[#1a1a1a] border-[#333] text-white placeholder:text-gray-500 min-h-20 p-3 rounded-md resize-none focus:border-[#555] focus:ring-0"
+              className="dark:bg-[#1a1a1a] dark:border-[#333] dark:text-white text-black placeholder:text-gray-500 min-h-20 p-3 rounded-md resize-none focus:border-[#555] focus:ring-0"
             />
           </div>
 

@@ -507,7 +507,7 @@ const ChatInputForm = ({
                                 ? "Research a topic..."
                                 : "Create something new..."
                           }
-                          className="min-h-[100px] max-h-[180px] text-[16px] max-w-[750px] font-medium p-3 w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none resize-none relative z-20"
+                          className="min-h-[100px] max-h-[180px] text-[16px] max-w-[750px] font-medium p-3 w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none resize-none relative z-20 text-black dark:text-white"
                           {...field}
                           onKeyUp={handleKeyDown}
                           disabled={disabled}
@@ -605,7 +605,7 @@ const ChatInputForm = ({
                                 alt="" 
                                 width={20} 
                                 height={20} 
-                                className="h-5 w-5 text-gray-500 hover:text-gray-700" 
+                                className="h-5 w-5 dark:text-gray-500 text-black hover:text-gray-700" 
                               />
                             </button>
                             <input

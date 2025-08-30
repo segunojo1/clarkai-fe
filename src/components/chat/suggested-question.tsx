@@ -26,7 +26,7 @@ export const SuggestedQuestion = ({ type, text, onClick }: SuggestedQuestionProp
               width={30} 
               height={30} 
             />
-            <p className='text-center text-[15px] font-normal'>{text}</p>
+            <p className='text-center text-[15px] font-normal dark:text-[#D4D4D4] text-[#191919]'>{text}</p>
         </button>
     )
 }

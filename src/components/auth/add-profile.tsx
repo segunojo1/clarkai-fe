@@ -89,7 +89,7 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
         department: signupDataWithoutStep.department || '',
         interests: signupDataWithoutStep.interests || '',
         study_vibe: signupDataWithoutStep.study_vibe || [],
-        user_image: userImageUrl,
+        user_image: selectedFile,
         is_google: status == 'authenticated' ? true : false
       };
       

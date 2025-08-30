@@ -32,7 +32,7 @@ const WorkspacesPage = () => {
     return (
         <div className="flex flex-col h-full w-full dark:bg-[#1a1a1a] bg-[#FAFAFA] text-white">
             {/* Top Header */}
-            <div className="flex items-center justify-between px-6 py-3 border-b border-[#333]">
+            <div className="flex items-center justify-between px-6 py-3">
                 <div className="flex items-center gap-2">
                     <X className="w-5 h-5 text-gray-400" />
                     <button className="flex items-center gap-2 text-white font-medium">
@@ -61,7 +61,7 @@ const WorkspacesPage = () => {
                                             </button>
                                         </UploadMaterialModal> */}
                     <Button
-                        variant="outline"
+                        variant="outline" className="text-black dark:text-white"
                         onClick={logout}
                     >
                         Logout
@@ -72,13 +72,13 @@ const WorkspacesPage = () => {
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#333]">
+            <div className="flex items-center justify-between px-6 py-4 ">
                 <div className="flex items-center gap-8">
                     <button
                         onClick={() => setActiveTab("Recently Viewed")}
                         className={`font-medium text-sm transition-colors ${activeTab === "Recently Viewed"
-                            ? "text-white border-b-2 border-white pb-1"
-                            : "text-gray-400 hover:text-white"
+                            ? "dark:text-white text-black bg-[#F0F0EF] dark:bg-[#404040] p-1 rounded-[4px]"
+                            : "text-gray-400 dark:hover:text-white hover:text-black"
                             }`}
                     >
                         Recently Viewed
@@ -86,8 +86,8 @@ const WorkspacesPage = () => {
                     <button
                         onClick={() => setActiveTab("Shared")}
                         className={`font-medium text-sm transition-colors ${activeTab === "Shared"
-                            ? "text-white border-b-2 border-white pb-1"
-                            : "text-gray-400 hover:text-white"
+                            ? "dark:text-white text-black bg-[#F0F0EF] dark:bg-[#404040] p-1 rounded-[4px]"
+                            : "text-gray-400 dark:hover:text-white hover:text-black"
                             }`}
                     >
                         Shared
@@ -95,8 +95,8 @@ const WorkspacesPage = () => {
                     <button
                         onClick={() => setActiveTab("Starred")}
                         className={`font-medium text-sm transition-colors ${activeTab === "Starred"
-                            ? "text-white border-b-2 border-white pb-1"
-                            : "text-gray-400 hover:text-white"
+                            ? "dark:text-white text-black bg-[#F0F0EF] dark:bg-[#404040] p-1 rounded-[4px]"
+                            : "text-gray-400 dark:hover:text-white hover:text-black"
                             }`}
                     >
                         Starred
@@ -116,7 +116,8 @@ const WorkspacesPage = () => {
                 <div className="flex flex-1">
                     {/* Left Sidebar - Workspace Card */}
                     <div className="w-64 p-6">
-                        <div className="bg-[#2a2a2a] rounded-lg p-6 border border-[#444] relative">
+                        <div className="dark:bg-[#2a2a2a] bg-[#F0F0EF] rounded-lg p-6  relative">
+                            
                             {/* Star icon in top right */}
                             <Star className="absolute top-4 right-4 w-4 h-4 text-gray-400 hover:text-yellow-400 cursor-pointer transition-colors" />
 
@@ -127,24 +128,31 @@ const WorkspacesPage = () => {
                                     alt="File icon"
                                     width={160}
                                     height={120}
-                                    className="w-40 h-32"
+                                    className="w-40 h-32 dark:block hidden"
+                                />
+                                <Image
+                                    src="/assets/file-outline.png"
+                                    alt="File icon"
+                                    width={160}
+                                    height={120}
+                                    className="w-40 h-32 dark:hidden block"
                                 />
                             </div>
 
                             {/* Text */}
                             <div className="text-center">
-                                <p className="text-gray-300 text-sm">Your workspace goes here</p>
+                                <p className="dark:text-gray-300 text-[#A3A3A3] text-sm">Your workspace goes here</p>
                             </div>
                         </div>
                     </div>
 
                     {/* Right Side - Main Content Area */}
                     <div className="flex-1 flex flex-col items-start justify-center text-center px-8 pl-16">
-                        <div className="max-w-md">
+                        <div className="max-w-[600px]">
                             {/* Main heading with globe icon */}
-                            <h1 className="text-3xl font-normal text-gray-300 mb-6 flex items-center justify-center gap-3">
+                            <h1 className="text-[40px] font-bold satoshi dark:text-gray-300 text-[#737373] mb-6 flex items-center justify-center gap-3">
                                 Looks a little quiet in here...
-                                <Globe className="w-8 h-8 text-gray-400" />
+                                <Globe className="w-8 h-8 text-[#FF3D00] dark:text-gray-400" />
                             </h1>
 
                             {/* Description */}
@@ -170,7 +178,7 @@ const WorkspacesPage = () => {
                         <div className="space-y-4 flex items-start flex-wrap">
                             {workspaces.map((workspace) => (
                                 <Link href={`/workspaces/${workspace.enc_id}`} className="" key={workspace.enc_id}>
-                                    <div className="hover:bg-[#2C2C2C] rounded-[14.6px] p-6 ">
+                                    <div className="dark:hover:bg-[#2C2C2C] hover:bg-[#F0F0EF] rounded-[14.6px] p-6 ">
 
                                         <div className="flex justify-center  mb-[19.44px] relative">
                                             <Star className="absolute top-2 right-[13px] w-4 h-4 text-gray-400 hover:text-yellow-400 cursor-pointer transition-colors" />
@@ -185,9 +193,9 @@ const WorkspacesPage = () => {
                                         </div>
 
                                         <div className="flex flex-col items-center">
-                                            <h3 className="text-gray-300 font-medium text-lg">{workspace.name}</h3>
+                                            <h3 className="dark:text-gray-300 text-black font-medium text-lg">{workspace.name}</h3>
                                             {workspace.description && (
-                                                <p className="text-gray-400 text-sm mt-1">{workspace.description}</p>
+                                                <p className="dark:text-gray-400 text-black text-sm mt-1">{workspace.description}</p>
                                             )}
                                         </div>
                                     </div>
