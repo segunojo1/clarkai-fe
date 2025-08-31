@@ -56,7 +56,7 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
 
 
     return (
-        <div className="flex h-full w-full">
+        <div className={`flex h-full w-full ${isFlashcardModalOpen ? 'pr-[300px]' : ''} transition-all duration-300`}>
             {/* Sidebar */}
             <div className="min-w-[235px] bg-gray-100 dark:bg-[#2c2c2c] pt-6 p-4">
                 <div className="flex items-center justify-between mb-[18px]">
@@ -108,15 +108,17 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
             <div className=" flex dark:bg-[#1a1a1a] bg-[#FAFAFA] text-white w-full !max-w-[calc(100vw)]">
                 {children}
                 {/* Flashcard Panel */}
-                <FlashcardPanel
-                    isOpen={isFlashcardModalOpen}
-                    onClose={() => {
-                        setIsFlashcardModalOpen(false);
-                        setSelectedFlashcardId(null);
-                    }}
-                    flashcards={selectedFlashcards}
-                    flashcardId={selectedFlashcardId}
-                />
+                <div className="fixed right-0 top-0 h-full z-50">
+                    <FlashcardPanel
+                        isOpen={isFlashcardModalOpen}
+                        onClose={() => {
+                            setIsFlashcardModalOpen(false)
+                            setSelectedFlashcardId(null)
+                        }}
+                        flashcards={selectedFlashcards}
+                        flashcardId={selectedFlashcardId}
+                    />
+                </div>
                 {/* <SlidingPanel
                 isOpen={isQuizPanelOpen}
                 onClose={handleCloseQuizPanel}

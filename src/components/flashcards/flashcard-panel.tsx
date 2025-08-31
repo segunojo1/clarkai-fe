@@ -138,34 +138,38 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
   if (!isMounted || !flashcardId) return null;
 
   return (
-    <div className=" min-w-[500px] inset-0 z-50 "  style={{
-      transition: 'opacity 300ms ease-in-out',
-      willChange: 'opacity',
-      pointerEvents: isMounted ? 'auto' : 'none'
-    }}>
+    <div 
+      className="fixed inset-0 z-50 pointer-events-none"
+      style={{
+        transition: 'opacity 300ms ease-in-out',
+        willChange: 'opacity'
+      }}
+    >
+      {/* Backdrop with click handler */}
+      {isMounted && (
+        <div 
+          className="fixed inset-0 bg-black/50 transition-opacity duration-300 ease-in-out"
+          style={{
+            opacity: isMounted ? 0.5 : 0,
+            pointerEvents: isMounted ? 'auto' : 'none'
+          }}
+          onClick={onClose}
+        />
+      )}
        
-      {/* Backdrop */}
-      {/* <div 
-        className={`fixed inset-0 bg-black/50 transition-opacity duration-300 ease-in-out ${
-          isMounted ? 'opacity-100' : 'opacity-0'
-        }`}
-        style={{
-          transition: 'opacity 300ms ease-in-out',
-          willChange: 'opacity',   
-          pointerEvents: isMounted ? 'auto' : 'none'
-        }}
-        onClick={onClose} 
-      /> */}  
-      
       {/* Panel */}
       <div 
-        className={` h-full w-[500px] max-w-lg bg-white dark:bg-[#2C2C2C] shadow-xl`}
+        className={`h-full w-full sm:w-1/2 md:w-1/2 lg:w-1/3 xl:w-1/4 bg-white dark:bg-[#2C2C2C] shadow-xl flex flex-col ml-auto pointer-events-auto`}
         style={{
           transform: isMounted ? 'translateX(0)' : 'translateX(100%)',
           transition: 'transform 300ms cubic-bezier(0.16, 1, 0.3, 1)',
           willChange: 'transform',
-          pointerEvents: 'auto',
-          zIndex: 50
+          maxWidth: '500px',
+          minWidth: '300px',
+          height: '100vh',
+          position: 'fixed',
+          right: 0,
+          top: 0
         }}
       >
         {/* Header */}
@@ -183,7 +187,7 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
         </div>
 
         {/* Content */}
-        <div className="h-[calc(100%-56px)] flex flex-col p-4">
+        <div className="h-[calc(100%-56px)] flex flex-col">
           {loading ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="flex flex-col items-center gap-4">
@@ -216,7 +220,7 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
               </div>
 
               {/* Flashcard */}
-              <div className="flex-1 flex items-center justify-center p-6">
+              <div className="flex-1 flex items-center justify-center p-4 sm:p-6 overflow-auto">
                 <Flashcard
                   question={flashcardData.questions[currentIndex].question}
                   answer={flashcardData.questions[currentIndex].answer}

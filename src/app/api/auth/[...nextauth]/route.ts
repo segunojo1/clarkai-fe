@@ -19,10 +19,10 @@ const handler = NextAuth({
           console.log("Access Token:", account.access_token);
 
           // For Google OAuth, we need to verify the token and handle signup if new user
-          // const response = await authService.verifyOathToken(account.access_token);
-          const response = process.env.NEXT_PUBLIC_ACCESS_TOKEN || '';
-          // Only attempt to sign up if this is a new user (indicated by isNewUser flag)
-          if (user) {
+          const response = await authService.verifyOathToken(account.access_token);
+          // const response = process.env.NEXT_PUBLIC_ACCESS_TOKEN || '';
+          // Only attempt prto sign up if this is a new user (indicated by isNewUser flag)
+         if (user) {
             try {
               await authService.signup({
                 email: user.email || '', 
