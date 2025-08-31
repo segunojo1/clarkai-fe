@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import { useChatStore } from "@/store/chat.store";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { WorkspaceCreationModal } from "../home/workspace-creation-modal";
+import { SubscriptionStatus } from "../subscription/subscription-status";
 
 export default function ClientLayout({
     children,
@@ -58,9 +59,12 @@ export default function ClientLayout({
                         {
                             !isWorkspacePage && (
                                 <div className="flex items-center gap-3">
+                                    
+                                    <SubscriptionStatus />
                                     <Button
                                         variant="outline"
                                         onClick={logout}
+                                        className="border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                                     >
                                         Logout
                                     </Button>

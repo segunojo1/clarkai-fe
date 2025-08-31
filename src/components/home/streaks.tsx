@@ -20,12 +20,17 @@ const Streaks = () => {
   // Create an array of 30 days
   const days = Array.from({ length: totalDays }, (_, i) => i + 1)
   useEffect(() => {
-    const getStreak = async () => {
-      const response = await streakService.getAndAddStreak()
+    const getandAddStreak = async () => {
+      const [streakNumber, addStreak] = await Promise.all([
+        streakService.getStreak(),
+        streakService.addStreak()
+      ]);
+      console.log(streakNumber, addStreak);
       
+      setStreakCount(streakNumber)   
     }
 
-    getStreak()
+    getandAddStreak()
   }, [])
 
   return (

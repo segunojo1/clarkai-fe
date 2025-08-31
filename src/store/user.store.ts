@@ -2,12 +2,18 @@ import { StaticImport } from 'next/dist/shared/lib/get-img-props';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
+export type SubscriptionPlan = 'free' | 'premium' | 'enterprise';
+
 type User = {
   id: string;
   email: string;
   name?: string;
   image_url?: string;
-  // Add other user properties as needed
+  subscription?: {
+    plan: SubscriptionPlan;
+    status: 'active' | 'canceled' | 'expired' | 'inactive';
+    expiresAt?: string;
+  };
 };
 
 type UserStore = {

@@ -32,12 +32,22 @@ class StreakService {
         return StreakService.instance;
     }
 
-    public async getAndAddStreak() {
+    public async addStreak() {
         try {
             const response = await this.api.post(`/api/user/streak/increment`);
             return response.data;
         } catch (error) {
-            console.error("Failed to get and add streak:", error);
+            console.error("Failed to add streak:", error);
+            throw error;
+        }
+    }
+
+    public async getStreak() {
+        try {
+            const response = await this.api.get(`/api/user/getstreak`);
+            return response.data.streakCount;
+        } catch (error) {
+            console.error("Failed to get streak:", error);
             throw error;
         }
     }
