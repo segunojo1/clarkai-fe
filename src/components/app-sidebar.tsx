@@ -64,7 +64,7 @@ export const LatestChat = () => {
                         <h2 className="text-[12px]/[22px] font-bold">Recent Chats</h2>
                         <div className="max-h-[120px] overflow-y-scroll">
                             {chats.map(chat => (
-                                <Link key={chat.id} href={`/chat/${chat.id}`} className="p-1 w-full hover:bg-gray-800 flex px-[11px]">
+                                <Link key={chat.id} href={`/chat/${chat.id}`} className="p-1 w-full dark:hover:bg-gray-800 hover:bg-gray-300 flex px-[11px]">
                                     <p className="text-[14px] font-medium">{chat.name}</p>
                                 </Link>
                             ))}

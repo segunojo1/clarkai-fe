@@ -254,7 +254,7 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
           </Button>
         </div>
 
-        <div className='text-[15px] rounded-[4px] mx-[10px] mb-[10px] font-normal text-white px-[30px] py-[10px] bg-[#ff3c0027]'>
+        <div className='text-[15px] rounded-[4px] mx-[10px] mb-[10px] font-normal dark:text-white text-black px-[30px] py-[10px] dark:bg-[#ff3c0027] bg-[#F9E5DE]'>
           You can also generate a quiz based on this set — just type @quiz or generate another Flashcard set using
         </div>
       </div>

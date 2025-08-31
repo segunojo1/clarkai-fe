@@ -97,7 +97,7 @@ export function Flashcard({
             onPrevious();
           }}
           disabled={cardNumber === 1}
-          className="shrink-0"
+          className="shrink-0 text-black dark:text-white"
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -109,10 +109,10 @@ export function Flashcard({
             e.stopPropagation();
             setIsFlipped(!isFlipped);
           }}
-          className="flex text-[14px] font-medium items-center gap-2 text-[#A3A3A3]"
+          className="flex text-[14px] font-medium items-center gap-2 dark:text-[#A3A3A3] text-black"
         >
           {cardNumber} / {totalCards}
-          <span className='text-[16px] font-medium text-[#FAFAFA]'>Show Front</span>
+          <span className='text-[16px] font-medium dark:text-[#FAFAFA]'>Show Front</span>
         </Button>
         
         
@@ -124,7 +124,7 @@ export function Flashcard({
             onNext();
           }}
           disabled={cardNumber === totalCards}
-          className="shrink-0"
+          className="shrink-0 text-black dark:text-white"
         >
           <ArrowRight className="h-4 w-4" />
         </Button>

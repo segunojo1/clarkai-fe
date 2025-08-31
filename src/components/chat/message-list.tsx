@@ -313,7 +313,7 @@ export function ChatMessageList({
                     setIsFlashcardModalOpen(true);
                   }}
                 > 
-                  <div className="bg-gray-50 p-4 border border-[#d4d4d439] w-fit rounded-[10px] dark:bg-[#2C2C2C] hover:bg-gray-100 dark:hover:bg-[#4a4a4a] transition-colors">
+                  <div className=" bg-[#BCB3B0] p-4 border border-[#d4d4d439] w-fit rounded-[10px] dark:bg-[#2C2C2C] hover:bg-gray-100 dark:hover:bg-[#4a4a4a] transition-colors">
                     <h4 className="text-sm font-bold text-gray-900 dark:text-[#D4D4D4] mb-2">
                       Flashcard Pack Generated
                     </h4>
