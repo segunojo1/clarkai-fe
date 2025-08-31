@@ -11,6 +11,11 @@ import {
     DialogFooter,
     DialogClose
 } from "@/components/ui/dialog"
+import {  
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { ChevronDown, Globe, Link as LinkIcon, FileText, Scan, Loader2, X, Sparkles, Download } from "lucide-react"
 import { PDFDownloadLink } from '@react-pdf/renderer';
@@ -66,9 +71,11 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
 
     const wordRanges = [
         { value: '300-500', label: 'Short (300-500 words)' },
-        { value: '500-1000', label: 'Medium (500-1000 words)' },
-        { value: '1000-1500', label: 'Long (1000-1500 words)' },
-        { value: '1500-2000', label: 'Detailed (1500-2000 words)' },
+        { value: '500-1000', label: 'Normal (500-1000 words)' },
+        { value: '1000-1500', label: 'Medium (1000-1500 words)' },
+        { value: '1500-2000', label: 'Long (1500-2000 words)' },
+        { value: '2000-3000', label: 'Detailed (2000-3000 words)' },
+        { value: '3000-5000', label: 'Very Detailed (3000-5000 words)' },
     ]
 
     const materialLength = selectedWorkspace && selectedWorkspace?.workspace?.files?.pdfFiles.length + selectedWorkspace?.workspace?.files?.imageFiles?.length
@@ -78,11 +85,11 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
     // const { workspace } = selectedWorkspace
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
+            <PopoverTrigger asChild>
                 {children}
-            </DialogTrigger>
-            <DialogContent className="bg-[#18191A] border border-[#333] text-white md:max-w-[500px] max-h-[80vh] p-0 rounded-2xl shadow-2xl overflow-y-auto !top-[40%] !left-[80%] mt-0 ml-0" style={{ transform: 'none' }}>
+            </PopoverTrigger>
+            <PopoverContent className="bg-[#18191A] border border-[#333] text-white w-[500px] max-h-[80vh] p-0 rounded-2xl shadow-2xl overflow-y-auto" align="start" sideOffset={8}>
                 {/* Nav Tabs */}
                 <div className="flex items-center justify-center gap-2 px-8 pt-4 pb-2">
                     <button
@@ -695,8 +702,8 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                         </div>
                     )} */}
                 </div>
-            </DialogContent>
-        </Dialog>
+            </PopoverContent>
+        </Popover>
     )
 }
 

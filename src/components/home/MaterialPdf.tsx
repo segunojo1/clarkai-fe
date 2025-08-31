@@ -1,14 +1,14 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
-
-// Register font if needed
-// Font.register({ family: 'Arial', src: 'path/to/arial.ttf' });
+import { Document, Page, Text, View, StyleSheet, Link as PdfLink } from '@react-pdf/renderer';
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
 
 const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 12,
-    lineHeight: 1.5,
+    lineHeight: 1.6,
     fontFamily: 'Helvetica',
   },
   header: {
@@ -22,23 +22,65 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#666',
+    marginBottom: 5,
   },
   content: {
     fontSize: 12,
     lineHeight: 1.6,
   },
-  section: {
-    marginBottom: 20,
+  paragraph: {
+    marginBottom: 10,
+  },
+  heading1: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  heading2: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 18,
+    marginBottom: 8,
+  },
+  heading3: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 16,
+    marginBottom: 6,
+  },
+  list: {
+    marginLeft: 20,
+    marginBottom: 10,
+  },
+  listItem: {
+    flexDirection: 'row',
+    marginBottom: 4,
+  },
+  listItemBullet: {
+    width: 20,
+    paddingRight: 5,
   },
   codeBlock: {
     backgroundColor: '#f5f5f5',
     padding: 10,
     borderRadius: 4,
-    marginVertical: 5,
+    marginVertical: 8,
     fontFamily: 'Courier',
     fontSize: 10,
+  },
+  inlineCode: {
+    backgroundColor: '#f5f5f5',
+    padding: '1px 4px',
+    borderRadius: 3,
+    fontFamily: 'Courier',
+    fontSize: 10,
+  },
+  link: {
+    color: '#1a73e8',
+    textDecoration: 'none',
   },
   table: {
     width: '100%',
@@ -56,13 +98,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderLeftWidth: 0,
     borderTopWidth: 0,
-  },
-  tableCell: {
-    padding: 8,
-    fontSize: 10,
+    padding: 5,
   },
   tableHeader: {
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#f5f5f5',
     fontWeight: 'bold',
   },
 });
@@ -72,80 +111,88 @@ interface MaterialPdfProps {
   title?: string;
 }
 
-const MaterialPdf: React.FC<MaterialPdfProps> = ({ content, title = 'Generated Material' }) => {
-  // Simple markdown parser for common elements
-  const parseMarkdown = (text: string) => {
-    if (!text) return [];
-    
-    const lines = text.split('\n');
-    return lines.map((line, index) => {
-      // Skip empty lines
-      if (!line.trim()) return <Text key={index}> </Text>;
-      
-      // Headers
-      if (line.startsWith('### ')) {
-        return (
-          <Text key={index} style={{ fontSize: 16, fontWeight: 'bold', marginTop: 10, marginBottom: 5 }}>
-            {line.replace('### ', '')}
-          </Text>
-        );
-      }
-      
-      // Subheaders
-      if (line.startsWith('## ')) {
-        return (
-          <Text key={index} style={{ fontSize: 18, fontWeight: 'bold', marginTop: 15, marginBottom: 8 }}>
-            {line.replace('## ', '')}
-          </Text>
-        );
-      }
-      
-      // Main headers
-      if (line.startsWith('# ')) {
-        return (
-          <Text key={index} style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20, marginBottom: 10 }}>
-            {line.replace('# ', '')}
-          </Text>
-        );
-      }
-      
-      // Code blocks
-      if (line.startsWith('    ')) {
-        return (
-          <View key={index} style={styles.codeBlock}>
-            <Text style={{ fontFamily: 'Courier' }}>{line.trim()}</Text>
-          </View>
-        );
-      }
-      
-      // Bullet points
-      if (line.startsWith('- ')) {
-        return (
-          <View key={index} style={{ flexDirection: 'row', marginBottom: 4 }}>
-            <Text>• </Text>
-            <Text>{line.replace('- ', '')}</Text>
-          </View>
-        );
-      }
-      
-      // Regular text
-      return (
-        <Text key={index} style={{ marginBottom: 8 }}>
-          {line || ' '}
-        </Text>
-      );
-    });
-  };
+// Define the type for markdown components
+type MarkdownComponents = {
+  [nodeType: string]: React.ComponentType<any>;
+};
 
+// Custom components for react-markdown to render in PDF
+const components: MarkdownComponents = {
+  p: ({ children }: { children?: React.ReactNode }) => (
+    <View style={styles.paragraph}><Text>{children}</Text></View>
+  ),
+  h1: ({ children }: { children?: React.ReactNode }) => (
+    <View style={styles.heading1}><Text>{children}</Text></View>
+  ),
+  h2: ({ children }: { children?: React.ReactNode }) => (
+    <View style={styles.heading2}><Text>{children}</Text></View>
+  ),
+  h3: ({ children }: { children?: React.ReactNode }) => (
+    <View style={styles.heading3}><Text>{children}</Text></View>
+  ),
+  ul: ({ children }: { children?: React.ReactNode }) => (
+    <View style={styles.list}>{children}</View>
+  ),
+  ol: ({ children }: { children?: React.ReactNode }) => (
+    <View style={styles.list}>{children}</View>
+  ),
+  li: ({ children }: { children?: React.ReactNode }) => (
+    <View style={styles.listItem}>
+      <Text style={styles.listItemBullet}>•</Text>
+      <Text>{children}</Text>
+    </View>
+  ),
+  code: ({ children, inline }: { children?: React.ReactNode; inline?: boolean }) => (
+    <Text style={inline ? styles.inlineCode : styles.codeBlock}>
+      {String(children).replace(/\n$/, '')}
+    </Text>
+  ),
+  a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
+    <PdfLink src={href || '#'} style={styles.link}>
+      {children}
+    </PdfLink>
+  ),
+  table: ({ children }: { children?: React.ReactNode }) => (
+    <View style={styles.table}>
+      {children}
+    </View>
+  ),
+  thead: ({ children }: { children?: React.ReactNode }) => (
+    <View style={styles.tableHeader}>{children}</View>
+  ),
+  tbody: ({ children }: { children?: React.ReactNode }) => (
+    <View>{children}</View>
+  ),
+  tr: ({ children }: { children?: React.ReactNode }) => (
+    <View style={styles.tableRow}>{children}</View>
+  ),
+  th: ({ children }: { children?: React.ReactNode }) => (
+    <View style={[styles.tableCol, styles.tableHeader]}>
+      <Text>{children}</Text>
+    </View>
+  ),
+  td: ({ children }: { children?: React.ReactNode }) => (
+    <View style={styles.tableCol}>
+      <Text>{children}</Text>
+    </View>
+  ),
+};
+
+const MaterialPdf: React.FC<MaterialPdfProps> = ({ content, title = 'Generated Material' }) => {
   return (
     <Document>
-      <Page style={styles.page}>
+      <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.subtitle}>Generated on {new Date().toLocaleDateString()}</Text>
         </View>
         <View style={styles.content}>
-          {parseMarkdown(content)}
+          <Markdown
+            remarkPlugins={[remarkGfm, remarkMath]}
+            components={components}
+          >
+            {content}
+          </Markdown>
         </View>
       </Page>
     </Document>

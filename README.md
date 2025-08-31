@@ -82,6 +82,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🙏 Acknowledgments
 
 - Built by:
+  - Segun Ojo
   - Seyi Ogundipe
   - Ashiru Sheriffdeen
   - Hasbiyallah Oyebo
