@@ -243,12 +243,12 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                             <div className="w-full flex flex-col items-start">
                                 {selectedWorkspace?.workspace?.files?.pdfFiles?.length == 0 && (
                                     <>
-                                        <DialogHeader className="text-left mb-8 w-full">
-                                            <DialogTitle className="text-3xl font-normal text-white flex items-center gap-3 mb-4">
+                                        <div className="text-left mb-8 w-full">
+                                            <h2 className="text-3xl font-normal text-white flex items-center gap-3 mb-4">
                                                 Upload your First Material
                                                 <Globe className="w-7 h-7 text-gray-400" />
-                                            </DialogTitle>
-                                        </DialogHeader>
+                                            </h2>
+                                        </div>
                                         <div className="space-y-6 text-base text-gray-300 leading-relaxed mb-8 w-full max-w-xl text-left break-words">
                                             <p>
                                                 Upload PDFs, videos, or notes to start building your learning flow.
@@ -642,8 +642,8 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                 </div>
                             ) : (
                                 <div className="w-full flex flex-col items-start justify-start">
-                                    <DialogHeader className="text-left mb-8 w-full">
-                                        <DialogTitle className="text-3xl font-normal text-white flex items-center gap-3 mb-4">
+                                    <div className="text-left mb-8 w-full">
+                                        <h2 className="text-3xl font-normal text-white flex items-center gap-3 mb-4">
                                             Nothing to answer here... yet
                                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A3A3A3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                 <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
@@ -651,8 +651,8 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                 <path d="M9 10h6" />
                                                 <path d="M9 18h2" />
                                             </svg>
-                                        </DialogTitle>
-                                    </DialogHeader>
+                                        </h2>
+                                    </div>
                                     {selectedWorkspace?.workspace?.files?.pdfFiles?.length !== 0 ? (
                                         <>
                                             <div className="space-y-6 text-gray-300 leading-relaxed mb-8 w-full max-w-xl text-left break-words">

@@ -36,7 +36,7 @@ export default function WorkspacePage() {
   const router = useRouter()
   // const searchParams = useSearchParams()
   const [isQuizPanelOpen, setIsQuizPanelOpen] = useState(false)
-  const [askSource, setAskSource] = useState<'ai' | 'materials'>('ai')
+  const [askSource, setAskSource] = useState<'ai' | 'materials'>('materials')
 
   useEffect(() => {
     const handleQuizPanelEvent = (event: Event) => {
@@ -423,7 +423,7 @@ export default function WorkspacePage() {
   }
 
   return (
-    <div className="flex h-full w-fit !max-w-[calc(100vw-235px)] overflow-hidden">
+    <div className="flex h-full w-full !max-w-[calc(100vw-235px)] overflow-hidden">
       <div className={`flex flex-col h-full  justify-between pb-12 ${isQuizPanelOpen ? '' : 'min-w-full'}`}>
         <div className='absolute top-10 right-10 '>
           <UploadMaterialModal workspaceId={id.toString()}>
@@ -449,7 +449,7 @@ export default function WorkspacePage() {
               <Loader2 className='w-8 h-8 animate-spin' />
             </div>
           ) : (
-            <div>
+            <div className=''>
               {messages.length === 0 ? (
                 <div className='mt-16'>
                   <WelcomeScreen onSend={handleSend} />

@@ -81,8 +81,8 @@ interface ChatInputFormProps {
   onGenerateFlashcards?: (context: string) => Promise<void>;
   onGenerateMaterial?: (context: string) => Promise<void>;
   onGenerateQuiz?: (context: string) => Promise<void>;
-  askSource?: string;
-  setAskSource?: (source: string) => void;
+  askSource?: 'ai' | 'materials';
+  setAskSource?: (source: 'ai' | 'materials') => void;
 }
 
 const ChatInputForm = ({

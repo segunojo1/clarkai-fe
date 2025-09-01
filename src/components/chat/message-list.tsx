@@ -228,14 +228,15 @@ export function ChatMessageList({
   };
 
   return (
-    <div className={cn("flex w-full flex-col space-y-4 p-4 overflow-y-auto h-[calc(100vh-200px)]", className)}>
-      <div className='absolute left-5'>
+    <div className={cn("w-full max-w-3xl mx-auto px-4 flex flex-col space-y-4 overflow-y-auto h-[calc(100vh-200px)]", className)}>
+      {/* <div className='absolute left-5'>
         <UserAvatar />
-      </div>
+      </div> */}
+      <UserAvatar />
       {messages.length > 0 && (
         <div className="h-[140px]"></div>
       )}
-      <div className='max-w-[750px] w-full mx-auto'>
+      <div className='max-w-3xl w-full mx-auto'>
         {messages.map((message) => {
           const isFlashcardMessage = message.metadata?.type === 'flashcards' || 
             (message.fromUser && message.text.includes('@flashcard')) || 
@@ -249,7 +250,7 @@ export function ChatMessageList({
               <div
                 className={`flex flex-col items-${message.fromUser ? 'end' : 'start'} text-[15px] satoshi font-normal mb-4 w-full`}
               >
-                <div className="flex flex-col items-end max-w-[80%] gap-2">
+                <div className={`flex flex-col ${message.fromUser ? 'items-end' : 'items-start'} w-full gap-2`}>
                   {message.attachments?.map((file, fileIndex) => (
                     <div
                       key={fileIndex}
@@ -269,9 +270,9 @@ export function ChatMessageList({
                   }
 
                   {message.text && !message.filePath && (
-                    <div className={`relative group rounded-[69px] p-4 ${message.fromUser ? 'bg-[#F0F0EF] dark:bg-[#404040] dark:text-white text-black' : 'bg-transparent'}`}>
+                    <div className={`relative group rounded-[69px] p-4 max-w-full  ${message.fromUser ? 'bg-[#F0F0EF] dark:bg-[#404040] dark:text-white text-black' : 'bg-transparent'}`}>
                       {message.fromUser ? (
-                        <p className="whitespace-pre-wrap break-words">
+                        <p className="whitespace-pre-wrap break-words max-w-full">
                           {message.text.split(/(@\w+)/).map((part, i) => {
                             // Only process non-empty parts
                             if (!part) return null;
@@ -285,7 +286,7 @@ export function ChatMessageList({
                           })}
                         </p>
                       ) : (
-                        <div className="markdown-body text-black dark:text-white">
+                        <div className="markdown-body text-black dark:text-white max-w-full overflow-x-auto break-words">
                           <MarkdownRenderer content={message.text} />
                         </div>
                       )}
