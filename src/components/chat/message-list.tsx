@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChatMessage } from "@/lib/types";
 import type { FileAttachment as FileAttachmentType } from '@/lib/types';
-import { ChevronRight, FileText, Link } from 'lucide-react';
+import { ChevronRight, Copy, FileText, Link, LucideSpeaker, Speaker, SpeakerIcon, StopCircle, Volume1, Volume1Icon, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PDFViewer } from './pdf-viewer';
 import UserAvatar from '../user-avatar';
@@ -153,6 +153,51 @@ const copyToClipboard = (text: string) => {
   });
 };
 
+// Simple read-aloud using the Web Speech API
+const readAloud = (text: string) => {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+    console.warn('Speech synthesis not supported in this environment.');
+    return;
+  }
+  const synth = window.speechSynthesis;
+  // If already speaking, stop first to avoid overlap
+  if (synth.speaking) synth.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 1;
+  utterance.pitch = 1;
+  utterance.lang = navigator.language || 'en-US';
+  synth.speak(utterance);
+};
+
+// Convert markdown to plain text for clean TTS
+const markdownToPlainText = (md: string): string => {
+  if (!md) return '';
+  let s = md;
+  // Remove code blocks
+  s = s.replace(/```[\s\S]*?```/g, '');
+  // Inline code
+  s = s.replace(/`([^`]+)`/g, '$1');
+  // Images ![alt](url) -> alt
+  s = s.replace(/!\[([^\]]*)\]\([^\)]*\)/g, '$1');
+  // Links [text](url) -> text
+  s = s.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '$1');
+  // Headings: remove leading #
+  s = s.replace(/^\s{0,3}#{1,6}\s*/gm, '');
+  // Blockquotes
+  s = s.replace(/^>\s?/gm, '');
+  // Lists/bullets
+  s = s.replace(/^\s*[-*+]\s+/gm, '');
+  s = s.replace(/^\s*\d+\.\s+/gm, '');
+  // Emphasis/bold/strikethrough
+  s = s.replace(/[\*_~]{1,3}([^\*_~]+)[\*_~]{1,3}/g, '$1');
+  // HTML tags
+  s = s.replace(/<[^>]+>/g, '');
+  // Collapse spaces
+  s = s.replace(/\s+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+  return s;
+};
+
+
 export function ChatMessageList({
   messages,
   isLoading,
@@ -163,6 +208,7 @@ export function ChatMessageList({
   className?: string
 }) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [speakingText, setSpeakingText] = useState<string | null>(null);
   const {setSelectedFlashcards, setIsFlashcardModalOpen, setSelectedFlashcardId} = useWorkspaceStore()
   // const [selectedFlashcards, setSelectedFlashcards] = useState<FlashcardData[]>([]);
   // const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
@@ -227,6 +273,32 @@ export function ChatMessageList({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const stopReading = () => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      const synth = window.speechSynthesis;
+      if (synth.speaking) synth.cancel();
+    }
+    setSpeakingText(null);
+  };
+
+  const handleReadAloud = (text: string) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      console.warn('Speech synthesis not supported in this environment.');
+      return;
+    }
+    const synth = window.speechSynthesis;
+    // If already speaking something else, stop first
+    if (synth.speaking) synth.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    utterance.lang = navigator.language || 'en-US';
+    utterance.onend = () => setSpeakingText(null);
+    utterance.onerror = () => setSpeakingText(null);
+    setSpeakingText(text);
+    synth.speak(utterance);
+  };
+
   return (
     <div className={cn("w-full max-w-3xl mx-auto px-4 flex flex-col space-y-4 overflow-y-auto h-[calc(100vh-200px)]", className)}>
       {/* <div className='absolute left-5'>
@@ -241,6 +313,8 @@ export function ChatMessageList({
           const isFlashcardMessage = message.metadata?.type === 'flashcards' || 
             (message.fromUser && message.text.includes('@flashcard')) || 
             (!message.fromUser && message.text.includes('Flashcard'));
+          const cleanedText = markdownToPlainText(message.text);
+          const isSpeakingThis = speakingText === cleanedText;
           
           return (
             <div key={`${message.role}`} className={cn({
@@ -295,9 +369,23 @@ export function ChatMessageList({
                       <div className="absolute right-0 mt-1 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => copyToClipboard(message.text)}
-                          className="text-sm text-blue-500 hover:underline"
+                          title="Copy"
+                          aria-label="Copy"
+                          className="inline-flex items-center justify-center h-8 w-8 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200/70 dark:hover:bg-gray-700/70 border border-transparent hover:border-gray-300/60 dark:hover:border-gray-600/60 transition-colors"
                         >
-                          Copy
+                          <Copy width={16} height={16} />
+                        </button>
+                        <button
+                          onClick={() => (isSpeakingThis ? stopReading() : handleReadAloud(cleanedText))}
+                          className="inline-flex items-center justify-center h-8 w-8 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200/70 dark:hover:bg-gray-700/70 border border-transparent hover:border-gray-300/60 dark:hover:border-gray-600/60 transition-colors"
+                          title={isSpeakingThis ? "Stop" : "Read aloud"}
+                          aria-label={isSpeakingThis ? "Stop" : "Read aloud"}
+                        >
+                          {isSpeakingThis ? (
+                            <StopCircle width={16} height={16} />
+                          ) : (
+                            <Volume2 width={16} height={16} />
+                          )}
                         </button>
                       </div>
                     </div>
