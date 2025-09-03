@@ -16,6 +16,7 @@ import { hasCompletedOnboarding, setOnboardingCompleted } from '@/lib/cookies';
 import { useUserStore } from '@/store/user.store';
 import chatService from '@/services/chat.service';
 import { useChatStore } from '@/store/chat.store';
+import { getTimeBasedGreeting } from '@/lib/utils';
 
 const HomePageContent = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -53,7 +54,7 @@ const HomePageContent = () => {
         ) : (
           <Image src='/assets/user.svg' alt='' width={45} height={45} className='' />
         )}
-        <h1 className='text-[30px]/[120%] font-bold satoshi'>Good Evening, {user?.name?.split(' ')[0]}</h1>
+        <h1 className='text-[30px]/[120%] font-bold satoshi'>{getTimeBasedGreeting()}, {user?.name?.split(' ')[0]}</h1>
       </div>
       <div className='flex flex-col items-start '>
         <ChatInputForm onSend={handleSend} disabled={isLoading} />

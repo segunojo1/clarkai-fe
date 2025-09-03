@@ -507,7 +507,7 @@ const ChatInputForm = ({
                                 ? "Research a topic..."
                                 : "Create something new..."
                           }
-                          className="min-h-[100px] max-h-[180px] text-[16px] max-w-[750px] font-medium p-3 w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none resize-none relative z-20 text-black dark:text-white"
+                          className="min-h-[100px] caret-[#ff3d00] max-h-[180px] text-[16px] max-w-[750px] font-medium p-3 w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none resize-none relative z-20 text-black dark:text-white"
                           {...field}
                           onKeyUp={handleKeyDown}
                           disabled={disabled}
@@ -516,6 +516,7 @@ const ChatInputForm = ({
                             caretColor: 'white'
                           }}
                         />
+                        
                         <div 
                           className="absolute inset-0 pointer-events-none z-10 p-3 opacity-0"
                           style={{
@@ -605,7 +606,14 @@ const ChatInputForm = ({
                                 alt="" 
                                 width={20} 
                                 height={20} 
-                                className="h-5 w-5 dark:text-gray-500 text-black hover:text-gray-700" 
+                                className="h-5 w-5 dark:text-gray-500 text-black hover:text-gray-700 dark:block hidden" 
+                              />
+                              <Image 
+                                src="/assets/file-light.svg" 
+                                alt="" 
+                                width={20} 
+                                height={20} 
+                                className="h-5 w-5 dark:text-gray-500 text-black hover:text-gray-700 dark:hidden block" 
                               />
                             </button>
                             <input
@@ -618,39 +626,7 @@ const ChatInputForm = ({
                               aria-label="File input"
                             />
                           </div>
-                          <button
-                            type="button"
-                            onClick={toggleListening}
-                            disabled={!isSpeechSupported}
-                            className={`relative p-1.5 rounded-full transition-all duration-200 ${
-                              isListening 
-                                ? 'bg-red-100 text-red-500 animate-pulse' 
-                                : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700'
-                            }`}
-                            title={isListening ? 'Stop listening' : 'Start voice input'}
-                            aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
-                          >
-                            {isListening ? (
-                              <div className="relative">
-                                <MicOff className="h-5 w-5" />
-                                <div 
-                                  className="absolute -inset-1 rounded-full bg-red-100 opacity-75"
-                                  style={{
-                                    transform: `scale(${1 + (volume / 200)})`,
-                                    transition: 'transform 0.1s ease-out'
-                                  }}
-                                />
-                              </div>
-                            ) : (
-                              <Image 
-                                width={20} 
-                                height={20} 
-                                alt="" 
-                                src="/assets/waveform.svg" 
-                                className="h-5 w-5" 
-                              />
-                            )}
-                          </button>
+                          
                           <Popover open={isTagPopoverOpen} onOpenChange={setIsTagPopoverOpen}>
                             <PopoverTrigger asChild>
                               <Button type="button" variant="ghost" size="icon">
@@ -679,6 +655,48 @@ const ChatInputForm = ({
                               </div>
                             </PopoverContent>
                           </Popover>
+                          <button
+                            type="button"
+                            onClick={toggleListening}
+                            disabled={!isSpeechSupported}
+                            className={`relative p-1.5 rounded-full transition-all duration-200 ${
+                              isListening 
+                                ? 'bg-red-100 text-red-500 animate-pulse' 
+                                : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700'
+                            }`}
+                            title={isListening ? 'Stop listening' : 'Start voice input'}
+                            aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
+                          >
+                            {isListening ? (
+                              <div className="relative">
+                                <MicOff className="h-5 w-5" />
+                                <div 
+                                  className="absolute -inset-1 rounded-full bg-red-100 opacity-75"
+                                  style={{
+                                    transform: `scale(${1 + (volume / 200)})`,
+                                    transition: 'transform 0.1s ease-out'
+                                  }}
+                                />
+                              </div>
+                            ) : (
+                              <>
+                              <Image 
+                                width={20} 
+                                height={20} 
+                                alt="" 
+                                src="/assets/waveform.svg" 
+                                className="h-5 w-5 dark:block hidden" 
+                              />
+                              <Image 
+                                width={20} 
+                                height={20} 
+                                alt="" 
+                                src="/assets/waveform-light.svg" 
+                                className="h-5 w-5 dark:hidden block" 
+                              />
+                              </>
+                            )}
+                          </button>
                           <Button
                             type="submit"
                             size="icon"

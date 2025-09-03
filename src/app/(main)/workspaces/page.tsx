@@ -30,7 +30,7 @@ const WorkspacesPage = () => {
     }, [])
 
     return (
-        <div className="flex flex-col h-full w-full dark:bg-[#1a1a1a] bg-[#FAFAFA] text-white">
+        <div className="flex flex-col h-full w-full dark:bg-[#1a1a1a] bg-[#FAFAFA] text-white !max-w-[calc(100vw)]">
             {/* Top Header */}
             <div className="flex items-center justify-between px-6 py-3">
                 <div className="flex items-center gap-2">

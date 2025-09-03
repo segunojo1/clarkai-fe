@@ -3,6 +3,7 @@
 import { useUserStore } from '@/store/user.store';
 import UserAvatar from '../user-avatar'
 import { SuggestedQuestion } from './suggested-question'
+import { getTimeBasedGreeting } from '@/lib/utils';
 
 export function WelcomeScreen({ onSend }: { onSend: (message: string) => void }) {
 
@@ -23,12 +24,12 @@ export function WelcomeScreen({ onSend }: { onSend: (message: string) => void })
     }
   ]
 
-  const getTimeBasedGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good Morning';
-    if (hour < 18) return 'Good Afternoon';
-    return 'Good Evening';
-  };
+  // const getTimeBasedGreeting = () => {
+  //   const hour = new Date().getHours();
+  //   if (hour < 12) return 'Good Morning';
+  //   if (hour < 18) return 'Good Afternoon';
+  //   return 'Good Evening';
+  // };
 
   return (
     <div className="flex flex-col items-center flex-grow">

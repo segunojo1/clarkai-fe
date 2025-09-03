@@ -1,7 +1,7 @@
 "use client"
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { PlusIcon, Globe, File, FileText, ChevronDown, Edit, ChevronUp } from "lucide-react"
+import { PlusIcon, Globe, File, FileText, ChevronDown, Edit, ChevronUp, ChevronsLeft, ChevronsRight } from "lucide-react"
 import { useState, useEffect } from "react"
 import workspaceServiceInstance from "@/services/workspace.service"
 import Link from "next/link"
@@ -10,6 +10,8 @@ import { useWorkspaceStore } from "@/store/workspace.store"
 import { FlashcardPanel } from "../flashcards/flashcard-panel"
 import Image from "next/image"
 import { useUserStore } from "@/store/user.store"
+import { useSidebar } from "../ui/sidebar"
+import { Button } from "../ui/button"
 
 interface Workspace {
     enc_id: string
@@ -35,6 +37,8 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const { user } = useUserStore()
+    const { state: mainSidebarState, setOpen: setMainSidebarOpen } = useSidebar()
+    const [workspaceOpen, setWorkspaceOpen] = useState(true)
 
     useEffect(() => {
         const fetchWorkspaces = async () => {
@@ -53,12 +57,26 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
         console.log(workspaces)
     }, [])
 
+    // Coordinate with main sidebar: when workspace opens, collapse main to icon-only
+    useEffect(() => {
+        if (workspaceOpen) {
+            setMainSidebarOpen(false)
+        }
+    }, [workspaceOpen, setMainSidebarOpen])
+
+    // If main sidebar gets expanded, close workspace sidebar
+    useEffect(() => {
+        if (mainSidebarState === "expanded") {
+            setWorkspaceOpen(false)
+        }
+    }, [mainSidebarState])
 
 
     return (
         <div className={`flex h-full w-full ${isFlashcardModalOpen ? 'pr-[300px]' : ''} transition-all duration-300`}>
-            {/* Sidebar */}
-            <div className="min-w-[235px] bg-gray-100 dark:bg-[#2c2c2c] pt-6 p-4">
+            {/* Workspace Sidebar */}
+            {workspaceOpen && (
+            <div className="min-w-[235px] bg-gray-100 dark:bg-[#2c2c2c] pt-6 p-4 fixed min-h-screen h-full overflow-y-scroll">
                 <div className="flex items-center justify-between mb-[18px]">
                     <div className="flex items-center gap-[7px]">
                         <Image
@@ -72,9 +90,20 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
 
                         <ChevronDown color="#A3A3A3" className="w-[14px] h-[20px]" />
                     </div>
-                    <Link href="/chat" className="group-data-[collapsible=icon]:hidden">
-                        <Edit width={20} height={20} />
-                    </Link>
+                    <div className="flex items-center gap-2">
+                        <Link href="/chat" className="group-data-[collapsible=icon]:hidden">
+                            <Edit width={20} height={20} />
+                        </Link>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="!h-6 !w-6"
+                          title="Close workspace sidebar"
+                          onClick={() => setWorkspaceOpen(false)}
+                        >
+                          <ChevronsLeft className="!w-5 !h-5" />
+                        </Button>
+                    </div>
                 </div>
                 <div className="border-y-[2px] mb-[11px]">
                     <Input placeholder="Search" className="border-0 dark:bg-[#2c2c2c] bg-[#F0F0EF]" />
@@ -103,9 +132,26 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
                     )}
                 </div>
             </div>
+            )}
 
             {/* Main Content */}
-            <div className=" flex dark:bg-[#1a1a1a] bg-[#FAFAFA] text-white w-full !max-w-[calc(100vw)]">
+            <div className={` flex dark:bg-[#1a1a1a] bg-[#FAFAFA] text-white w-full justify-end !max-w-[calc(100vw)] ${workspaceOpen ? 'ml-[235px]' : 'ml-0'}`}>
+                {!workspaceOpen && (
+                  <div className="fixed left-0 top-0 p-2 z-20">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="!h-8 !w-8 bg-[#F8F8F7] dark:bg-[#2C2C2C] text-[#525252]"
+                      title="Open workspace sidebar"
+                      onClick={() => {
+                        setWorkspaceOpen(true)
+                        setMainSidebarOpen(false)
+                      }}
+                    >
+                      <ChevronsRight className="!w-5 !h-5" />
+                    </Button>
+                  </div>
+                )}
                 {children}
                 {/* Flashcard Panel */}
                 <div className="fixed right-0 top-0 h-full z-50">
