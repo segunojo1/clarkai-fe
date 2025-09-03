@@ -184,7 +184,6 @@ const SignUpPage = () => {
       'study-vibe': <StudyVibe key="study-vibe" onSuccess={handleStudyVibeSubmit} />,
       'add-profile': <AddProfile key="add-profile" onSuccess={handleProfileComplete} />
     };
-
     return stepComponents[currentStepName] || null;
   };
 

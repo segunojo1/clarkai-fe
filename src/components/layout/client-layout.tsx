@@ -12,6 +12,8 @@ import { useChatStore } from "@/store/chat.store";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { WorkspaceCreationModal } from "../home/workspace-creation-modal";
 import { SubscriptionStatus } from "../subscription/subscription-status";
+import { signOut } from "next-auth/react";
+import Cookies from "js-cookie";
 
 export default function ClientLayout({
     children,
@@ -27,11 +29,19 @@ export default function ClientLayout({
     const pathname = usePathname()
     const isWorkspacePage = pathname.startsWith('/workspaces')
 
-    const logout = () => {
+    const logout = async () => {
+        await signOut({ redirect: false }); // prevent NextAuth auto-redirect
+        sessionStorage.clear()
         authService.logout();
         route.push("/auth/login")
     }
     useEffect(() => {
+        // Auth guard: redirect to login if missing token
+        const token = Cookies.get('token');
+        if (!token) {
+            route.push('/auth/login');
+            return;
+        }
         const initializeData = async () => {
             try {
                 await getAllChats(1)
@@ -41,7 +51,7 @@ export default function ClientLayout({
             }
         }
         initializeData()
-    }, [])
+    }, [route, getAllChats, getWorkspaces])
     return (
         <main className="w-full h-full relative flex-1">
             {(

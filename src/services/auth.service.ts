@@ -69,6 +69,29 @@ class AuthService {
         'Content-Type': 'application/json',
       },
     });
+
+    // Ensure latest token is always attached to requests
+    this.api.interceptors.request.use((config) => {
+      const token = Cookies.get('token');
+      if (token) {
+        config.headers = config.headers || {};
+        (config.headers as any)['Authorization'] = `Bearer ${token}`;
+      }
+      return config;
+    });
+
+    // Handle unauthorized responses centrally
+    this.api.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error?.response?.status === 401) {
+          try {
+            this.logout();
+          } catch {}
+        }
+        return Promise.reject(error);
+      }
+    );
   }
 
   public static getInstance(): AuthService {
@@ -310,6 +333,26 @@ class AuthService {
       }
 
       console.error('Token verification failed:', errorMessage);
+      throw new Error(errorMessage);
+    }
+  }
+
+  public async googleLogin({email, name, image_url}: {email: string, name: string, image_url: string}) {
+    try {
+      const response = await this.api.post<{ email: string; name: string; image_url: string }>('/googleLogin', { email, name, image_url });
+      return response.data;
+    } catch (error: unknown) {
+      let errorMessage = 'Google login failed';
+
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        errorMessage = axiosError.response?.data?.message || errorMessage;
+      }
+      else if (error instanceof Error) {
+        errorMessage = error.message || errorMessage;
+      }
+
+      console.error('Google login failed:', errorMessage);
       throw new Error(errorMessage);
     }
   }

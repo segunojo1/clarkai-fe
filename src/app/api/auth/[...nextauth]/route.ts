@@ -1,5 +1,4 @@
 // app/api/auth/[...nextauth]/route.ts
-// import authService from "@/services/auth.service";
 import authService from "@/services/auth.service";
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
@@ -9,90 +8,82 @@ const handler = NextAuth({
     GoogleProvider({
       clientId: process.env.NEXT_PUBLIC_CLIENTID as string,
       clientSecret: process.env.NEXT_PUBLIC_CLIENTSECRET as string,
+      authorization: {
+        params: {
+          prompt: "select_account",
+          access_type: "offline",
+          response_type: "code",
+          scope: "openid profile email",
+        },
+      },
     }),
   ],
   callbacks: {
-    async jwt({ token, account, user }) {
-      if (account && user) {
+    async signIn({ account, profile }) {
+      try {
+        // Only handle Google OAuth
+        if (account?.provider === "google") {
+          return true; // Always allow signin, we'll handle user status in jwt callback
+        }
+        return true;
+      } catch (error) {
+        console.error("SignIn callback error:", error);
+        return false;
+      }
+    },
+    async jwt({ token, account, profile, trigger, session }) {
+      // Handle Google OAuth
+      if (account && account.provider === "google") {
         try {
-          console.log("=== OAuth Verification Debug ===");
-          console.log("Access Token:", account.access_token);
+          // Call your Google login endpoint
+          const googleResponse = await authService.googleLogin({
+            email: profile?.email || "",
+            name: profile?.name || "",
+            image_url: profile?.picture || "",
+          });
 
-          // For Google OAuth, we need to verify the token and handle signup if new user
-          const response = await authService.verifyOathToken(account.access_token);
-          // const response = process.env.NEXT_PUBLIC_ACCESS_TOKEN || '';
-          // Only attempt prto sign up if this is a new user (indicated by isNewUser flag)
-         if (user) {
-            try {
-              await authService.signup({
-                email: user.email || '', 
-                name: user.name || '', 
-                nickname: user.name || '', 
-                oauth: true, 
-                oauth_method: "google"
-              });
-              console.log("Google OAuth signup successful");
-            } catch (signupError) {
-              console.log("Signup error:", signupError);
-              
-              // Check if it's a duplicate user error (status 409)
-              const isDuplicateUser = 
-                (signupError as any)?.response?.status === 409 || 
-                (signupError as any)?.status === 409 ||
-                (signupError as any)?.message?.includes('User already exists.') ||
-                (signupError as any)?.error === 'User already exists.';
-
-              if (isDuplicateUser) {
-                console.log("User already exists, attempting login...");
-                try {
-                  await authService.login({
-                    email: user.email || '', 
-                    oauth: true, 
-                    oauth_method: "google"
-                  });
-                  console.log("Google OAuth login successful");
-                } catch (loginError) {
-                  console.error("Error during Google OAuth login:", loginError);
-                  throw new Error(`Google OAuth login failed: ${(loginError as any)?.error || (loginError as any)?.message}`);
-                }
-              } else {
-                // For other errors, rethrow with more context
-                console.error("Error during Google OAuth signup:", signupError);
-                const errorMessage = (signupError as any)?.error || 
-                (signupError as any)?.message || 
-                                  'Unknown error during Google OAuth signup';
-                throw new Error(`Google OAuth signup failed: ${errorMessage}`);
-              }
-            }
-          }
-          
-          console.log("Verify Token Response:", JSON.stringify(response, null, 2));
-
-          const backendUser = response;
-
-          // attach stuff to the token
-          token.backendUserId = (backendUser as any).id;
-          token.backendAccessToken = (backendUser as any).accessToken;
-          token.googleAccessToken = account.access_token; 
+          // Store the backend token and user data
+          token.backendAccessToken = googleResponse.token;
+          token.user = googleResponse.user;
+          token.isOnboardingNeeded = !googleResponse.user.account_completed;
         } catch (error) {
-          console.error("Backend auth failed:", error);
+          console.error("Google login error in jwt callback:", error);
+          throw error;
         }
       }
+
+      // Handle session update if triggered
+      if (trigger === "update" && session?.user) {
+        token.user = { ...token.user, ...session.user };
+      }
+
       return token;
     },
-    async session({ session, token }: any) {  // ✅ include token
-      session.user.backendUserId = token.backendUserId as string;
-      session.user.isOnboardingNeeded = token.isOnboardingNeeded as boolean;
-      session.user.googleAccessToken = token.googleAccessToken as string; 
+    async session({ session, token }) {
+      // Send properties to the client
+      if (token.backendAccessToken) {
+        session.user.backendAccessToken = token.backendAccessToken as string;
+      }
+      
+      if (token.user) {
+        session.user.id = (token.user as any).id;
+        session.user.name = (token.user as any).name;
+        session.user.email = (token.user as any).email;
+        session.user.isOnboardingNeeded = token.isOnboardingNeeded as boolean;
+      }
 
       return session;
     },
   },
+  pages: {
+    signIn: "/auth/login",
+    error: "/auth/error",
+  },
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 24 hours
   },
 });
-
 
 export { handler as GET, handler as POST };
