@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ChevronDown, Globe, Star, X, Moon } from "lucide-react"
+import { ChevronDown, Globe, Star, X, Moon, Trash } from "lucide-react"
 import { WorkspaceCreationModal } from "@/components/home/workspace-creation-modal"
 import { useWorkspaceStore } from "@/store/workspace.store"
 import Image from "next/image"
@@ -10,7 +10,57 @@ import Link from "next/link"
 import ThemeSwitcher from "@/components/theme-switcher"
 import authService from "@/services/auth.service"
 import { useRouter } from "next/navigation"
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { DialogTrigger } from "@radix-ui/react-dialog"
+import workspaceService from "@/services/workspace.service"
+import { toast } from "sonner"
 // import { UploadMaterialModal } from "@/components/home/upload-material-modal"
+
+type WorkspaceDeleteDialogProps = { workspaceId: string }
+
+const WorkspaceDeleteDialog = ({ workspaceId }: WorkspaceDeleteDialogProps) => {
+  const [open, setOpen] = useState(false)
+
+  const handleDelete = async () => {
+    try {
+      await workspaceService.deleteWorkspace(workspaceId)
+      toast.success("Workspace deleted successfully")
+      useWorkspaceStore.getState().getWorkspaces()
+    } catch (error) {
+      toast.error("Error deleting workspace")
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Trash
+          className="absolute top-4 left-4 w-4 h-4 text-gray-400 hover:text-yellow-400 cursor-pointer transition-colors group-hover:block hidden"
+          onClick={(e) => {
+            e.preventDefault()
+            setOpen(true)
+          }}
+        />
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Workspace</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete this workspace?
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="destructive" onClick={handleDelete}>
+            Delete
+          </Button>
+          <DialogClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
 
 const WorkspacesPage = () => {
     // const router = useRouter()
@@ -120,7 +170,6 @@ const WorkspacesPage = () => {
                             
                             {/* Star icon in top right */}
                             <Star className="absolute top-4 right-4 w-4 h-4 text-gray-400 hover:text-yellow-400 cursor-pointer transition-colors" />
-
                             {/* File icon using file.png */}
                             <div className="flex justify-center mb-8 mt-4">
                                 <Image
@@ -180,8 +229,9 @@ const WorkspacesPage = () => {
                                 <Link href={`/workspaces/${workspace.enc_id}`} className="" key={workspace.enc_id}>
                                     <div className="dark:hover:bg-[#2C2C2C] hover:bg-[#F0F0EF] rounded-[14.6px] p-6 ">
 
-                                        <div className="flex justify-center  mb-[19.44px] relative">
+                                        <div className="group flex justify-center  mb-[19.44px] relative">
                                             <Star className="absolute top-2 right-[13px] w-4 h-4 text-gray-400 hover:text-yellow-400 cursor-pointer transition-colors" />
+                                            <WorkspaceDeleteDialog workspaceId={workspace.enc_id} />
                                             <Image
                                                 src="/assets/file.png"
                                                 alt="File icon"

@@ -65,6 +65,8 @@ interface WorkspaceStore {
     messages: ChatMessage[]
     isLoading: boolean
     error: string | null
+    askSource: string
+    setAskSource: (source: string) => void
     getWorkspaces: () => Promise<void>
     createWorkspace: (name: string, description?: string) => Promise<void>
     selectWorkspace: (workspace: Workspace) => void
@@ -95,6 +97,10 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     selectedFlashcards: [],
     isFlashcardModalOpen: false,
     selectedFlashcardId: null,
+    askSource: 'ai',
+    setAskSource: (source: 'ai' | 'materials') => {
+        set({ askSource: source })
+    },
     setIsFlashcardModalOpen: (open: boolean) => {
         set({ isFlashcardModalOpen: open })
     },

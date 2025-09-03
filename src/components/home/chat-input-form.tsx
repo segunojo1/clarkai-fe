@@ -17,6 +17,7 @@ import Image from "next/image"
 import { FormMessage } from "../ui/form"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "../ui/command"
 import { PopoverClose } from "@radix-ui/react-popover"
+import { useWorkspaceStore } from "@/store/workspace.store"
 
 declare global {
   interface SpeechRecognitionErrorEvent extends Event {
@@ -91,10 +92,10 @@ const ChatInputForm = ({
   onGenerateFlashcards,
   onGenerateMaterial,
   onGenerateQuiz,
-  askSource,
-  setAskSource
+  
 }: ChatInputFormProps) => {
   const [selectedFiles, setSelectedFiles] = useState<Array<{ file: File; previewUrl: string }>>([])
+  const {askSource, setAskSource} = useWorkspaceStore()
   // const [isCLoading, setIsCLoading] = useState(false)
   const [mode, setMode] = useState<'ask' | 'create' | 'research'>('ask')
   // const [caretPosition, setCaretPosition] = useState(0)
@@ -512,11 +513,8 @@ const ChatInputForm = ({
                           onKeyUp={handleKeyDown}
                           disabled={disabled}
                           ref={textareaRef}
-                          style={{
-                            caretColor: 'white'
-                          }}
                         />
-                        
+
                         <div 
                           className="absolute inset-0 pointer-events-none z-10 p-3 opacity-0"
                           style={{
@@ -558,7 +556,7 @@ const ChatInputForm = ({
                                     <Button
                                       type="button"
                                       className={`w-full text-left px-4 py-2 text-sm ${
-                                        askSource === 'ai' ? 'bg-gray-100 text-[#FF3D00]' : 'text-gray-700 hover:bg-gray-50'
+                                        askSource === 'ai' ? '!bg-gray-100 text-[#FF3D00]' : 'text-gray-700 hover:bg-gray-50  bg-gray-200 '
                                       }`}
                                       onClick={() => setAskSource('ai')}
                                     >
@@ -569,7 +567,7 @@ const ChatInputForm = ({
                                     <Button
                                       type="button"
                                       className={`w-full text-left px-4 py-2 text-sm ${
-                                        askSource === 'materials' ? 'bg-gray-100 text-[#FF3D00]' : 'text-white bg-[#4a4848] hover:cursor-pointer hover:bg-[#484646]'
+                                        askSource === 'materials' ? '!bg-gray-100 text-[#FF3D00]' : 'text-gray-700 hover:bg-gray-50 bg-gray-200 hover:cursor-pointer '
                                       }`}
                                       onClick={() => setAskSource('materials')}
                                     >

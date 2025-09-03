@@ -183,6 +183,16 @@ class WorkspaceService {
             throw error;
         }
     }
+
+    public async deleteWorkspace(id: string) {
+        try {
+            const response = await this.api.delete(`/workspace/${id}`)
+            return response.data
+        } catch (error) {
+            console.error("Failed to delete workspace:", error)
+            throw error
+        }
+    }
 }
 
 export default WorkspaceService.getInstance();
