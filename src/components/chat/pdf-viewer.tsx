@@ -82,7 +82,7 @@ export function PDFViewer({ file, onClose }: PDFViewerProps) {
   const { messages, sendMessage, chatDetails, setIsLoading, isLoading } = useChatStore()
   console.log(chatDetails);
 
-  const handleSend = async (text: string, files?: File) => {
+  const handleSend = async (text: string, files?: any) => {
     if (!text.trim()) return
     if (id) {
 

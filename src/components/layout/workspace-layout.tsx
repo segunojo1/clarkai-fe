@@ -20,6 +20,7 @@ interface Workspace {
     tag?: string
     files?: {
         pdfFiles?: { id: string | number; fileName: string; filePath: string; }[]
+        imageFiles?: { id: string | number; fileName: string; filePath: string; }[]
     }
     materials?: { id: string | number; name: string }[]
     quizzes?: { id: string | number; name: string }[]

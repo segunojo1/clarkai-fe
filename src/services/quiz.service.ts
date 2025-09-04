@@ -12,7 +12,7 @@ interface GenerateQuizParams {
   file_id?: string;
   difficulty?: QuizDifficulty;
   duration?: number;
-  context: string;
+  context?: string;
   is_context?: boolean
 }
 

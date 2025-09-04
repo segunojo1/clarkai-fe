@@ -68,7 +68,7 @@ interface WorkspaceStore {
     askSource: string
     isQuizPanelOpen: boolean
     setIsQuizPanelOpen: (open: boolean) => void
-    setAskSource: (source: string) => void
+    setAskSource: (source: 'ai' | 'materials') => void
     getWorkspaces: () => Promise<void>
     createWorkspace: (name: string, description?: string) => Promise<void>
     selectWorkspace: (workspace: Workspace) => void

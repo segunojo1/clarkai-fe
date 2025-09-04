@@ -93,15 +93,15 @@ class ChatService {
       throw error;
     }
   }
-  public async getObjectUrlFromLink(link: string) {
-    try {
-      const response = await axios.get(link)
-      const blob = await response.blob();
-      return URL.createObjectURL(blob);
-    } catch (error) {
-      console.error("err getting object url from link", error)
-    }
-  }
+  // public async getObjectUrlFromLink(link: string) {
+  //   try {
+  //     const response = await axios.get(link)
+  //     const blob = await response.blob();
+  //     return URL.createObjectURL(blob);
+  //   } catch (error) {
+  //     console.error("err getting object url from link", error)
+  //   }
+  // }
 
 }
 
