@@ -89,14 +89,14 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
             <PopoverTrigger asChild>
                 {children}
             </PopoverTrigger>
-            <PopoverContent className="bg-[#18191A] border border-[#333] text-white w-[500px] max-h-[80vh] p-0 rounded-2xl shadow-2xl overflow-y-auto" align="start" sideOffset={8}>
+            <PopoverContent className="dark:bg-[#18191A] bg-[#F8F8F7] border border-[#333] text-white w-[500px] max-h-[80vh] p-0 rounded-2xl shadow-2xl overflow-y-auto" align="start" sideOffset={8}>
                 {/* Nav Tabs */}
-                <div className="flex items-center justify-center gap-2 px-8 pt-4 pb-2">
+                <div className="flex items-center justify-start gap-2 px-8 pt-4 pb-2">
                     <button
                         onClick={() => setActiveTab("Materials")}
                         className={`font-medium text-base transition-colors flex items-center gap-1 px-4 py-2 rounded-lg ${activeTab === "Materials"
                             ? "bg-[#232323] text-white"
-                            : "text-gray-400 hover:text-white"
+                            : "text-gray-400 dark:hover:text-white"
                             }`}
                     >
                         Materials
@@ -106,7 +106,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                         onClick={() => setActiveTab("Canvas")}
                         className={`font-medium text-base transition-colors px-4 py-2 rounded-lg ${activeTab === "Canvas"
                             ? "bg-[#232323] text-white"
-                            : "text-gray-400 hover:text-white"
+                            : "text-gray-400 dark:hover:text-white"
                             }`}
                     >
                         Canvas
@@ -115,7 +115,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                         onClick={() => setActiveTab("Quizzes")}
                         className={`font-medium text-base transition-colors px-4 py-2 rounded-lg ${activeTab === "Quizzes"
                             ? "bg-[#232323] text-white"
-                            : "text-gray-400 hover:text-white"
+                            : "text-gray-400 dark:hover:text-white"
                             }`}
                     >
                         Quizzes
@@ -131,20 +131,20 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                     </button> */}
                 </div>
                 {/* Stats Row - conditional positioning based on active tab */}
-                <div className={`flex items-center justify-between  px-8 pb-2 text-[14px] text-gray-400 w-full ${activeTab === "Quizzes" ? "pt-0" : "pt-1"
+                <div className={`flex items-center justify-start px-8 pb-2 text-[14px] text-black dark:text-gray-400 w-full ${activeTab === "Quizzes" ? "pt-0" : "pt-1"
                     }`}>
-                    <div className="flex items-center gap-2 bg-[#232323] px-4 py-2 rounded-full font-medium">
+                    <div className="flex items-center gap-2 dark:bg-[#232323] bg-[#E5E5E5] px-[13px] py-1 rounded-full font-medium">
                         <span>{materialLength} Mat. Uploaded</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 px-[13px] py-1">
                         <LinkIcon className="w-5 h-5" />
                         <span>0 links</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 px-[13px] py-1">
                         <FileText className="w-5 h-5" />
                         <span>0 Docs</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 px-[13px] py-1">
                         <Scan className="w-5 h-5" />
                         <span>0 Scans</span>
                     </div>
@@ -157,7 +157,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                             {selectedWorkspace && selectedWorkspace?.workspace?.files?.pdfFiles?.length > 0 ? (
                                 <div className="flex justify-center items-center flex-wrap gap-2 mx-auto max-h-[500px] overflow-y-scroll mb-5">
                                     {selectedWorkspace?.workspace.files.pdfFiles.map((file: { id: string; filePath: string; fileName: string; size: string }) => (
-                                        <div key={file.id} className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer hover:bg-[#232323] rounded-2xl p-2" onClick={() => window.open(file.filePath, '_blank')}>
+                                        <div key={file.id} className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2" onClick={() => window.open(file.filePath, '_blank')}>
                                             <div className="rounded-2xl p-0 flex flex-col items-center justify-center relative" style={{ minHeight: 96 }}>
                                                 {/* File icon - no background, no border */}
                                                 <div className="flex justify-center mb-2 mt-4">
@@ -171,13 +171,13 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                     />
                                                 </div>
                                                 <div className="text-center max-w-[130px] w-[130px] h-[50px]">
-                                                    <p className="text-gray-300 text-xs font-medium leading-tight break-words">{file.fileName}<br />{file.size}</p>
+                                                    <p className="dark:text-gray-300  text-[#737373] text-xs font-medium leading-tight break-words">{file.fileName}<br />{file.size}</p>
                                                 </div>
                                             </div>
                                         </div>
                                     ))}
                                     {selectedWorkspace?.workspace.files.imageFiles.map((file: { id: string; filePath: string; fileName: string; size: string }) => (
-                                        <div key={file.id} className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer hover:bg-[#232323] rounded-2xl p-2" onClick={() => window.open(file.filePath, '_blank')}>
+                                        <div key={file.id} className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2" onClick={() => window.open(file.filePath, '_blank')}>
                                             <div className="rounded-2xl p-0 flex flex-col items-center justify-center relative" style={{ minHeight: 96 }}>
                                                 {/* File icon - no background, no border */}
                                                 <div className="flex justify-center mb-2 mt-4">
@@ -213,7 +213,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                         </div>
 
                                         <div className="text-left w-full pl-4">
-                                            <p className="text-gray-300 text-xs font-medium leading-tight">Your Material<br />goes here</p>
+                                            <p className="dark:text-gray-300 text-[#737373] text-xs font-medium leading-tight">Your Material<br />goes here</p>
                                         </div>
                                     </div>
                                 </div>
@@ -244,12 +244,12 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                 {selectedWorkspace?.workspace?.files?.pdfFiles?.length == 0 && (
                                     <>
                                         <div className="text-left mb-8 w-full">
-                                            <h2 className="text-3xl font-normal text-white flex items-center gap-3 mb-4">
+                                            <h2 className="text-3xl font-normal dark:text-white text-black flex items-center gap-3 mb-4">
                                                 Upload your First Material
                                                 <Globe className="w-7 h-7 text-gray-400" />
                                             </h2>
                                         </div>
-                                        <div className="space-y-6 text-base text-gray-300 leading-relaxed mb-8 w-full max-w-xl text-left break-words">
+                                        <div className="space-y-6 text-base dark:text-gray-300 text-black leading-relaxed mb-8 w-full max-w-xl text-left break-words">
                                             <p>
                                                 Upload PDFs, videos, or notes to start building your learning flow.
                                             </p>
@@ -301,7 +301,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                 ) : (
                                     <div className="flex flex-col gap-2 items-center justify-center  w-full">
                                         <FileUploadButton workspaceId={workspaceId} />
-                                        <p className="text-[17px] font-bold text-white">OR</p>
+                                        <p className="text-[17px] font-bold dark:text-white text-black">OR</p>
                                         <Dialog open={isCreatingMaterial} onOpenChange={setIsCreatingMaterial}>
                                             <DialogTrigger asChild>
                                                 <Button className="bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-medium text-lg px-[100px] py-[10px] cursor-pointer rounded-[5px] transition-colors ml-4 w-96">
@@ -643,7 +643,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                             ) : (
                                 <div className="w-full flex flex-col items-start justify-start">
                                     <div className="text-left mb-8 w-full">
-                                        <h2 className="text-3xl font-normal text-white flex items-center gap-3 mb-4">
+                                        <h2 className="text-3xl font-normal dark:text-white text-black flex items-center gap-3 mb-4">
                                             Nothing to answer here... yet
                                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A3A3A3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                 <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
@@ -655,7 +655,7 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                     </div>
                                     {selectedWorkspace?.workspace?.files?.pdfFiles?.length !== 0 ? (
                                         <>
-                                            <div className="space-y-6 text-gray-300 leading-relaxed mb-8 w-full max-w-xl text-left break-words">
+                                            <div className="space-y-6 dark:text-gray-300 text-black leading-relaxed mb-8 w-full max-w-xl text-left break-words">
                                                 <p className="text-sm">
                                                     Create quizzes from your uploaded materials, notes, or custom questions to start testing your knowledge.
                                                 </p>
@@ -764,10 +764,10 @@ export function FileUploadButton({ workspaceId }: { workspaceId: string }) {
                 className="bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-medium text-lg px-[100px] py-[10px] cursor-pointer rounded-[5px] transition-colors ml-4 w-96"
             >
                 {uploading ? (
-                    <>
+                    <div className="flex items-center gap-2">
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         Uploading... {uploadProgress}%
-                    </>
+                    </div>
                 ) : (
                     "Upload Materials"
                 )}

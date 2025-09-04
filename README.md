@@ -89,3 +89,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Special thanks to our early users for their valuable feedback
 - Inspired by the belief that learning should be smarter, not harder
 - Developed with a passion for making education more accessible and efficient
+print("hi")
+pri()

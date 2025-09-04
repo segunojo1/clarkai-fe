@@ -55,7 +55,7 @@ export const LatestChat = () => {
                             <Globe width={20} height={20} />
                             <p className=" text-[12px]/[22px] font-medium satoshi text-center">Your latest chats will show up once you start talking to Clark.</p>
                             <Link href="/chat" className="w-full cursor-pointer">
-                                <Button className="min-w-full  bg-[#F8F8F7] dark:bg-[#2C2C2C] text-[#525252] text-3 font-semibold">Start a Chat</Button>
+                                <Button className="min-w-full  bg-[#F8F8F7] dark:bg-[#2C2C2C]  hover:bg-[#ffffff] text-[#525252] text-3 font-semibold">Start a Chat</Button>
                             </Link>
                         </CardContent>
                     </Card>
@@ -99,7 +99,7 @@ export const LatestWorkspace = () => {
                     <Globe width={20} height={20} />
                     <p className=" text-[12px]/[22px] font-medium satoshi text-center">Your workspaces will appear here once you create one.</p>
                     <WorkspaceCreationModal>
-                        <Button className="min-w-full  bg-[#F8F8F7] dark:bg-[#2C2C2C] text-[#525252] text-3 font-semibold">Start a workspace</Button>
+                        <Button className="min-w-full  bg-[#F8F8F7] dark:bg-[#2C2C2C] hover:bg-[#ffffff] text-[#525252] text-3 font-semibold">Start a workspace</Button>
                     </WorkspaceCreationModal>
                 </CardContent>
             </Card>

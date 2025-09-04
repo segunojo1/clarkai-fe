@@ -39,13 +39,14 @@ const handler = NextAuth({
           const googleResponse = await authService.googleLogin({
             email: profile?.email || "",
             name: profile?.name || "",
-            image_url: profile?.picture || "",
+            image_url: profile?.image || "",
           });
 
           // Store the backend token and user data
           token.backendAccessToken = googleResponse.token;
           token.user = googleResponse.user;
           token.isOnboardingNeeded = !googleResponse.user.account_completed;
+          
         } catch (error) {
           console.error("Google login error in jwt callback:", error);
           throw error;
@@ -54,7 +55,11 @@ const handler = NextAuth({
 
       // Handle session update if triggered
       if (trigger === "update" && session?.user) {
-        token.user = { ...token.user, ...session.user };
+        const existingUser =
+          token.user && typeof token.user === "object"
+            ? (token.user as Record<string, unknown>)
+            : {};
+        token.user = { ...existingUser, ...session.user } as any;
       }
 
       return token;
@@ -70,6 +75,7 @@ const handler = NextAuth({
         session.user.name = (token.user as any).name;
         session.user.email = (token.user as any).email;
         session.user.isOnboardingNeeded = token.isOnboardingNeeded as boolean;
+        
       }
 
       return session;

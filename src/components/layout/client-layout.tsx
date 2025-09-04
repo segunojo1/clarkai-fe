@@ -14,6 +14,7 @@ import { WorkspaceCreationModal } from "../home/workspace-creation-modal";
 import { SubscriptionStatus } from "../subscription/subscription-status";
 import { signOut } from "next-auth/react";
 import Cookies from "js-cookie";
+import { UploadMaterialModal } from "../home/upload-material-modal";
 
 export default function ClientLayout({
     children,
@@ -78,6 +79,9 @@ export default function ClientLayout({
                                     >
                                         Logout
                                     </Button>
+                                    <UploadMaterialModal workspaceId="22">
+                                    <h1>upload</h1>
+                                    </UploadMaterialModal>
 
                                     <ThemeSwitcher />
                                 </div>

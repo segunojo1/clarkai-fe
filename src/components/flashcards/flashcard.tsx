@@ -34,7 +34,7 @@ export function Flashcard({
   return (
     <div className="w-full h-full">
       <div 
-        className="w-full h-[300px] rounded-xl cursor-pointer"
+        className="w-full h-[370px] rounded-xl cursor-pointer"
         onClick={() => setIsFlipped(!isFlipped)}
       >
         <div 

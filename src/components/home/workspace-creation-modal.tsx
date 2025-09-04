@@ -9,6 +9,7 @@ import { Globe, X } from "lucide-react"
 import workspaceServiceInstance from "@/services/workspace.service"
 import { useRouter } from "next/navigation"
 import { useWorkspaceStore } from '@/store/workspace.store';
+import { toast } from "sonner"
 
 const workspaceTags = [
   { color: "text-blue-500", id: "blue" },
@@ -32,13 +33,14 @@ export function WorkspaceCreationModal({ children }: WorkspaceCreationModalProps
   const [workspaceName, setWorkspaceName] = useState("")
   const [selectedTag, setSelectedTag] = useState("")
   const [note, setNote] = useState("")
+  const [loading, setLoading] = useState(false)
 
   const handleCreateWorkspace = async () => {
     if (!workspaceName) {
       alert("Please enter a workspace name");
       return;
     }
-
+    setLoading(true)
     try {
       const workspaceService = workspaceServiceInstance;
       await workspaceService.createWorkspace(workspaceName, selectedTag, note);
@@ -48,7 +50,7 @@ export function WorkspaceCreationModal({ children }: WorkspaceCreationModalProps
       setWorkspaceName("");
       setSelectedTag("");
       setNote("");
-      
+      setLoading(false);
       // Refresh the workspaces list
       useWorkspaceStore.getState().getWorkspaces();
       
@@ -56,7 +58,8 @@ export function WorkspaceCreationModal({ children }: WorkspaceCreationModalProps
       router.push('/workspaces')
     } catch (error) {
       console.error("Error creating workspace:", error);
-      alert("Failed to create workspace. Please try again.");
+      toast("Failed to create workspace. Please try again.");
+      setLoading(false)
     }
   }
 
@@ -104,9 +107,9 @@ export function WorkspaceCreationModal({ children }: WorkspaceCreationModalProps
                 <button
                   key={tag.id}
                   onClick={() => setSelectedTag(tag.id)}
-                  className={`p-1 transition-all duration-200 ${
+                  className={`p-[2px] transition-all duration-200 ${
                     selectedTag === tag.id 
-                      ? 'ring-2 ring-white ring-offset-2 ring-offset-[#2C2C2C] rounded-full' 
+                      ? 'ring-2 ring-white ring-offset-2 dark:ring-offset-[#2C2C2C] ring-offset-[#575656] rounded-full' 
                       : 'hover:scale-105'
                   }`}
                 >
@@ -133,7 +136,7 @@ export function WorkspaceCreationModal({ children }: WorkspaceCreationModalProps
               onClick={handleCreateWorkspace}
               className="w-full bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-medium py-3 h-12 rounded-md transition-colors duration-200"
             >
-              Create Workspace
+             {loading ? "Creating Workspace..." : "Create Workspace" }
             </Button>
           </div>
         </div>

@@ -25,7 +25,7 @@ const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
   const route = useRouter()
-  const { data: session, status, update } = useSession()
+  const { data: session, status } = useSession()
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -43,28 +43,41 @@ const LoginForm = () => {
           setIsGoogleLoading(true)
           
           // Check if this is a Google OAuth session with backend token
-          if (session.user.backendAccessToken) {
+          // Use a locally-typed user to access custom fields added via NextAuth callbacks
+          const oauthUser = session.user as (typeof session.user & {
+            backendAccessToken?: string
+            isOnboardingNeeded?: boolean
+          })
+
+          if (oauthUser?.backendAccessToken) {
             // Store the backend token in cookies
-            Cookies.set("token", session.user.backendAccessToken, { 
+            Cookies.set("token", oauthUser.backendAccessToken, { 
               expires: 7, 
               sameSite: "lax", 
               secure: process.env.NODE_ENV === "production" 
             })
+
+            Cookies.set('user',  JSON.stringify(oauthUser), {
+              expires: 7, 
+              sameSite: "lax", 
+              secure: process.env.NODE_ENV === "production" 
+            });
+          
             
             // Check if user needs to complete onboarding
-            if (session.user.isOnboardingNeeded) {
+            if (oauthUser?.isOnboardingNeeded) {
               sessionStorage.setItem("is_oauth_signup", "true")
               useAuthStore.getState().updateSignupData({ 
                 currentStep: 3,
-                name: session.user.name || "",
-                email: session.user.email || "",
-                nickname: session.user.name || ""
+                name: oauthUser.name || "",
+                email: oauthUser.email || "",
+                nickname: oauthUser.name || ""
               })
               route.push("/auth/signup")
             } else {
               // Existing user - get user data from session and update store
               try {
-                const userData = (session as any).user
+                const userData = oauthUser as any
                 if (userData) {
                   useUserStore.getState().setUser(userData)
                 }
@@ -128,6 +141,21 @@ const LoginForm = () => {
     } finally {
       setIsGoogleLoading(false)
     }
+  }
+
+  // Show a full-screen loading state during OAuth callback or while session is resolving
+  if (isGoogleLoading || status === 'authenticated' || status === 'loading') {
+    return (
+      <AuthClientLayout>
+        <div className="min-h-[60vh] md:min-h-[70vh] flex flex-col items-center justify-center gap-4">
+          <svg className="animate-spin h-6 w-6 text-[#FF3D00]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+          <p className="text-sm text-[#737373]">Signing you in and setting things up...</p>
+        </div>
+      </AuthClientLayout>
+    )
   }
 
   return (

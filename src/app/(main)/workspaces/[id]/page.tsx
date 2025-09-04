@@ -29,13 +29,13 @@ import quizService from '@/services/quiz.service'
 
 export default function WorkspacePage() {
   const { setCurrentChatId, setChatDetails, setIsLoading, isLoading } = useChatStore()
-  const { messages, setMessages, askQuestion } = useWorkspaceStore()
+  const { messages, setMessages, askQuestion, isQuizPanelOpen, setIsQuizPanelOpen } = useWorkspaceStore()
   // const [isLoading, setIsLoading] = useState(false)
   const [loadChats, setLoadChats] = useState(false);
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
   // const searchParams = useSearchParams()
-  const [isQuizPanelOpen, setIsQuizPanelOpen] = useState(false)
+  // const [isQuizPanelOpen, setIsQuizPanelOpen] = useState(false)
   const [askSource, setAskSource] = useState<'ai' | 'materials'>('materials')
 
   useEffect(() => {
@@ -362,6 +362,8 @@ export default function WorkspacePage() {
         file_id: undefined,
         difficulty,
         duration: 10,
+        context: messageText,
+        is_context: true
       });
 
       if (response?.quiz_id) {
@@ -369,13 +371,15 @@ export default function WorkspacePage() {
         const assistantMessage: ChatMessage = {
           createdAt: new Date(),
           role: 'assistant',
-          text: response.quiz_id,
+          text: "I've generated a quiz ",
           fromUser: false,
           isFile: false,
           updatedAt: new Date(),
           flashcardId: '',
         size: 0,
-        isFlashcard: false
+        isFlashcard: false,
+        isQuiz: true,
+        quizId: response.quiz_id
         };
   
         updatedMessages = [
@@ -424,7 +428,7 @@ export default function WorkspacePage() {
 
   return (
     <div className="flex h-full w-full !max-w-[calc(100vw-235px)] overflow-hidden">
-      <div className={`flex flex-col h-full  justify-between pb-12 ${isQuizPanelOpen ? '' : 'min-w-full'}`}>
+      <div className={`flex flex-col h-full  justify-between pb-12 w-full ${isQuizPanelOpen ? '' : 'min-w-full'}`}>
         <div className='absolute top-10 right-10 '>
           <UploadMaterialModal workspaceId={id.toString()}>
             <button className="p-1 border-2 rounded-full border-[#ffffff] transition-colors">

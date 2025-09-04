@@ -1,37 +1,20 @@
-import { User, getServerSession, Session } from 'next-auth'
-
-import { DefaultSession, DefaultUser } from 'next-auth'
+import type { DefaultSession } from 'next-auth'
+import { getServerSession, Session } from 'next-auth'
 import { JWT } from 'next-auth/jwt'
 
-declare module 'next-auth' {
-  interface Session {
-    user: {
-      id: string
-    } & DefaultSession['user']
-    googleIdToken?: string;
+export const session = async ({ session, token }: { session: Session; token: JWT }) => {
+  // Safely assign id if present on the token
+  if (session.user && token.id) {
+    ;(session.user as any).id = token.id
   }
-  interface User extends DefaultUser {
-    id: string
-  }
+  return session
 }
 
-declare module 'next-auth/jwt' {
-  interface JWT {
-    id: string
-  }
-}  
-
-export const session = async ({ session, token }: { session: Session; token: JWT }) => {
-  session.user.id = token.id
-  return session
-}              
-
-export const getUserSession = async (): Promise<User | null> => {
+export const getUserSession = async (): Promise<DefaultSession['user'] | null> => {
   const authUserSession = await getServerSession({
     callbacks: {
       session,
     },
   })
-  // if (!authUserSession) throw new Error('unauthorized')
   return authUserSession?.user || null
 }

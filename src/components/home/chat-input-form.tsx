@@ -77,7 +77,7 @@ const TAGS = [
 ]
 
 interface ChatInputFormProps {
-  onSend: (message: string, file?: File) => void;
+  onSend: (message: string, files?: File[]) => void;
   disabled?: boolean;
   onGenerateFlashcards?: (context: string) => Promise<void>;
   onGenerateMaterial?: (context: string) => Promise<void>;
@@ -552,17 +552,7 @@ const ChatInputForm = ({
                               </PopoverTrigger>
                               <PopoverContent className="w-48 p-0 gap-2 flex flex-col" align="start">
                                 <div className="grid">
-                                  <PopoverClose asChild>
-                                    <Button
-                                      type="button"
-                                      className={`w-full text-left px-4 py-2 text-sm ${
-                                        askSource === 'ai' ? '!bg-gray-100 text-[#FF3D00]' : 'text-gray-700 hover:bg-gray-50  bg-gray-200 '
-                                      }`}
-                                      onClick={() => setAskSource('ai')}
-                                    >
-                                      Ask AI
-                                    </Button>
-                                  </PopoverClose>
+                                  
                                   <PopoverClose asChild>
                                     <Button
                                       type="button"
@@ -572,6 +562,18 @@ const ChatInputForm = ({
                                       onClick={() => setAskSource('materials')}
                                     >
                                       Ask Materials
+                                    </Button>
+                                  </PopoverClose>
+
+                                  <PopoverClose asChild>
+                                    <Button
+                                      type="button"
+                                      className={`w-full text-left px-4 py-2 text-sm ${
+                                        askSource === 'ai' ? '!bg-gray-100 text-[#FF3D00]' : 'text-gray-700 hover:bg-gray-50  bg-gray-200 '
+                                      }`}
+                                      onClick={() => setAskSource('ai')}
+                                    >
+                                      Ask AI
                                     </Button>
                                   </PopoverClose>
                                 </div>

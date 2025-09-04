@@ -212,11 +212,11 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
             case 1:
                 return (
                     <div className="p-4">
-                        <h3 className="text-3xl font-bold text-white mb-6">Let&apos;s Build a Quiz!</h3>
+                        <h3 className="text-3xl font-bold dark:text-white text-black mb-6">Let&apos;s Build a Quiz!</h3>
                         <form onSubmit={handleSubmit} className="space-y-3 w-[341px]">
                             {/* Step 1 form content remains unchanged */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-[5px]">
+                                <label className="block text-sm font-medium dark:text-gray-300 text-black mb-[5px]">
                                     Enter a Topic
                                 </label>
                                 <input
@@ -225,20 +225,20 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                     value={formData.step1.topic}
                                     onChange={handleInputChange}
                                     placeholder="E.g., Machine Learning, Calculus, World War II"
-                                    className="w-full bg-[#232323] border border-[#333] rounded-lg p-3 text-white text-sm focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]"
+                                    className="w-full dark:bg-[#232323] border dark:border-[#333] border-[#D4D4D4] rounded-lg p-3 dark:text-white text-black text-sm focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-[5px]">
+                                <label className="block text-sm font-medium dark:text-gray-300 text-black mb-[5px]">
                                     Where should we pull questions from?
                                 </label>
                                 <select
                                     name="step1.materialId"
                                     value={formData.step1.materialId}
                                     onChange={handleInputChange}
-                                    className="w-full bg-[#232323] border border-[#333] rounded-lg p-3 text-white text-sm focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]"
+                                    className="w-full dark:bg-[#232323] bg-white border dark:border-[#333] border-[#D4D4D4]  rounded-lg p-3 dark:text-white text-black text-sm focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]"
                                 >
                                     {materials.map(material => (
                                         <option key={material.id} value={material.id}>
@@ -249,14 +249,14 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-[5px]">
+                                <label className="block text-sm font-medium dark:text-gray-300 text-black mb-[5px]">
                                     How do you want the quiz to be structured?
                                 </label>
                                 <select
                                     name="step1.quizType"
                                     value={formData.step1.quizType}
                                     onChange={handleInputChange}
-                                    className="w-full bg-[#232323] border border-[#333] rounded-lg p-3 text-white text-sm focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00] mb-4"
+                                    className="w-full dark:bg-[#232323] bg-white border dark:border-[#333] border-[#D4D4D4]   rounded-lg p-3 dark:text-white text-black text-sm focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00] mb-4"
                                 >
                                     <option value="mcq">Multiple Choice Questions</option>
                                     <option value="true_false">True/False</option>
@@ -265,7 +265,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                 </select>
 
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-gray-300">Timed Quiz?</span>
+                                    <span className="text-sm dark:text-gray-300 text-black">Timed Quiz?</span>
                                     <div className="flex items-center space-x-2">
                                         <label className="inline-flex items-center">
                                             <input
@@ -294,7 +294,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
 
                                 {formData.step1.isTimed === 'yes' && (
                                     <div className="mt-4">
-                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        <label className="block text-sm font-medium dark:text-gray-300 text-black mb-2">
                                             Total quiz duration (minutes)
                                         </label>
                                         <input
@@ -303,7 +303,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                             value={formData.step1.timePerQuestion}
                                             onChange={handleInputChange}
                                             min="1"
-                                            className="w-full bg-[#232323] border border-[#333] rounded-lg p-2 text-white text-sm focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]"
+                                            className="w-full dark:bg-[#232323] bg-white border dark:border-[#333] border-[#D4D4D4] rounded-lg p-2 dark:text-white text-black text-sm focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]"
                                         />
                                     </div>
                                 )}
@@ -333,11 +333,11 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                             </button>
                         </div>
 
-                        <h3 className="text-3xl font-bold text-white mb-8">Customize your quiz experience.</h3>
+                        <h3 className="text-3xl font-bold dark:text-white text-black mb-8">Customize your quiz experience.</h3>
 
                         <form onSubmit={handleSubmit} className="space-y-3 w-[341px]">
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                <label className="block text-sm font-medium dark:text-gray-300 text-black mb-2">
                                     Number of Questions
                                 </label>
                                 <input
@@ -347,20 +347,20 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                     onChange={handleInputChange}
                                     min="5"
                                     max="30"
-                                    className="w-full bg-[#232323] border border-[#333] rounded-lg p-3 text-white text-sm focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]"
+                                    className="w-full dark:bg-[#232323] bg-white border dark:border-[#333] border-[#D4D4D4] rounded-lg p-3 dark:text-white text-black text-sm focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                <label className="block text-sm font-medium text-black dark:text-gray-300 mb-2">
                                     Difficulty
                                 </label>
                                 <select
                                     name="step2.difficulty"
                                     value={formData.step2.difficulty}
                                     onChange={handleInputChange}
-                                    className="w-full bg-[#232323] border border-[#333] rounded-lg p-3 text-white text-sm focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]"
+                                    className="w-full dark:bg-[#232323] bg-white border dark:border-[#333] border-[#D4D4D4] rounded-lg p-3 dark:text-white text-black text-sm focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]"
                                 >
                                     <option value="Easy">Easy</option>
                                     <option value="Medium">Medium</option>
@@ -369,14 +369,14 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                <label className="block text-sm font-medium dark:text-gray-300 text-black mb-2">
                                     Focus Area
                                 </label>
                                 <select
                                     name="step2.focusArea"
                                     value={formData.step2.focusArea}
                                     onChange={handleInputChange}
-                                    className="w-full bg-[#232323] border border-[#333] rounded-lg p-3 text-white text-sm focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]"
+                                    className="w-full dark:bg-[#232323] bg-white border dark:border-[#333] border-[#D4D4D4] rounded-lg p-3 dark:text-white text-black text-sm focus:border-[#FF3D00] focus:ring-1 focus:ring-[#FF3D00]"
                                 >
                                     <option value="">If material is selected, select the focus</option>
                                     <option value="concepts">Key Concepts</option>
@@ -385,7 +385,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                 </select>
                             </div>
 
-                            <div className="border-t border-[#333] pt-4">
+                            <div className="dark:border-t border-[#333] pt-4">
                                 <button
                                     type="button"
                                     onClick={handleNext}
@@ -403,7 +403,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                         <div className="flex items-center justify-between mb-4">
                             <button
                                 onClick={handleBack}
-                                className="flex items-center text-gray-400 hover:text-white transition-colors"
+                                className="flex items-center text-black dark:text-gray-400 hover:text-white transition-colors"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -422,20 +422,20 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
 
                         <div className="space-y-6">
                             <div>
-                                <h3 className="text-2xl font-bold text-white mb-2">Ready to quiz?</h3>
-                                <p className="text-gray-400 text-sm">All done...</p>
+                                <h3 className="text-2xl font-bold text-black dark:text-white mb-2">Ready to quiz?</h3>
+                                <p className="text-black dark:text-gray-400 text-sm">All done...</p>
                             </div>
 
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div className="space-y-4">
                                     {/* Preview of selected options */}
-                                    <div className="bg-[#1E1E1E] p-4 rounded-lg border border-[#333]">
+                                    <div className="dark:bg-[#1E1E1E] bg-white p-4 rounded-lg border border-[#333]">
                                         <h4 className="text-[#FF3D00] text-sm font-medium mb-3">Quiz Preview</h4>
 
                                         <div className="space-y-3">
                                             <div className="flex justify-between">
-                                                <span className="text-gray-400">Source:</span>
-                                                <span className="text-white">
+                                                <span className="text-black dark:text-gray-400">Source:</span>
+                                                <span className="text-black dark:text-white">
                                                     {formData.step3.source === 'all'
                                                         ? 'All Materials'
                                                         : materials.find(m => m.id === formData.step3.source)?.name || 'N/A'}
@@ -443,8 +443,8 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                             </div>
 
                                             <div className="flex justify-between">
-                                                <span className="text-gray-400">Question Type:</span>
-                                                <span className="text-white capitalize">
+                                                <span className="text-black dark:text-gray-400">Question Type:</span>
+                                                <span className="text-black dark:text-white capitalize">
                                                     {formData.step3.questionType === 'mcq' ? 'Multiple Choice' :
                                                         formData.step3.questionType === 'true_false' ? 'True/False' :
                                                             formData.step3.questionType === 'short_answer' ? 'Short Answer' :
@@ -453,13 +453,13 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                             </div>
 
                                             <div className="flex justify-between">
-                                                <span className="text-gray-400">Number of Questions:</span>
-                                                <span className="text-white">{formData.step3.numQuestions}</span>
+                                                <span className="text-black dark:text-gray-400">Number of Questions:</span>
+                                                <span className="text-black dark:text-white">{formData.step3.numQuestions}</span>
                                             </div>
 
                                             <div className="flex justify-between">
-                                                <span className="text-gray-400">Total Time:</span>
-                                                <span className="text-white">
+                                                <span className="text-black dark:text-gray-400">Total Time:</span>
+                                                <span className="text-black dark:text-white">
                                                     {formData.step1.isTimed === 'yes'
                                                         ? `${formData.step1.timePerQuestion} seconds`
                                                         : 'No time limit'}
@@ -468,8 +468,8 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
 
                                             {formData.step3.focusArea && (
                                                 <div className="flex justify-between">
-                                                    <span className="text-gray-400">Focus Area:</span>
-                                                    <span className="text-white capitalize">
+                                                    <span className="text-black dark:text-gray-400">Focus Area:</span>
+                                                    <span className="text-black dark:text-white capitalize">
                                                         {formData.step3.focusArea === 'concepts' ? 'Key Concepts' :
                                                             formData.step3.focusArea === 'examples' ? 'Examples & Applications' :
                                                                 formData.step3.focusArea === 'theorems' ? 'Theorems & Proofs' : ''}
@@ -478,18 +478,18 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                             )}
 
                                             <div className="flex justify-between">
-                                                <span className="text-gray-400">Difficulty:</span>
-                                                <span className="text-white capitalize">{formData.step2.difficulty.toLowerCase()}</span>
+                                                <span className="text-black dark:text-gray-400">Difficulty:</span>
+                                                <span className="text-black dark:text-white capitalize">{formData.step2.difficulty.toLowerCase()}</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="text-sm text-gray-400 text-center py-2">
+                                    <div className="text-sm text-black dark:text-gray-400 text-center py-2">
                                         Review your quiz settings. Click &quot;Generate Quiz&quot; to create your quiz.
                                     </div>
                                 </div>
 
-                                <div className="border-t border-[#333] pt-6">
+                                <div className="dark:border-t border-[#333] pt-6">
                                     <button
                                         type="submit"
                                         className="w-full py-4 bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-bold uppercase rounded-lg transition-colors flex items-center justify-center space-x-2"
@@ -509,7 +509,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                     <button
                                         type="button"
                                         onClick={handleBack}
-                                        className="w-full mt-3 py-2 text-gray-400 hover:text-white text-sm font-medium"
+                                        className="w-full mt-3 py-2 dark:text-gray-400 text-black hover:text-white text-sm font-medium"
                                     >
                                         Back to Edit
                                     </button>
@@ -520,19 +520,18 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
             case 4:
                 return (
                     <div className="p-6 flex flex-col items-center justify-center h-full">
-                        <Edit />
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF3D00] mb-4"></div>
-                        <h3 className="text-xl font-bold text-white mb-2">Assembling questions...</h3>
-                        <p className="text-gray-400 text-center">Please wait while we prepare your quiz. This may take a moment.</p>
+                        <h3 className="text-xl font-bold text-black dark:text-white mb-2">Assembling questions...</h3>
+                        <p className="text-black dark:text-gray-400 text-center">Please wait while we prepare your quiz. This may take a moment.</p>
                     </div>
                 )
             case 5:
                 return (
-                    <div className="p-6 text-white max-w-[440px] mx-auto">
+                    <div className="p-6 dark:text-white text-black max-w-[440px] mx-auto">
                         {/* Header */}
                         <div className="text-center mb-8">
                             <h2 className="text-2xl font-bold mb-2">Quiz Generated!</h2>
-                            <p className="text-gray-400">
+                            <p className="dark:text-gray-400 text-black">
                                 Your quiz is ready to go. You can start now,
                                 <span
                                     className="underline cursor-pointer hover:text-white"
@@ -544,7 +543,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                     review the questions
                                 </span>, or
                                 <span
-                                    className="underline cursor-pointer hover:text-white"
+                                    className="underline cursor-pointer dark:hover:text-white"
                                     onClick={async () => {
                                         try {
                                             const quizUrl = `${window.location.origin}/quiz/${generatedQuiz?.id}`;
@@ -567,11 +566,11 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                         {/* Quiz Metadata */}
                         <div className="mb-8">
                             <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-xl font-semibold">
+                                <h3 className="text-xl font-semibold text-black dark:text-white">
                                     {formData.step1.topic || 'Untitled Quiz'}
                                 </h3>
                                 <button
-                                    className="text-gray-400 hover:text-white"
+                                    className="text-black dark:text-gray-400 hover:text-white"
                                     onClick={() => {
                                         // TODO: Implement edit quiz functionality
                                         toast('Edit quiz coming soon!');
@@ -585,19 +584,19 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
 
                             <ul className="space-y-4">
                                 <li className="flex justify-between items-center">
-                                    <div className="flex items-center space-x-2 text-gray-400">
+                                    <div className="flex items-center space-x-2 text-black dark:text-gray-400">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                             <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
                                         </svg>
                                         <span>Source:</span>
-                                        <span className="text-white">
+                                        <span className="text-black dark:text-white">
                                             {formData.step3.source === 'all'
                                                 ? 'All Materials'
                                                 : materials.find(m => m.id === formData.step3.source)?.name || 'Unknown'}
                                         </span>
                                     </div>
                                     <button
-                                        className="text-gray-400 hover:text-white"
+                                        className="text-black dark:text-gray-400 hover:text-white"
                                         onClick={() => {
                                             const source = formData.step3.source === 'all'
                                                 ? 'All materials in the workspace'
@@ -612,12 +611,12 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                 </li>
 
                                 <li className="flex justify-between items-center">
-                                    <div className="flex items-center space-x-2 text-gray-400">
+                                    <div className="flex items-center space-x-2 text-black dark:text-gray-400">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                             <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                                         </svg>
                                         <span>Created:</span>
-                                        <span className="text-white">
+                                        <span className="text-black dark:text-white">
                                             {new Date().toLocaleDateString('en-US', {
                                                 year: 'numeric',
                                                 month: 'long',
@@ -626,7 +625,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                         </span>
                                     </div>
                                     <button
-                                        className="text-gray-400 hover:text-white"
+                                        className="text-black dark:text-gray-400 hover:text-white"
                                         onClick={() => {
                                             // TODO: Implement refresh functionality
                                             toast('Refreshing...');
@@ -639,15 +638,15 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                 </li>
 
                                 <li className="flex justify-between items-center">
-                                    <div className="flex items-center space-x-2 text-gray-400">
+                                    <div className="flex items-center space-x-2 text-black dark:text-gray-400">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 10.414V14a1 1 0 102 0v-3.586l1.293 1.293a1 1 0 001.414-1.414z" clipRule="evenodd" />
                                         </svg>
                                         <span>Status:</span>
-                                        <span className="text-white">Ready to start</span>
+                                        <span className="text-black dark:text-white">Ready to start</span>
                                     </div>
                                     <button
-                                        className="text-gray-400 hover:text-white"
+                                        className="text-black dark:text-gray-400 hover:text-white"
                                         onClick={() => {
                                             // TODO: Implement delete functionality
                                             toast.info('Delete quiz coming soon!');
@@ -695,7 +694,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
                                         toast.error('Quiz ID not found');
                                     }
                                 }}
-                                className="flex-1 py-3 border border-gray-600 text-white bg-transparent hover:bg-gray-800 rounded-lg transition-colors flex items-center justify-center gap-2"
+                                className="flex-1 py-3 border border-gray-600 dark:text-white text-black hover:text-white bg-transparent hover:bg-gray-800 rounded-lg transition-colors flex items-center justify-center gap-2"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
@@ -711,11 +710,11 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
     }
 
     return (
-        <div className={`h-full w-[540px] bg-[#2C2C2C] z-[9999999] border-l border-[#333] transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'
+        <div className={`h-full min-w-[542px] dark:bg-[#2C2C2C] bg-[#F8F8F7] z-[9999999] border-l dark:border-[#333] transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'
             }`}>
             <div className="flex flex-col h-full">
-                <div className="flex justify-between items-center p-4 border-b border-[#333]">
-                    <h2 className="text-lg font-medium text-white">Create Quiz</h2>
+                <div className="flex justify-between items-center p-4 dark:border-b border-[#333]">
+                    <h2 className="text-lg font-medium dark:text-white text-black">Create Quiz</h2>
                     <button
                         onClick={onClose}
                         className="p-2 hover:bg-[#232323] rounded-full transition-colors"

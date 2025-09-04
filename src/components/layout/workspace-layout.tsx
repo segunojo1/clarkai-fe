@@ -39,6 +39,7 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
     const { user } = useUserStore()
     const { state: mainSidebarState, setOpen: setMainSidebarOpen } = useSidebar()
     const [workspaceOpen, setWorkspaceOpen] = useState(true)
+    
 
     useEffect(() => {
         const fetchWorkspaces = async () => {
@@ -73,7 +74,7 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
 
 
     return (
-        <div className={`flex h-full w-full ${isFlashcardModalOpen ? 'pr-[300px]' : ''} transition-all duration-300`}>
+        <div className={`flex h-full w-full transition-all duration-300`}>
             {/* Workspace Sidebar */}
             {workspaceOpen && (
             <div className="min-w-[235px] bg-gray-100 dark:bg-[#2c2c2c] pt-6 p-4 fixed min-h-screen h-full overflow-y-scroll">
@@ -134,8 +135,8 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
             </div>
             )}
 
-            {/* Main Content */}
-            <div className={` flex dark:bg-[#1a1a1a] bg-[#FAFAFA] text-white w-full justify-end !max-w-[calc(100vw)] ${workspaceOpen ? 'ml-[235px]' : 'ml-0'}`}>
+            {/* Main Content + Flashcard Panel (inline) */}
+            <div className={`flex dark:bg-[#1a1a1a] bg-[#FAFAFA] text-white w-full justify-end !max-w-[calc(100vw)] ${workspaceOpen ? 'ml-[235px]' : 'ml-0'}`}>
                 {!workspaceOpen && (
                   <div className="fixed left-0 top-0 p-2 z-20">
                     <Button
@@ -152,18 +153,23 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
                     </Button>
                   </div>
                 )}
-                {children}
-                {/* Flashcard Panel */}
-                <div className="fixed right-0 top-0 h-full z-50">
-                    <FlashcardPanel
+                <div className="flex w-full min-h-screen">
+                  <div className="flex-1 min-w-0">
+                    {children}
+                  </div>
+                  {isFlashcardModalOpen && (
+                    <div className="w-[452px] max-w-[542px] min-w-[360px]">
+                      <FlashcardPanel
                         isOpen={isFlashcardModalOpen}
                         onClose={() => {
-                            setIsFlashcardModalOpen(false)
-                            setSelectedFlashcardId(null)
+                          setIsFlashcardModalOpen(false)
+                          setSelectedFlashcardId(null)
                         }}
                         flashcards={selectedFlashcards}
                         flashcardId={selectedFlashcardId}
-                    />
+                      />
+                    </div>
+                  )}
                 </div>
                 {/* <SlidingPanel
                 isOpen={isQuizPanelOpen}

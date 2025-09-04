@@ -12,6 +12,8 @@ interface GenerateQuizParams {
   file_id?: string;
   difficulty?: QuizDifficulty;
   duration?: number;
+  context: string;
+  is_context?: boolean
 }
 
 interface QuizQuestion {
@@ -118,7 +120,9 @@ class QuizService {
         mode: params.mode,
         file_id: params.file_id,
         difficulty: params.difficulty || 'medium',
-        duration: params.duration // Add duration to the request
+        duration: params.duration,
+        context: params.context,
+        is_context: params.is_context
       });
 
       if (!response.data.success) {

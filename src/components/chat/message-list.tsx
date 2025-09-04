@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChatMessage } from "@/lib/types";
 import type { FileAttachment as FileAttachmentType } from '@/lib/types';
-import { ChevronRight, Copy, FileText, Link, LucideSpeaker, Speaker, SpeakerIcon, StopCircle, Volume1, Volume1Icon, Volume2 } from 'lucide-react';
+import { ChevronRight, Copy, FileText, Link as LinkIcon, StopCircle, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PDFViewer } from './pdf-viewer';
 import UserAvatar from '../user-avatar';
@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { useSidebar } from '../ui/sidebar';
 import MarkdownRenderer from '../markdown-renderer';
 import { useWorkspaceStore } from '@/store/workspace.store';
-import chatService from '@/services/chat.service';
+import Link from 'next/link'
 
 // const isFile = (obj: unknown): obj is File => {
 //   if (obj instanceof File) return true;
@@ -29,7 +29,7 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
   const [showPdfViewer, setShowPdfViewer] = useState(false);
   const fileUrlRef = useRef<string>('');
   const { setOpen } = useSidebar()
-  
+
 
   // Create object URL for the file
   useEffect(() => {
@@ -79,7 +79,7 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
     // if (file.url) {
     //   const resp = await chatService.getObjectUrlFromLink(file.url)
     //   console.log(resp);
-      
+
     // }
     if (file instanceof File) {
       return fileUrlRef.current || URL.createObjectURL(file);
@@ -94,18 +94,18 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
     <>
       <div className="mt-2 flex flex-col items-start gap-2">
         {
-           (
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-gray-700 dark:text-gray-300 flex items-center gap-2"
-            onClick={handleOpenInCanvas}
-          >
-            View in Canvas
-            <ChevronRight />
-          </Button>
-        </div>
+          (
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-700 dark:text-gray-300 flex items-center gap-2"
+                onClick={handleOpenInCanvas}
+              >
+                View in Canvas
+                <ChevronRight />
+              </Button>
+            </div>
           )
         }
         <div className="bg-gray-50 p-3 rounded-lg dark:bg-[#404040] flex flex-col items-center gap-2">
@@ -209,7 +209,7 @@ export function ChatMessageList({
 }) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [speakingText, setSpeakingText] = useState<string | null>(null);
-  const {setSelectedFlashcards, setIsFlashcardModalOpen, setSelectedFlashcardId} = useWorkspaceStore()
+  const { setSelectedFlashcards, setIsFlashcardModalOpen, setSelectedFlashcardId, isQuizPanelOpen, setIsQuizPanelOpen } = useWorkspaceStore()
   // const [selectedFlashcards, setSelectedFlashcards] = useState<FlashcardData[]>([]);
   // const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
   // const [selectedFlashcardId, setSelectedFlashcardId] = useState<string | null>(null);
@@ -236,7 +236,7 @@ export function ChatMessageList({
   //       // Fetch flashcards from the workspace
   //       const workspaceService = (await import('@/services/workspace.service')).default;
   //       const flashcards = await workspaceService.fetchWorkspaceFlashcards(workspaceId);
-        
+
   //       if (flashcards && flashcards.length > 0) {
   //         // Transform the API response to match the FlashcardData format
   //         const formattedFlashcards = flashcards.map((card: any) => ({
@@ -244,7 +244,7 @@ export function ChatMessageList({
   //           answer: `Created on: ${new Date(card.createdAt).toLocaleDateString()}`,
   //           explanation: `Workspace: ${card.workspaceId}`
   //         }));
-          
+
   //         setSelectedFlashcards(formattedFlashcards);
   //       } else {
   //         setSelectedFlashcards([{
@@ -310,12 +310,12 @@ export function ChatMessageList({
       )}
       <div className='max-w-3xl w-full mx-auto'>
         {messages.map((message) => {
-          const isFlashcardMessage = message.metadata?.type === 'flashcards' || 
-            (message.fromUser && message.text.includes('@flashcard')) || 
+          const isFlashcardMessage = message.metadata?.type === 'flashcards' ||
+            (message.fromUser && message.text.includes('@flashcard')) ||
             (!message.fromUser && message.text.includes('Flashcard'));
           const cleanedText = markdownToPlainText(message.text);
           const isSpeakingThis = speakingText === cleanedText;
-          
+
           return (
             <div key={`${message.role}`} className={cn({
               ' rounded-lg transition-colors': isFlashcardMessage
@@ -336,10 +336,12 @@ export function ChatMessageList({
 
                   {
                     message.isFile && message.fromUser && !message.attachments && (
-                      <FileAttachmentPreview file={{name: message.text,
+                      <FileAttachmentPreview file={{
+                        name: message.text,
                         type: message.filePath,
-                        url:message.filePath,
-                        size: message.size}} />
+                        url: message.filePath,
+                        size: message.size
+                      }} />
                     )
                   }
 
@@ -393,28 +395,50 @@ export function ChatMessageList({
                 </div>
               </div>
               {isFlashcardMessage && message.isFlashcard && message.flashcardId && (
-                <div 
+                <div
                   className="mt-2 ml-14 mb-4 cursor-pointer"
                   onClick={() => {
                     console.log('Opening flashcard with ID:', message.flashcardId);
                     setSelectedFlashcards([]);
                     setSelectedFlashcardId(message.flashcardId);
                     setIsFlashcardModalOpen(true);
+                    setIsQuizPanelOpen(false);
                   }}
-                > 
+                >
                   <div className=" bg-[#BCB3B0] p-4 border border-[#d4d4d439] w-fit rounded-[10px] dark:bg-[#2C2C2C] hover:bg-gray-100 dark:hover:bg-[#4a4a4a] transition-colors">
                     <h4 className="text-sm font-bold text-gray-900 dark:text-[#D4D4D4] mb-2">
                       Flashcard Pack Generated
                     </h4>
                     <div className="mt-[10px]">
                       <div className="text-sm font-bold gap-1 flex items-center dark:text-[#D4D4D4] w-fit p-[6px] bg-[#404040] text-center rounded-[4px]">
-                        <Link width={16} className="mr-1" /> Open Flashcards
+                        <LinkIcon width={16} className="mr-1" /> Open Flashcards
                       </div>
                     </div>
                   </div>
                 </div>
               )}
-              
+
+              {message.isQuiz && message.quizId && (
+                <div
+                  className="mt-2 ml-14 mb-4 cursor-pointer "
+                  onClick={() => {
+                    console.log('Opening flashcard with ID:', message.quizId);
+
+                    setIsQuizPanelOpen(false);
+                  }}
+                >
+                  <div className=" bg-[#BCB3B0] min-w-[200px] p-4 border border-[#d4d4d439] w-fit rounded-[10px] dark:bg-[#2C2C2C] dark:hover:bg-gray-100 hover:bg-[#4a4a4a] transition-colors">
+                    <h4 className="text-sm font-bold text-gray-900 dark:text-[#D4D4D4] mb-2">
+                      Quiz Generated
+                    </h4>
+                    <div className="mt-[10px]">
+                      <div className="text-sm font-bold gap-1 flex items-center dark:text-[#D4D4D4] w-full p-[6px] bg-[#404040] text-center rounded-[4px]">
+                        <Link href={`/quiz/${message.quizId}`} className="flex items-center gap-1"> <LinkIcon width={16} className="mr-1" /> Open Quiz   </Link>                   </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {message.text === 'Generating flashcards...' && (
                 <div className="mt-2 ml-14">
                   <div className="bg-gray-50 p-4 rounded-lg dark:bg-[#404040] flex flex-col items-center gap-2">
@@ -435,7 +459,7 @@ export function ChatMessageList({
             </div>
           );
         })}
-        
+
         {isLoading && (
           <div className="flex items-center justify-center">
             <div className="flex gap-2">
@@ -446,7 +470,7 @@ export function ChatMessageList({
           </div>
         )}
 
-        
+
         {/* <FlashcardPanel 
           isOpen={isFlashcardModalOpen} 
           onClose={() => {

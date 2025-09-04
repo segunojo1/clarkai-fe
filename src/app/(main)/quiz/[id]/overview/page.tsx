@@ -107,7 +107,29 @@ const Overview = () => {
       setLeaderboardLoading(true);
       const response = await quizService.getQuizLeaderboard(id as string) as LeaderboardResponse;
       if (response.success) {
-        setLeaderboard(response.leaderboard);
+        // Sort by highest score and recompute ranks locally
+        const sorted = [...response.leaderboard].sort((a, b) => {
+          // Primary: score descending
+          if (b.score !== a.score) return b.score - a.score;
+          // Secondary: percentage descending (percentage may be a string like "85" or "85%")
+          const parsePct = (p: string) => parseFloat(String(p).replace('%', '')) || 0;
+          const pctDiff = parsePct(b.percentage) - parsePct(a.percentage);
+          if (pctDiff !== 0) return pctDiff;
+          // Tertiary: if timeTaken is numeric-like in seconds; otherwise keep stable
+          const toSeconds = (t?: string | null) => {
+            if (!t) return Number.MAX_SAFE_INTEGER;
+            // support formats like "MM:SS" or raw seconds
+            if (/^\d+:\d{2}$/.test(t)) {
+              const [m, s] = t.split(':').map(Number);
+              return (m || 0) * 60 + (s || 0);
+            }
+            const n = Number(t);
+            return isNaN(n) ? Number.MAX_SAFE_INTEGER : n;
+          };
+          return toSeconds(a.timeTaken) - toSeconds(b.timeTaken);
+        }).map((entry, idx) => ({ ...entry, rank: idx + 1 }));
+
+        setLeaderboard(sorted);
         if (response.totalParticipants !== undefined && response.averageScore !== undefined) {
           setStats({
             totalParticipants: response.totalParticipants,
@@ -157,7 +179,8 @@ const Overview = () => {
             userEmail: response.userScore.userEmail,
             quizSource: response.quiz.quizSource,
             quizSourceType: response.quiz.quizSourceType,
-            createdAt: response.quiz.createdAt
+            createdAt: response.quiz.createdAt,
+            
           });
         }
       } catch (error) {
@@ -187,10 +210,10 @@ const Overview = () => {
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <div className="text-red-500 mb-4">{'Failed to load quiz results'}</div>
         <button
-          onClick={() => router.push('/dashboard')}
+          onClick={() => router.back()}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
-          Back to Dashboard
+          Back
         </button>
       </div>
     );
@@ -217,7 +240,7 @@ const Overview = () => {
                 <div className="space-y-2">
                   <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                     <BarChart2 className="w-4 h-4 mr-2 flex-shrink-0" />
-                    <span>Class average - 86% of 27</span>
+                    <span>Class average -  of </span>
                   </div>
                   <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                     <FileText className="w-4 h-4 mr-2 flex-shrink-0" />
@@ -235,7 +258,7 @@ const Overview = () => {
                   </div>
                   <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                     <Clock className="w-4 h-4 mr-2 flex-shrink-0" />
-                    <span>Avg Time Taken - 07:00 mins</span>
+                    <span>Avg Time Taken -  mins</span>
                   </div>
                   <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                     <Award className="w-4 h-4 mr-2 flex-shrink-0" />

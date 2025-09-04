@@ -9,7 +9,7 @@ export const handleGoogleSignIn = async () => {
     console.log("Starting Google sign-in");
     
     // Clear any existing auth data
-    Cookies.remove("token");
+    // Cookies.remove("token");
     sessionStorage.removeItem("google_oauth_token");
     sessionStorage.removeItem("is_oauth_signup");
     

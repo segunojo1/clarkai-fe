@@ -337,9 +337,13 @@ class AuthService {
     }
   }
 
-  public async googleLogin({email, name, image_url}: {email: string, name: string, image_url: string}) {
+  public async googleLogin({ email, name, image_url }: { email: string; name: string; image_url: string }): Promise<{ user: any; token: string }> {
     try {
-      const response = await this.api.post<{ email: string; name: string; image_url: string }>('/googleLogin', { email, name, image_url });
+      // Backend is expected to return an auth token and user object
+      const response = await this.api.post<{ user: any; token: string }>(
+        '/googleLogin',
+        { email, name, image_url }
+      );
       return response.data;
     } catch (error: unknown) {
       let errorMessage = 'Google login failed';
@@ -348,6 +352,7 @@ class AuthService {
         const axiosError = error as { response?: { data?: { message?: string } } };
         errorMessage = axiosError.response?.data?.message || errorMessage;
       }
+      // Handle standard Error
       else if (error instanceof Error) {
         errorMessage = error.message || errorMessage;
       }

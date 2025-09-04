@@ -66,6 +66,8 @@ interface WorkspaceStore {
     isLoading: boolean
     error: string | null
     askSource: string
+    isQuizPanelOpen: boolean
+    setIsQuizPanelOpen: (open: boolean) => void
     setAskSource: (source: string) => void
     getWorkspaces: () => Promise<void>
     createWorkspace: (name: string, description?: string) => Promise<void>
@@ -97,7 +99,11 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     selectedFlashcards: [],
     isFlashcardModalOpen: false,
     selectedFlashcardId: null,
-    askSource: 'ai',
+    askSource: 'materials',
+    isQuizPanelOpen: false,
+    setIsQuizPanelOpen: (open: boolean) => {
+        set({ isQuizPanelOpen: open })
+    },
     setAskSource: (source: 'ai' | 'materials') => {
         set({ askSource: source })
     },

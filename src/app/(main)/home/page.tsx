@@ -34,7 +34,7 @@ const HomePageContent = () => {
   const { theme } = useTheme();
   const { user } = useUserStore()
 
-  const handleSend = async (text: string, files?: File) => {
+  const handleSend = async (text: string, files?: File[]) => {
     setIsLoading(true)
     if (!text.trim()) return
     const { id } = await chatService.createChat();
@@ -43,7 +43,7 @@ const HomePageContent = () => {
     if (id) {
       await sendMessage(id, text, [], false, files)
     }
-    // await sendMessage(message)
+    // await sendMessage(message) 
   }
   return (
     <div className='w-full flex flex-col h-full items-center bg-[#FAFAFA] dark:bg-[#262626]'>

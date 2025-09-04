@@ -81,7 +81,7 @@ const Quiz = () => {
       } catch (error) {
         console.error('Failed to fetch quiz:', error);
         toast.error('Failed to load quiz. Please try again.');
-        router.push('/dashboard');
+        router.back();
       } finally {
         setLoading(false);
       }
@@ -240,12 +240,12 @@ const Quiz = () => {
   };
 
   return (
-    <div className='min-h-screen satoshi bg-[#1a1a1a]'>
-      <div className='p-[25px] sticky top-0 bg-[#1a1a1a] z-10 flex justify-between items-center'>
+    <div className='min-h-screen satoshi dark:bg-[#1a1a1a] bg-[#FAFAFA]'>
+      <div className='p-[25px] sticky top-0 dark:bg-[#1a1a1a] bg-[#FAFAFA] z-10 flex justify-between items-center'>
         <h2 className='text-[14px] font-bold'>{name || 'Untitled Quiz'}</h2>
         <button
           onClick={handleSubmit}
-          className='px-4 py-2 bg-[#FF3D00] text-white rounded-md text-sm font-medium hover:bg-[#FF4D1A] transition-colors'
+          className='px-4 py-2 bg-[#FF3D00] dark:text-white text-black rounded-md text-sm font-medium hover:bg-[#FF4D1A] transition-colors'
         >
           Submit Quiz
         </button>
@@ -262,7 +262,7 @@ const Quiz = () => {
                 return (
                 <div
                   key={question.id}
-                  className='py-6 px-4 sm:px-6 lg:px-8 bg-[#2C2C2C] rounded-[10px] flex flex-col items-start gap-6'
+                  className='py-6 px-4 sm:px-6 lg:px-8 dark:bg-[#2C2C2C] bg-white rounded-[10px] flex flex-col items-start gap-6'
                 >
                   <div className='w-full flex justify-between items-center'>
                     <h3 className='font-bold text-[18px]'>{question.question}</h3>
@@ -276,7 +276,7 @@ const Quiz = () => {
                       return (
                         <div key={optionIndex} className='flex items-center gap-[10px]'>
                           <Checkbox
-                            className="h-5 w-5 bg-[#262626] rounded-[5px] border boder-[#fafafa] focus:ring-0 focus:ring-offset-0 peer data-[state=checked]:bg-[#fafafa] data-[state=checked]:bg-[#fafafa] transition-colors duration-200"
+                            className="h-5 w-5 dark:bg-[#262626] bg-white rounded-[5px] border boder-[#fafafa] focus:ring-0 focus:ring-offset-0 peer data-[state=checked]:bg-[#fafafa] data-[state=checked]:bg-[#fafafa] transition-colors duration-200"
                             checked={selectedAnswers[question.id] === option}
                             onCheckedChange={() => handleAnswerSelect(question.id, option)}
                           />
@@ -308,8 +308,8 @@ const Quiz = () => {
         </div>
         <div className='lg:sticky lg:top-20 flex flex-col items-end gap-5 mt-6 lg:mt-0'>
           <div className='flex items-center gap-[10px]'>
-            <p className='font-bold text-[16px] text-[#D4D4D4]'>Time Left</p>
-            <div className='text-[20px] font-bold py-[6px] px-2 rounded-tr-[6px] rounded-br-[6px] bg-[#2C2C2C] min-w-[100px] text-center'>
+            <p className='font-bold text-[16px] dark:text-[#D4D4D4] text-black'>Time Left</p>
+            <div className='text-[20px] font-bold py-[6px] px-2 rounded-tr-[6px] rounded-br-[6px] dark:bg-[#2C2C2C] bg-white min-w-[100px] text-center'>
               {formatTime(timeLeft)}
             </div>
           </div>
@@ -319,10 +319,10 @@ const Quiz = () => {
                 key={i + 1}
                 className={`w-8 h-8 rounded-[4px] flex items-center justify-center text-sm font-medium ${
                   i >= (currentPage - 1) * questionsPerPage && i < currentPage * questionsPerPage
-                    ? 'bg-[#404040]'
+                    ? 'bg-[#404040] dark:text-[#2c2c2c] text-white'
                     : selectedAnswers[i + 1]
                     ? 'bg-[#ffffff] text-[#2c2c2c]'
-                    : 'bg-[#2c2c2c]'
+                    : 'bg-[#2c2c2c] dark:text-[#2c2c2c] text-white'
                 }`}
                 onClick={() => {
                   const questionNumber = i + 1;

@@ -29,6 +29,8 @@ export interface ChatMessage {
   updatedAt?: Date;
   attachments?: FileAttachment[];
   metadata?: ChatMessageMetadata;
+  isQuiz?: boolean;
+  quizId?: string;
 }
 
 export interface FileAttachment {
