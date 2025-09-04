@@ -75,9 +75,9 @@ const FileAttachmentPreview = ({ file }: { file: FileAttachmentType | File }) =>
 
   if (!file) return null;
 
-  const getFileUrl = async () => {
+  const getFileUrl = () => {
     // if (file.url) {
-    //   const resp = await chatService.getObjectUrlFromLink(file.url)
+    //   const resp = chatService.getObjectUrlFromLink(file.url)
     //   console.log(resp);
 
     // }
@@ -338,9 +338,12 @@ export function ChatMessageList({
                     message.isFile && message.fromUser && !message.attachments && (
                       <FileAttachmentPreview file={{
                         name: message.text,
-                        type: message.filePath,
-                        url: message.filePath,
-                        size: message.size
+                        // Provide a safe default MIME type; filePath is a path/URL, not a MIME type
+                        type: 'application/octet-stream',
+                        // Ensure we don't pass null where a string | undefined is expected
+                        url: message.filePath ?? undefined,
+                        // Coerce null size to undefined to satisfy the optional number type
+                        size: message.size ?? undefined
                       }} />
                     )
                   }

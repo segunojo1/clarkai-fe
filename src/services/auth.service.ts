@@ -42,7 +42,7 @@ export interface CompleteSignupPayload {
   department: string;
   interests: string;
   study_vibe: string[];
-  user_image?: string;
+  user_image?: File | null;
   is_google?: boolean;
 }
 
