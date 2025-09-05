@@ -7,7 +7,7 @@ import authService from "@/services/auth.service";
 import { useRouter, usePathname } from "next/navigation";
 import ThemeSwitcher from "../theme-switcher";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useChatStore } from "@/store/chat.store";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { WorkspaceCreationModal } from "../home/workspace-creation-modal";
@@ -29,6 +29,7 @@ export default function ClientLayout({
     const route = useRouter()
     const pathname = usePathname()
     const isWorkspacePage = pathname.startsWith('/workspaces')
+    const [isAuth, setIsAuth] = useState(false);
 
     const logout = async () => {
         await signOut({ redirect: false }); // prevent NextAuth auto-redirect
@@ -39,8 +40,8 @@ export default function ClientLayout({
     useEffect(() => {
         // Auth guard: redirect to login if missing token
         const token = Cookies.get('token');
-        if (!token) {
-            route.push('/auth/login');
+        if (token) {
+            setIsAuth(true)
             return;
         }
         const initializeData = async () => {
@@ -70,18 +71,22 @@ export default function ClientLayout({
                         {
                             !isWorkspacePage && (
                                 <div className="flex items-center gap-3">
-                                    
-                                    <SubscriptionStatus />
-                                    <Button
-                                        variant="outline"
-                                        onClick={logout}
-                                        className="border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
-                                    >
-                                        Logout
-                                    </Button>
-                                    <UploadMaterialModal workspaceId="22">
-                                    <h1>upload</h1>
-                                    </UploadMaterialModal>
+
+                                    {
+                                        isAuth && (
+                                            <div className="flex items-center gap-3">
+                                                <SubscriptionStatus />
+
+                                                <Button
+                                                    variant="outline"
+                                                    onClick={logout}
+                                                    className="border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                                >
+                                                    Logout
+                                                </Button>
+                                            </div>
+                                        )
+                                    }
 
                                     <ThemeSwitcher />
                                 </div>

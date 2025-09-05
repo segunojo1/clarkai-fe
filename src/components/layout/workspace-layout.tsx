@@ -200,7 +200,7 @@ const WorkspaceItem = ({ workspace }: { workspace: Workspace }) => {
                 <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-2">
                         <Globe width={19} height={19} color={workspace.tag ? workspace.tag : "#99a1af"} />
-                        {workspace.name}
+                        {workspace.name.slice(0, 20)}...
                     </div>
                     {expanded ? <ChevronUp className="w-4 h-4 transition-transform duration-200" /> : <ChevronDown className="w-4 h-4 transition-transform duration-200" />}
                 </div>

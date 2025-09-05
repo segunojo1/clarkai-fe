@@ -227,9 +227,9 @@ const WorkspacesPage = () => {
                         <div className="space-y-4 flex items-start flex-wrap">
                             {workspaces.map((workspace) => (
                                 <Link href={`/workspaces/${workspace.enc_id}`} className="" key={workspace.enc_id}>
-                                    <div className="dark:hover:bg-[#2C2C2C] hover:bg-[#F0F0EF] rounded-[14.6px] p-6 ">
+                                    <div className="dark:hover:bg-[#2C2C2C] flex flex-col items-center hover:bg-[#F0F0EF] rounded-[14.6px] p-6 ">
 
-                                        <div className="group flex justify-center  mb-[19.44px] relative">
+                                        <div className="group flex justify-center  max-w-[160px]  mb-[19.44px] relative">
                                             <Star className="absolute top-2 right-[13px] w-4 h-4 text-gray-400 hover:text-yellow-400 cursor-pointer transition-colors" />
                                             <WorkspaceDeleteDialog workspaceId={workspace.enc_id} />
                                             <Image
@@ -243,9 +243,9 @@ const WorkspacesPage = () => {
                                         </div>
 
                                         <div className="flex flex-col items-center">
-                                            <h3 className="dark:text-gray-300 text-black font-medium text-lg">{workspace.name}</h3>
+                                            <h3 className="dark:text-gray-300 text-black font-medium text-lg"> {workspace.name.length >= 15 ? workspace.name.slice(0, 15) + ".." : workspace.name}</h3>
                                             {workspace.description && (
-                                                <p className="dark:text-gray-400 text-black text-sm mt-1">{workspace.description}</p>
+                                                <p className="dark:text-gray-400 text-black text-sm mt-1"> {workspace.description.length >= 20 ? workspace.description.slice(0, 20) + ".." : workspace.description}</p>
                                             )}
                                         </div>
                                     </div>

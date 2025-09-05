@@ -92,24 +92,11 @@ export const LatestWorkspace = () => {
         );
     }
 
-    if (workspaces.length === 0) {
-        return (
-            <Card className="text-[#525252] dark:text-[#D4D4D4] bg-[#F0F0EF] dark:bg-[#404040] rounded-[10px] !p-[10px] h-[132px] w-[214px] shadow-none mx-auto">
-                <CardContent className=" flex flex-col items-center justify-between px-0 h-full">
-                    <Globe width={20} height={20} />
-                    <p className=" text-[12px]/[22px] font-medium satoshi text-center">Your workspaces will appear here once you create one.</p>
-                    <WorkspaceCreationModal>
-                        <Button className="min-w-full  bg-[#F8F8F7] dark:bg-[#2C2C2C] hover:bg-[#ffffff] text-[#525252] text-3 font-semibold">Start a workspace</Button>
-                    </WorkspaceCreationModal>
-                </CardContent>
-            </Card>
-        )
-    }
-
     // Show collapsed version when sidebar is collapsed
     if (state === "collapsed") {
         return (
             <div className="flex justify-center">
+                
                 <WorkspaceCreationModal>
                     <Button size="icon" className="bg-[#F8F8F7] dark:bg-[#2C2C2C] text-[#525252]">
                         <Globe width={20} height={20} />
@@ -120,34 +107,51 @@ export const LatestWorkspace = () => {
     }
 
     return (
-        <Card className="text-[#525252] dark:text-[#D4D4D4] bg-[#F0F0EF] dark:bg-[#404040] rounded-[10px] !p-[10px] h-[184px] w-[214px] shadow-none mx-auto">
-            <CardContent className=" flex flex-col items-center justify-between px-0 h-full">
-                <div className="flex flex-col w-full gap-2">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-[14px] font-medium">Workspaces</h2>
-                        <div className="flex gap-[10px] ">
+        <div>
+            {
+                workspaces.length == 0 ? (
+                    <Card className="text-[#525252] dark:text-[#D4D4D4] bg-[#F0F0EF] dark:bg-[#404040] rounded-[10px] !p-[10px] h-[132px] w-[214px] shadow-none mx-auto">
+                        <CardContent className=" flex flex-col items-center justify-between px-0 h-full">
+                            <Globe width={20} height={20} />
+                            <p className=" text-[12px]/[22px] font-medium satoshi text-center">Your workspaces will appear here once you create one.</p>
                             <WorkspaceCreationModal>
-                                <PlusIcon className="w-4 h-4" />
+                                <Button className="min-w-full  bg-[#F8F8F7] dark:bg-[#2C2C2C] hover:bg-[#ffffff] text-[#525252] text-3 font-semibold">Start a workspace</Button>
                             </WorkspaceCreationModal>
-                            <Link href="/workspaces">
-                                <ChevronDown className="h-4 w-4 -rotate-90" />
-                            </Link>
-                        </div>
-                    </div>
-                    <div className="flex flex-col overflow-y-scroll gap-1 h-[132px]">
-                        {workspaces.map((workspace) => (
-                            <Link href={`/workspaces/${workspace.enc_id}`} key={workspace.enc_id} className={`${pathname === workspace.enc_id ? "bg-[#ffffff]" : ""} flex items-center justify-between dark:bg-[#262626] gap-1 px-[10px] py-[5px] rounded-[5px]`}>
-                                <div className="flex items-center gap-2">
-                                    <Globe width={20} height={20} />
-                                    <p className="text-sm font-medium">{workspace.name}</p>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <Card className="text-[#525252] dark:text-[#D4D4D4] bg-[#F0F0EF] dark:bg-[#404040] rounded-[10px] !p-[10px] h-[184px] w-[214px] shadow-none mx-auto">
+                        <CardContent className=" flex flex-col items-center justify-between px-0 h-full">
+                            <div className="flex flex-col w-full gap-2">
+                                <div className="flex items-center justify-between">
+                                    <h2 className="text-[14px] font-medium">Workspaces</h2>
+                                    <div className="flex gap-[10px] ">
+                                        <WorkspaceCreationModal>
+                                            <PlusIcon className="w-4 h-4" />
+                                        </WorkspaceCreationModal>
+                                        <Link href="/workspaces">
+                                            <ChevronDown className="h-4 w-4 -rotate-90" />
+                                        </Link>
+                                    </div>
                                 </div>
-                                <ChevronRight className="h-4 w-4" />
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
+                                <div className="flex flex-col overflow-y-scroll gap-1 h-[132px]">
+                                    {workspaces.map((workspace) => (
+                                        <Link href={`/workspaces/${workspace.enc_id}`} key={workspace.enc_id} className={`${pathname === workspace.enc_id ? "bg-[#ffffff]" : ""} flex items-center justify-between dark:bg-[#262626] gap-1 px-[10px] py-[5px] rounded-[5px]`}>
+                                            <div className="flex items-center gap-2">
+                                                <Globe width={20} height={20} />
+                                                <p className="text-sm font-medium">{workspace.name}</p>
+                                            </div>
+                                            <ChevronRight className="h-4 w-4" />
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )
+            }
+        </div>
+
     );
 }
 

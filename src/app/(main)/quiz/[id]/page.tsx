@@ -81,7 +81,7 @@ const Quiz = () => {
       } catch (error) {
         console.error('Failed to fetch quiz:', error);
         toast.error('Failed to load quiz. Please try again.');
-        router.back();
+        // router.back();
       } finally {
         setLoading(false);
       }
@@ -230,7 +230,7 @@ const Quiz = () => {
     const result = await submitQuiz(guestData);
     if (result?.success) {
       setShowGuestModal(false);
-      router.push(`/workspaces`);
+      router.push(`/auth/login`);
     }
     return result;
   };
@@ -319,10 +319,10 @@ const Quiz = () => {
                 key={i + 1}
                 className={`w-8 h-8 rounded-[4px] flex items-center justify-center text-sm font-medium ${
                   i >= (currentPage - 1) * questionsPerPage && i < currentPage * questionsPerPage
-                    ? 'bg-[#404040] dark:text-[#2c2c2c] text-white'
+                    ? 'bg-[#404040] text-white'
                     : selectedAnswers[i + 1]
-                    ? 'bg-[#ffffff] text-[#2c2c2c]'
-                    : 'bg-[#2c2c2c] dark:text-[#2c2c2c] text-white'
+                    ? 'bg-[#ffffff] text-black'
+                    : 'bg-[#2c2c2c] text-white'
                 }`}
                 onClick={() => {
                   const questionNumber = i + 1;

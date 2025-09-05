@@ -145,7 +145,15 @@ class QuizService {
 
   public async getQuizById(quizId: string): Promise<GetQuizResponse> {
     try {
-      const response = await this.api.get<GetQuizResponse>(`/quiz/${quizId}`);
+      // Use a direct axios instance without interceptors to avoid sending auth token
+      const response = await axios.get<GetQuizResponse>(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/quiz/${quizId}`,
+        {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
       return {
         success: response.data.success,
         message: response.data.message,
