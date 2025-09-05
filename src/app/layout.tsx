@@ -3,7 +3,7 @@ import "./globals.css";
 // import "github-markdown.css";
 import { sfProRounded } from "./fonts";
 import { Providers } from "@/components/providers";
-
+import { Analytics } from "@vercel/analytics/next"
 
 
 export const metadata: Metadata = {
@@ -23,6 +23,7 @@ export default function RootLayout({
       >
         <Providers>
           {children}
+          <Analytics />
         </Providers>
       </body>
     </html>

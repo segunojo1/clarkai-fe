@@ -1,7 +1,7 @@
 // auth/reset/page.tsx
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
@@ -25,7 +25,7 @@ const resetPasswordSchema = z
     path: ["confirmPassword"],
   })
 
-const ResetPasswordPage = () => {
+const ResetPasswordContent = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get("token") || ""
@@ -106,6 +106,15 @@ const ResetPasswordPage = () => {
         </Form>
       </div>
     </AuthClientLayout>
+  )
+}
+
+// Wrapper component to satisfy Next.js requirement: useSearchParams must be within a Suspense boundary
+const ResetPasswordPage = () => {
+  return (
+    <Suspense fallback={null}>
+      <ResetPasswordContent />
+    </Suspense>
   )
 }
 
