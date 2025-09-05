@@ -362,6 +362,26 @@ class AuthService {
     }
   }
 
+  public async sendForgotPasswordMail({email, url}: {email: string, url: string}) {
+    try{
+      const response = await this.api.post('/forgotPassword', {email, url});
+      return response.data
+      
+    } catch(error){
+      throw error;
+    }
+  }
+
+  public async resetPassword({token, password}: {token: string, password: string}) {
+    try{
+      const response = await this.api.post('/resetPassword', {token, password});
+      return response.data
+      
+    } catch(error){
+      throw error;
+    }
+  }
+
   public logout(): void {
     // Remove auth token and user data from cookies
     Cookies.remove('token');

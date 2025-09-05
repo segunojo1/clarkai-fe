@@ -23,6 +23,7 @@ import useAuthStore from "@/store/auth.store"
 
 const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false)
+  const [isForgotLoading, setIsForgotLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
   const route = useRouter()
   const { data: session, status } = useSession()
@@ -143,6 +144,25 @@ const LoginForm = () => {
     }
   }
 
+  const handleForgotPassword = async () => {
+    const email = form.getValues("email")
+    if (!email) {
+      toast.error("Please enter your email above first")
+      return
+    }
+    try {
+      setIsForgotLoading(true)
+      const resetBaseUrl = typeof window !== 'undefined' ? `${window.location.origin}/auth/reset` : 'https://clarkai-fe.vercel.app/auth/reset'
+      await authService.sendForgotPasswordMail({ email, url: resetBaseUrl })
+      toast.success("Password reset email sent. Please check your inbox.")
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send reset email'
+      toast.error(errorMessage)
+    } finally {
+      setIsForgotLoading(false)
+    }
+  }
+
   // Show a full-screen loading state during OAuth callback or while session is resolving
   if (isGoogleLoading || status === 'authenticated' || status === 'loading') {
     return (
@@ -190,6 +210,16 @@ const LoginForm = () => {
                 </FormItem>
               )}
             />
+            <div className="flex justify-end -mt-2">
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="text-sm text-[#FF3D00] hover:underline disabled:opacity-50"
+                disabled={isForgotLoading}
+              >
+                {isForgotLoading ? 'Sending reset email...' : 'Forgot password?'}
+              </button>
+            </div>
             <div className="relative flex items-center">
               <div className="w-full border-t border-[#D4D4D4]"></div>
             </div>

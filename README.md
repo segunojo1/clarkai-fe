@@ -91,3 +91,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Developed with a passion for making education more accessible and efficient
 print("hi")
 pri()
+practice py
