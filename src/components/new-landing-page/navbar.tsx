@@ -6,7 +6,7 @@ import Link from 'next/link'
 
 const Navbar = () => {
   return (
-    <nav className='flex items-center justify-between px-6 py-4'>
+    <nav className='flex items-center justify-between fixed w-full px-6 py-4'>
         <div className='flex items-center'>
           <img src='/assets/orange.png' alt='Logo' className='h-8 w-8 ' />
           <div className='w-[1px] h-[25px] bg-[#A3A3A3] mx-3' />
@@ -29,7 +29,7 @@ const Navbar = () => {
             </div>
 
             <div className='md:flex hidden'>
-                <ul className='flex items-center gap-[3px]'>
+                <ul className='flex items-center gap-[3px] text-white tracking-[-0.72px]'>
                     <li className='gap-[10px] flex items-center p-[5px] px-3'><div className='w-[18px] h-[18px] rounded-[4.5px] bg-[#404040]'></div><Link href='/story'>Story</Link></li>
                     <li className='gap-[10px] flex items-center p-[5px] px-3'><div className='w-[18px] h-[18px] rounded-[4.5px] bg-[#404040]'></div><Link href='/features'>Features</Link></li>
                     <li className='gap-[10px] flex items-center p-[5px] px-3'><div className='w-[18px] h-[18px] rounded-[4.5px] bg-[#404040]'></div><Link href='/pricing'>Pricing</Link></li>

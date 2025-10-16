@@ -1,9 +1,10 @@
+import Hero from "@/components/new-landing-page/hero";
 import Navbar from "@/components/new-landing-page/navbar";
 
 
 export default function Home() {
   return (
-    <div className="satoshi">
+    <div className="satoshi bg-[#262626]">
       {/* <main className="bg-[#F8F8F8]">
         <Hero />
         <WhyClark />
@@ -12,6 +13,7 @@ export default function Home() {
       </main>
       <Footer /> */}
       <Navbar />
+      <Hero />
     </div>
   );
 }
