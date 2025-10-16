@@ -243,3 +243,9 @@
   display: block;
   margin: 1em 0;
 }
+.reveal-text{
+  margin-bottom: 75px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}

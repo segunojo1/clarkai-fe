@@ -1,3 +1,4 @@
+import ClarkStory from "@/components/new-landing-page/clark-story";
 import Hero from "@/components/new-landing-page/hero";
 import Navbar from "@/components/new-landing-page/navbar";
 
@@ -14,6 +15,7 @@ export default function Home() {
       <Footer /> */}
       <Navbar />
       <Hero />
+      <ClarkStory />
     </div>
   );
 }
