@@ -91,7 +91,7 @@ const ScrollReveal = () => {
         {
           borderBottomWidth: "0%",
           opacity: 0.15,
-          y: 30
+          y: 30,
         },
         {
           borderBottomWidth: "100%",
@@ -113,7 +113,7 @@ const ScrollReveal = () => {
         ".star",
         {
           opacity: 0.15,
-          scale: 0.7
+          scale: 0.7,
         },
         {
           borderBottomWidth: "100%",
@@ -133,19 +133,18 @@ const ScrollReveal = () => {
         }
       );
 
-
       gsap.fromTo(
         ".wind",
         {
           opacity: 0.15,
-          scale: 0.7, 
-          y: 30
+          scale: 0.7,
+          y: 30,
         },
         {
           borderBottomWidth: "100%",
           opacity: 1,
           rotate: 360,
-          scale: 1.2, 
+          scale: 1.2,
           y: 0,
           duration: 1,
           ease: "power2.out",
@@ -166,7 +165,7 @@ const ScrollReveal = () => {
     <div ref={container} className="">
       <div
         id="txts"
-        className="satoshi text-[33px] md:text-[45px]/normal font-medium flex flex-col text-[#fafafa] text-start max-w-[1073px] mx-auto leading-[-1.8px]"
+        className="satoshi text-[33px] md:text-[45px]/normal font-medium flex flex-col text-[#fafafa] text-start  leading-[-1.8px]"
       >
         <span className="reveal-text satoshi flex ">
           When we were kids,
@@ -239,7 +238,9 @@ const ScrollReveal = () => {
           mastering knowledge.
         </span>
 
-        <span className="reveal-text items-center "> And Clark makes it effortless. 
+        <span className="reveal-text items-center ">
+          {" "}
+          And Clark makes it effortless.
           <span className="relative">
             <Image
               src="/assets/wind.svg"
@@ -248,11 +249,14 @@ const ScrollReveal = () => {
               width={55}
               height={55}
             />
-            </span>
+          </span>
         </span>
-        <span className="reveal-text text-[#5AB864]">Built by students, for students. </span>
+        <span className="reveal-text text-[#5AB864]">
+          Built by students, for students.{" "}
+        </span>
         <span className="reveal-text"> — Sheriff, Seyi & Segun 💙</span>
       </div>
+      
     </div>
   );
 };

@@ -1,7 +1,7 @@
+import ClarkFeatures from "@/components/new-landing-page/clark-feats";
 import ClarkStory from "@/components/new-landing-page/clark-story";
 import Hero from "@/components/new-landing-page/hero";
 import Navbar from "@/components/new-landing-page/navbar";
-
 
 export default function Home() {
   return (
@@ -13,9 +13,14 @@ export default function Home() {
         <Collab />
       </main>
       <Footer /> */}
-      <Navbar />
-      <Hero />
-      <ClarkStory />
+      <div id="smooth-wrapper">
+        <div id="smooth-content" className="bg-[#262626]">
+          <Navbar />
+          <Hero />
+          <ClarkStory />
+          <ClarkFeatures />
+        </div>
+      </div>
     </div>
   );
 }
