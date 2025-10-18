@@ -4,6 +4,7 @@ import ClarkChat from "@/components/new-landing-page/ClarkChat";
 import Hero from "@/components/new-landing-page/hero";
 import Navbar from "@/components/new-landing-page/navbar";
 import ShareVibe from "@/components/new-landing-page/share-vibe";
+import SignIt from "@/components/new-landing-page/sign-it";
 
 export default function Home() {
   return (
@@ -23,6 +24,7 @@ export default function Home() {
           <ClarkFeatures />
           <ClarkChat />
           <ShareVibe />
+          <SignIt />
         </div>
       </div>
     </div>
