@@ -31,7 +31,7 @@ const ClarkFeatures = () => {
   }, []);
 
   return (
-    <section className="bg-white pt-[100px] ">
+    <section className="bg-white py-[100px] ">
       <div className=" max-w-[1240px] mx-auto">
         <div className="flex justify-between mb-[50px] items-center">
           <ArrowDown width={36} height={45} strokeWidth={6.3} />

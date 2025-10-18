@@ -1,7 +1,9 @@
 import ClarkFeatures from "@/components/new-landing-page/clark-feats";
 import ClarkStory from "@/components/new-landing-page/clark-story";
+import ClarkChat from "@/components/new-landing-page/ClarkChat";
 import Hero from "@/components/new-landing-page/hero";
 import Navbar from "@/components/new-landing-page/navbar";
+import ShareVibe from "@/components/new-landing-page/share-vibe";
 
 export default function Home() {
   return (
@@ -19,6 +21,8 @@ export default function Home() {
           <Hero />
           <ClarkStory />
           <ClarkFeatures />
+          <ClarkChat />
+          <ShareVibe />
         </div>
       </div>
     </div>
