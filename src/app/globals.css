@@ -249,3 +249,19 @@
   gap: 10px;
   flex-wrap: wrap;
 }
+/* @keyframes spin-decelerate {
+  0% {
+    transform: rotate(0deg);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  70% {
+    transform: rotate(1080deg); 
+  }
+  100% {
+    transform: rotate(1100deg);
+  }
+}
+
+.spin-decelerate {
+  animation: spin-decelerate 5s ease-out forwards;
+} */

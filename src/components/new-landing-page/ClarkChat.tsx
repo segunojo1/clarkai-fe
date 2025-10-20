@@ -1,23 +1,47 @@
 "use client";
-import { ArrowUp, ChevronDown, Loader } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
-import { Popover, PopoverTrigger } from "../ui/popover";
 import { toast } from "sonner";
 import GetEarlyAccessBtn from "./gea-btn";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const ClarkChat = () => {
+  const Reff = useRef(null);
+  useEffect(() => {
+    gsap.fromTo(
+      ".spin-decelerate",
+      { rotate: 0 },
+      {
+        rotate:1000,
+        duration: 5,
+        ease: "power4.out",
+        scrollTrigger: {
+          trigger: Reff.current,
+          start: "top 80%",
+          toggleActions: "play none none reverse",
+        },
+      }
+    );
+  }, []);
   return (
-    <section className="bg-[#262626] flex flex-col items-center px-[20px] py-[50px]">
+    <section
+      ref={Reff}
+      className="bg-[#262626] flex flex-col items-center px-[20px] py-[50px]"
+    >
       <div className="flex flex-col gap-[11px] items-center mb-[38px]">
         <Image
           src="/assets/icon-new.svg"
           alt="Clark Chat"
           width={71}
           height={71}
+          className="spin-decelerate"
         />
         <h2 className="text-[100px] font-normal -tracking-[4px] bebas max-w-[474px] text-[#FAFAFA] text-center">
           Imagine one day you could say:

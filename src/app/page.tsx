@@ -1,3 +1,4 @@
+import ClarkBottomBanner from "@/components/new-landing-page/clark-bottom-banner";
 import ClarkFeatures from "@/components/new-landing-page/clark-feats";
 import ClarkStory from "@/components/new-landing-page/clark-story";
 import ClarkChat from "@/components/new-landing-page/ClarkChat";
@@ -25,6 +26,7 @@ export default function Home() {
           <ClarkChat />
           <ShareVibe />
           <SignIt />
+          <ClarkBottomBanner />
         </div>
       </div>
     </div>

@@ -15,6 +15,7 @@ const SignIt = () => {
 
       <SignCanvas />
       <Footer />
+      
     </div>
   );
 };
@@ -44,35 +45,30 @@ export const Footer = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-8 text-[12px]/[19px] font-medium text-[#000]/80">
+      <div className="grid grid-cols-4 gap-8 text-[12px]/[19px] font-medium text-[#000]/80">
         <ul>
+          <li>Back story</li>
           <li>Features</li>
-          <li>Futures</li>
           <li>News</li>
-          <li>Newsletter</li>
         </ul>
 
         <ul>
           <li>About</li>
-          <li>Careers</li>
-          <li>Back story</li>
           <li>Terms</li>
+          <li>Privacy</li>
         </ul>
 
         <ul>
           <li>Support</li>
-          <li>Privacy</li>
+          <li>Futures</li>
+          <li>Careers</li>
+          <li>Newsletter</li>
         </ul>
 
         <ul>
           <li>Instagram</li>
           <li>Twitter</li>
           <li>LinkedIn</li>
-        </ul>
-
-        <ul>
-          <li>Back story</li>
-          <li>Newsletter</li>
         </ul>
       </div>
     </div>
