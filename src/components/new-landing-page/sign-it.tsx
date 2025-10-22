@@ -8,7 +8,7 @@ const SignIt = () => {
   return (
     <div className="bg-white border-b-[10px] border-b-black">
       <div className="flex items-center w-full justify-between p-[100px] pb-[38px]">
-        <h2 className="text-[70px]/[90px] bebas font-normal -tracking-[3.2px]">
+        <h2 className="text-[70px]/[90px] bebas text-black font-normal -tracking-[3.2px]">
           Sign it!
         </h2>
         <Image src="/assets/icon3.svg" alt="Sign it" width={71} height={71} />
@@ -130,14 +130,13 @@ export const SignCanvas = () => {
           onTouchEnd={stopDrawing}
         ></canvas>
 
-        {/* Bottom-Centered Controls */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-3 px-4 py-2 rounded-full ">
           <button
             onClick={undoLast}
             className="p-5 hover:bg-[#F0F0EF] rounded-md transition-colors"
             title="Undo Last Stroke"
           >
-            <RotateCcw size={22} className="rotate-[-25.13deg]" />
+            <RotateCcw color="black" size={22} className="rotate-[-25.13deg]" />
           </button>
 
           <button
@@ -155,7 +154,7 @@ export const SignCanvas = () => {
             className="p-5 hover:bg-[#F0F0EF] rounded-md transition-colors"
             title="Save"
           >
-            <ThumbsUp size={22} className="rotate-[25.13deg]"/>
+            <ThumbsUp color="black" size={22} className="rotate-[25.13deg]"/>
           </button>
         </div>
       </div>
@@ -179,7 +178,7 @@ export const Footer = () => {
   return (
     <div className="flex p-[100px] justify-between items-center">
       <div className="flex flex-col items-start gap-5">
-        <h3 className="text-[18.8px] font-bold -tracking-[0.7px]">
+        <h3 className="text-[18.8px] text-black font-bold -tracking-[0.7px]">
           Subscribe to the Clark Newsletter
         </h3>
         <p className="text-[12.3px] font-normal text-[#262626] -tracking-[0.4px]">
@@ -188,7 +187,7 @@ export const Footer = () => {
         <div className="relative">
           <Input
             placeholder="Enter your email"
-            className="py-[8px] w-[294px] h-full px-[30px] pr-[54px] bg-black text-[#A3A3A3] rounded-[20px]"
+            className="py-[8px] w-[294px] h-full px-[30px] pr-[54px] bg-black dark:bg-black text-[#A3A3A3] rounded-[20px]"
           />
           <ArrowRight color="#fff" width={24} height={17} className="cursor-pointer absolute top-0 bottom-0 right-[30px] my-auto" />
         </div>

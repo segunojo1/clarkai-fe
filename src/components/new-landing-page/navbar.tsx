@@ -3,6 +3,7 @@ import Image from "next/image";
 import React from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import GetEarlyAccessBtn from "./gea-btn";
 
 const Navbar = () => {
   return (
@@ -21,14 +22,7 @@ const Navbar = () => {
       </div>
 
       <div className="border border-[#404040] bg-[#262626] flex items-center p-1 rounded-[9px]">
-        <div className="flex items-center gap-[1.5px] group hover:gap-[3px] cursor-pointer transition-all duration-300">
-          <Button className="bg-[var(--orange-primary)] group-hover:bg-orange-700 cursor-pointer hover:bg-orange-700 py-[5px] px-[8.5px] rounded-l-[5px] rounded-r-[0px]">
-            Get Early Access
-          </Button>
-          <div className="bg-[var(--orange-primary)] p-[5px] group-hover:bg-orange-700 py-[5.5px] h-auto rounded-r-[5px]">
-            <ChevronRight className="text-white" height={25} width={19} />
-          </div>
-        </div>
+        <GetEarlyAccessBtn />
 
         <div className="md:flex hidden">
           <ul className="flex items-center gap-[3px] text-white tracking-[-0.72px]">

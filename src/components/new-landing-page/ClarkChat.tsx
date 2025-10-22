@@ -135,7 +135,7 @@ const ClarkChat = () => {
         </h2>
       </div>
 
-      <div className="py-[50px] px-[80px] flex flex-col items-center bg-[#FAFAFA] gap-[38px]">
+      <div className="py-[50px] px-[80px] text-black flex flex-col items-center bg-[#FAFAFA] gap-[38px]">
         <Chatbot textareaRef={textareaRef} createTabRef={createTabRef} />
         <h3
           ref={subHeadingRef}
@@ -165,15 +165,15 @@ export const Chatbot = ({
   const [mode, setMode] = React.useState<"ask" | "research" | "create">("create");
 
   return (
-    <div className="relative max-w-[1240px] w-full bg-white dark:bg-[#2C2C2C] rounded-[12px] overflow-hidden">
+    <div className="relative max-w-[1240px] w-full bg-white  rounded-[12px] overflow-hidden">
       <div className="relative">
         <Textarea
           ref={textareaRef}
           placeholder="Ask anything… or type @ to see Clark's magic commands..."
-          className="min-h-[140px] !border-0 !shadow-none caret-[#ff3d00] text-[16px] max-w-[750px] font-medium p-3 w-full focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none resize-none relative z-20"
+          className="min-h-[140px] text-black !border-0 !shadow-none caret-[#ff3d00] text-[16px] font-medium p-3 w-full focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none resize-none relative z-20"
         />
 
-        <div className="flex items-center gap-2 p-2 bg-white dark:bg-[#2c2c2c]">
+        <div className="flex items-center gap-2 p-2 bg-white dark:bg-[#fff]">
           <Tabs
             value={mode}
             onValueChange={(value) =>
@@ -181,7 +181,7 @@ export const Chatbot = ({
             }
             className="flex-1"
           >
-            <TabsList className="bg-[#F5F5F5] dark:bg-[#262626] rounded-[8px] p-0 flex justify-start gap-1 text-[12px]">
+            <TabsList className="bg-[#F5F5F5] dark:bg-[#F5F5F5] rounded-[8px] p-0 flex justify-start gap-1 text-[12px]">
               <TabsTrigger
                 value="ask"
                 className="group p-0 border-none shadow-none flex items-center rounded-md h-full text-sm font-medium text-gray-600 data-[state=active]:text-white data-[state=active]:bg-[#2C2C2C] transition-colors"
@@ -220,40 +220,33 @@ export const Chatbot = ({
               <button
                 type="button"
                 onClick={() => toast("haha, join Clark to try this out!")}
-                className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="p-1.5 rounded-full hover:bg-gray-100 "
                 aria-label="Attach file"
               >
-                <Image
-                  src="/assets/file.svg"
-                  alt=""
-                  width={20}
-                  height={20}
-                  className="h-5 w-5 dark:text-gray-500 text-black hover:text-gray-700 dark:block hidden"
-                />
                 <Image
                   src="/assets/file-light.svg"
                   alt=""
                   width={20}
                   height={20}
-                  className="h-5 w-5 dark:hidden block"
+                  className="h-5 w-5 "
                 />
               </button>
             </div>
 
             <>
-              <Image
+              {/* <Image
                 width={20}
                 height={20}
                 alt=""
                 src="/assets/waveform.svg"
                 className="h-5 w-5 dark:block hidden"
-              />
+              /> */}
               <Image
                 width={20}
                 height={20}
                 alt=""
                 src="/assets/waveform-light.svg"
-                className="h-5 w-5 dark:hidden block"
+                className="h-5 w-5"
               />
             </>
             <Button
