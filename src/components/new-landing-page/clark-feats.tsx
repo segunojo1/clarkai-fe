@@ -34,8 +34,8 @@ const ClarkFeatures = () => {
     <section className="bg-white py-[100px] ">
       <div className=" max-w-[1240px] mx-auto">
         <div className="flex justify-between mb-[50px] items-center">
-          <ArrowDown width={36} height={45} strokeWidth={6.3} />
-          <h2 className="text-[40px] font-normal tracking-[-1.6px] bebas max-w-[213px]">
+          <ArrowDown color="black" width={36} height={45} strokeWidth={6.3} />
+          <h2 className="text-[40px] font-normal text-black tracking-[-1.6px] bebas max-w-[213px]">
             Everything you need in One place.
           </h2>
         </div>
@@ -147,7 +147,7 @@ const ClarkFeatures = () => {
             </div>
           </div>
           <div className="col-span-2 flex items-end row-span-3">
-            <h2 className="text-[40px] font-normal max-w-[213px] tracking-[-1.6px] bebas">
+            <h2 className="text-[40px] text-black font-normal max-w-[213px] tracking-[-1.6px] bebas">
               Keep track of your Progress.
             </h2>
           </div>
@@ -162,7 +162,7 @@ const ClarkFeatures = () => {
           </div>
 
           <div className="col-span-2 flex items-end row-span-1 overflow-hidden relative group">
-            <h2 className="text-[40px] font-normal  tracking-[-1.6px] bebas">
+            <h2 className="text-[40px] font-normal text-black tracking-[-1.6px] bebas">
               DO MORE WITH A CHATBOT
             </h2>
           </div>
