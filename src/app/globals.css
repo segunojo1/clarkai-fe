@@ -48,6 +48,7 @@
 }
 
 :root {
+  --gap: 11rem;
   --orange-primary: #FF3D00;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -130,11 +131,38 @@
   20%, 50% { opacity: 0; }
 }
 
+
   .animation-caret-blink {
     animation-name: caret-blink;
     animation-duration: 1.25s;
     animation-timing-function: ease-out;
     animation-iteration-count: infinite;
+  }
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+
+  @keyframes marquee-vertical {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
+    }
+  }
+
+  .animate-marquee {
+    animation: marquee 15s linear infinite;
+  }
+
+  .animate-marquee-vertical {
+    animation: marquee-vertical 20s linear infinite;
   }
 
 .satoshi{
@@ -249,19 +277,3 @@
   gap: 10px;
   flex-wrap: wrap;
 }
-/* @keyframes spin-decelerate {
-  0% {
-    transform: rotate(0deg);
-    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  70% {
-    transform: rotate(1080deg); 
-  }
-  100% {
-    transform: rotate(1100deg);
-  }
-}
-
-.spin-decelerate {
-  animation: spin-decelerate 5s ease-out forwards;
-} */

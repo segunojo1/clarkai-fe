@@ -1,9 +1,30 @@
+"use client"
+import gsap from "gsap";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 
 const ShareVibe = () => {
+  const shareVibe = useRef(null);
+
+  useEffect(() => {
+    gsap.fromTo(
+          ".spinner",
+          { rotate: 0 },
+          {
+            rotate: 1000,
+            duration: 5,
+            ease: "power4.out",
+            scrollTrigger: {
+              trigger: shareVibe.current,
+              start: "top 80%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+  }, [])
+
   return (
-    <div className="bg-black flex flex-col gap-[38px] items-center p-[100px]">
+    <div ref={shareVibe} className="bg-black flex flex-col gap-[38px] items-center p-[100px]">
       <div className="flex items-center w-full justify-between">
         <h2 className="text-[147px] bebas text-white font-normal -tracking-[5.9px]">
           Share THE VIBE
@@ -13,6 +34,7 @@ const ShareVibe = () => {
           alt="Share THE VIBE"
           width={71}
           height={71}
+          className="spinner"
         />
       </div>
       <ShareCard />

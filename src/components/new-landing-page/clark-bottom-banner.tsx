@@ -1,15 +1,26 @@
-import React from 'react'
-import GetEarlyAccessBtn from './gea-btn'
+import React from "react";
+import GetEarlyAccessBtn from "./gea-btn";
+import Marquee from "./marquee";
 
 const ClarkBottomBanner = () => {
   return (
-    <div className='bg-[#FF3D00]'>
-        <div>
-            <GetEarlyAccessBtn />
+    <div className="bg-[#FF3D00] relative overflow-hidden">
+      
+      <div className="absolute inset-0 flex justify-center items-center z-10">
+        <div className="border-[1.25px] rounded-[5px] border-white  w-fit h-fit">
+        <GetEarlyAccessBtn />
         </div>
-        <h2 className='text-[646px]/normal bebas font-normal -tracking-[25px] text-white'>CLARK</h2>
-    </div>
-  )
-}
+      </div>
 
-export default ClarkBottomBanner
+      <Marquee>
+        <div className="whitespace-nowrap ">
+          <h2 className="inline-block text-[646px]/none bebas font-normal -tracking-[25px] text-white opacity-100">
+            CLARK
+          </h2>
+        </div>
+      </Marquee>
+    </div>
+  );
+};
+
+export default ClarkBottomBanner;
