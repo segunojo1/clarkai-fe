@@ -17,7 +17,7 @@ const ClarkChat = () => {
   const Reff = useRef(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const createTabRef = useRef<HTMLButtonElement>(null);
+  const createTabRef = useRef<HTMLParagraphElement>(null);
   const subHeadingRef = useRef<HTMLHeadingElement>(null);
   const paraRef = useRef<HTMLParagraphElement>(null);
 
@@ -159,8 +159,8 @@ export const Chatbot = ({
   textareaRef,
   createTabRef,
 }: {
-  textareaRef: React.RefObject<HTMLTextAreaElement>;
-  createTabRef: React.RefObject<HTMLButtonElement>;
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
+  createTabRef: React.RefObject<HTMLParagraphElement | null>;
 }) => {
   const [mode, setMode] = React.useState<"ask" | "research" | "create">("create");
 
