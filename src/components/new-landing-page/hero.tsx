@@ -6,80 +6,80 @@ import { Button } from "../ui/button";
 import GetEarlyAccessBtn from "./gea-btn";
 
 const Hero = () => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
-  const lastPos = useRef<{ x: number; y: number } | null>(null);
+  // const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  // const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+  // const lastPos = useRef<{ x: number; y: number } | null>(null);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  // useEffect(() => {
+  //   const canvas = canvasRef.current;
+  //   if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctxRef.current = ctx;
+  //   const ctx = canvas.getContext("2d");
+  //   if (!ctx) return;
+  //   ctxRef.current = ctx;
 
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      ctx.fillStyle = "#262626"; 
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    };
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
+  //   const resizeCanvas = () => {
+  //     canvas.width = window.innerWidth;
+  //     canvas.height = 1378;
+  //     ctx.fillStyle = "#262626"; 
+  //     ctx.fillRect(0, 0, canvas.width, canvas.height);
+  //   };
+  //   resizeCanvas();
+  //   window.addEventListener("resize", resizeCanvas);
 
-    const draw = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+  //   const draw = (e: MouseEvent) => {
+  //     const rect = canvas.getBoundingClientRect();
+  //     const x = e.clientX - rect.left;
+  //     const y = e.clientY - rect.top;
 
-      if (!lastPos.current) {
-        lastPos.current = { x, y };
-        return;
-      }
+  //     if (!lastPos.current) {
+  //       lastPos.current = { x, y };
+  //       return;
+  //     }
 
-      const ctx = ctxRef.current;
-      if (!ctx) return;
+  //     const ctx = ctxRef.current;
+  //     if (!ctx) return;
 
-      ctx.strokeStyle = "rgba(255,255,255,0.9)";
-      ctx.lineWidth = 3;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
+  //     ctx.strokeStyle = "rgba(255,255,255,0.9)";
+  //     ctx.lineWidth = 3;
+  //     ctx.lineCap = "round";
+  //     ctx.lineJoin = "round";
 
-      ctx.beginPath();
-      ctx.moveTo(lastPos.current.x, lastPos.current.y);
-      ctx.lineTo(x, y);
-      ctx.stroke();
+  //     ctx.beginPath();
+  //     ctx.moveTo(lastPos.current.x, lastPos.current.y);
+  //     ctx.lineTo(x, y);
+  //     ctx.stroke();
 
-      lastPos.current = { x, y };
-    };
+  //     lastPos.current = { x, y };
+  //   };
 
-    const fadeOut = () => {
-      const ctx = ctxRef.current;
-      if (!ctx) return;
-      ctx.fillStyle = "rgba(38,38,38,0.05)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      requestAnimationFrame(fadeOut);
-    };
+  //   const fadeOut = () => {
+  //     const ctx = ctxRef.current;
+  //     if (!ctx) return;
+  //     ctx.fillStyle = "rgba(38,38,38,0.05)";
+  //     ctx.fillRect(0, 0, canvas.width, canvas.height);
+  //     requestAnimationFrame(fadeOut);
+  //   };
 
-    fadeOut();
-    window.addEventListener("mousemove", draw);
-    window.addEventListener("mouseleave", () => (lastPos.current = null));
+  //   fadeOut();
+  //   window.addEventListener("mousemove", draw);
+  //   window.addEventListener("mouseleave", () => (lastPos.current = null));
 
-    return () => {
-      window.removeEventListener("mousemove", draw);
-      window.removeEventListener("resize", resizeCanvas);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener("mousemove", draw);
+  //     window.removeEventListener("resize", resizeCanvas);
+  //   };
+  // }, []);
 
   return (
-    <div className="relative h-screen p-8 pb-0 mb-[29px] overflow-hidden bg-[#262626]">
+    <div className="relative min-h-screen p-8  pb-0 mb-[29px] overflow-hidden bg-[#262626]">
      
-      <canvas
+      {/* <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full pointer-events-none z-10"
-      />
+      /> */}
 
-      <div className="flex items-center flex-col justify-end gap-[55.5px] h-full relative z-20">
+      <div className="flex items-center flex-col justify-end gap-[55.5px] h-full mt-[437px] relative z-20">
         <div className="flex w-full h-[172px] justify-between">
           <div className="flex self-end">
             <HeroBox variant="light" rotation={-7.45} top={0} left={0} />

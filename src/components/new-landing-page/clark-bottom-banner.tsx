@@ -5,11 +5,8 @@ import Marquee from "./marquee";
 const ClarkBottomBanner = () => {
   return (
     <div className="bg-[#FF3D00] relative overflow-hidden">
-      
       <div className="absolute inset-0 flex justify-center items-center z-10">
-        <div className="border-[1.25px] rounded-[5px] border-white  w-fit h-fit">
-        <GetEarlyAccessBtn />
-        </div>
+          <GetEarlyAccessBtn magnetic force={0.5} />
       </div>
 
       <Marquee>

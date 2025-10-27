@@ -8,7 +8,7 @@ import GetEarlyAccessBtn from "./gea-btn";
 
 const ClarkStory = () => {
   return (
-    <div className="max-w-[1073px] pb-[100px] mx-auto flex items-center gap-6 flex-col">
+    <div id="story" className="max-w-[1073px] pb-[100px] mx-auto flex items-center gap-6 flex-col">
       <ScrollReveal />
       <Image
         src="/assets/magic-btn.svg"

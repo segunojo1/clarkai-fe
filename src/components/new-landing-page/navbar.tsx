@@ -28,15 +28,15 @@ const Navbar = () => {
           <ul className="flex items-center gap-[3px] text-white tracking-[-0.72px]">
             <li className="gap-[10px] flex items-center p-[5px] px-3">
               <div className="w-[18px] h-[18px] rounded-[4.5px] bg-[#404040]"></div>
-              <Link href="/story">Story</Link>
+              <Link href="#story">Story</Link>
             </li>
             <li className="gap-[10px] flex items-center p-[5px] px-3">
               <div className="w-[18px] h-[18px] rounded-[4.5px] bg-[#404040]"></div>
-              <Link href="/features">Features</Link>
+              <Link href="#features">Features</Link>
             </li>
             <li className="gap-[10px] flex items-center p-[5px] px-3">
               <div className="w-[18px] h-[18px] rounded-[4.5px] bg-[#404040]"></div>
-              <Link href="/pricing">Pricing</Link>
+              <Link href="#pricing">Pricing</Link>
             </li>
           </ul>
         </div>

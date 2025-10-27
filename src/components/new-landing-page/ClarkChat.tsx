@@ -44,7 +44,7 @@ const ClarkChat = () => {
       {
         opacity: 1,
         stagger: 0.1,
-        duration: 0.8,
+        duration: 0.5,
         ease: "power2.out",
         scrollTrigger: {
           trigger: headingRef.current,
@@ -56,7 +56,6 @@ const ClarkChat = () => {
       }
     );
 
-    // === Main Scroll Animation (typing + tab + text reveal)
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: textareaRef.current,
@@ -81,7 +80,7 @@ const ClarkChat = () => {
       .to(
         {},
         {
-          duration: 3,
+          duration: 2,
           onUpdate: function () {
             const progress = this.progress();
             const chars = Math.floor(progress * textToType.length);

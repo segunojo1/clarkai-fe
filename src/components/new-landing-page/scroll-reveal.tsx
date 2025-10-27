@@ -35,7 +35,7 @@ const ScrollReveal = () => {
             start: "top 70%",
             end: "bottom 73%",
             toggleActions: "play none none reverse",
-            markers: true,
+            markers: false,
           },
         }
       );
@@ -48,7 +48,7 @@ const ScrollReveal = () => {
           start: "top 70%",
           end: "bottom 73%",
           toggleActions: "play none none reverse",
-          markers: true,
+          markers: false,
         },
       });
 
@@ -67,7 +67,7 @@ const ScrollReveal = () => {
             start: "top 70%",
             end: "bottom 73%",
             toggleActions: "play none none reverse",
-            markers: true,
+            markers: false,
           },
         }
       );

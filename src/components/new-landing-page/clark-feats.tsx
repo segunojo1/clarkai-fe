@@ -16,22 +16,23 @@ const ClarkFeatures = () => {
       const speed = parseFloat(img.dataset.speed || "0.5");
 
       gsap.to(img, {
-        yPercent: speed * -30,
-        ease: "none",
-        scrollTrigger: {
-          trigger: img.parentElement,
-          start: "top center",
-          end: "bottom top",
-          scrub: true,
-        },
-      });
+  yPercent: speed * -30,
+  ease: "power3.out",
+  scrollTrigger: {
+    trigger: img.parentElement,
+    start: "top center",
+    end: "bottom top",
+    scrub: 1, 
+  },
+});
+
     });
 
     return () => ScrollTrigger.getAll().forEach((t) => t.kill());
   }, []);
 
   return (
-    <section className="bg-white py-[100px] ">
+    <section id="features" className="bg-white py-[100px] ">
       <div className=" max-w-[1240px] mx-auto">
         <div className="flex justify-between mb-[50px] items-center">
           <ArrowDown color="black" width={36} height={45} strokeWidth={6.3} />
@@ -41,15 +42,15 @@ const ClarkFeatures = () => {
         </div>
 
         <div className="grid w-full grid-cols-4 auto-rows-[150px] gap-3 p-4">
-          <div className="col-span-4 flex justify-end  row-span-3 overflow-hidden relative group">
+          <div className="col-span-4 flex justify-end  row-span-4 overflow-hidden relative group">
             <div className="absolute inset-0 bg-[#262626] opacity-0 group-hover:opacity-50 transition-opacity duration-300 z-[2]" />
             <Image
-              src="/assets/bento1.png"
+              src="/assets/bento8.png"
               alt="bento1"
               width={800}
       height={1240}
               data-speed="0.6"
-              className="object-cover w-full min-h-[601px] will-change-transform "
+              className="object-contain -translate-y-36 w-full min-h-[1126px] will-change-transform "
             />
             <div className="z-[9999] max-w-[447px] text-[#FAFAFA] absolute bottom-[40px] right-[40px]  text-right ">
               <h3 className="text-[25px] font-bold">Organized Workspaces</h3>
@@ -61,14 +62,13 @@ const ClarkFeatures = () => {
             </div>
           </div>
 
-          <div className="col-span-2 row-span-3 flex items-start justify-start overflow-hidden relative group">
+          <div className="col-span-2 row-span-5 flex items-start justify-start overflow-hidden relative group">
             <div className="absolute inset-0 bg-[#262626] opacity-0 group-hover:opacity-50 transition-opacity duration-300 z-[2]" />
             <Image
               src="/assets/bento2.png"
               alt="bento2"
               width={612}
       height={800}
-              data-speed="1.5"
               className=" object-contain min-h-[800px] w-full will-change-transform "
             />
             <div className="z-[9999] max-w-[447px] mix-blend-difference absolute bottom-[40px] left-[40px] text-left text-[#FAFAFA] ">
@@ -83,7 +83,7 @@ const ClarkFeatures = () => {
             </div>
           </div>
 
-          <div className="col-span-2 row-span-2 overflow-hidden flex justify-end relative group">
+          <div className="col-span-2 row-span-3 overflow-hidden flex justify-end relative group">
             <div className="absolute inset-0 bg-[#262626] opacity-0 group-hover:opacity-50 transition-opacity duration-300 z-[2]" />
 
             <Image
@@ -91,7 +91,6 @@ const ClarkFeatures = () => {
               alt="bento3"
               width={611}
               height={500}
-              data-speed="1.2"
               className="object-contain min-h-[500px] w-full will-change-transform "
             />
             <div className="z-[9999] max-w-[447px] text-[#FAFAFA] absolute  bottom-[40px] right-[40px] text-right ">
@@ -106,15 +105,14 @@ const ClarkFeatures = () => {
             </div>
           </div>
 
-          <div className="col-span-2 row-span-1 overflow-hidden flex justify-end p-10 relative group">
+          <div className="col-span-2 row-span-2 overflow-hidden flex justify-end p-10 relative group">
             <div className="absolute inset-0 bg-[#262626] opacity-0 group-hover:opacity-50 transition-opacity duration-300 z-[2]" />
 
             <Image
               src="/assets/bento4.png"
               alt="bento4"
               fill
-              data-speed="0.8"
-              className="object-contain !scale-[1.4] will-change-transform "
+              className="object-contain w-full !scale-[1.4] will-change-transform "
             />
             <div className="z-[9999] max-w-[447px] text-[#FAFAFA] relative self-end justify-self-end text-right ">
               <h3 className="text-[25px] font-bold">
@@ -156,7 +154,6 @@ const ClarkFeatures = () => {
               src="/assets/bento6.png"
               alt="bento6"
               fill
-              data-speed="1.2"
               className="object-cover !scale-[1.3] will-change-transform "
             />
           </div>
@@ -167,15 +164,15 @@ const ClarkFeatures = () => {
             </h2>
           </div>
 
-          <div className="col-span-4 row-span-3 overflow-hidden relative flex justify-end  group">
+          <div className="col-span-4 row-span-4 overflow-hidden relative flex justify-end  group">
             <div className="absolute inset-0 bg-[#262626] opacity-0 group-hover:opacity-50 transition-opacity duration-300 z-[2]" />
             <Image
-              src="/assets/bento7.png"
+              src="/assets/bento9.png"
               alt="bento7"
               width={1240}
-              height={600}
-              data-speed="0.9"
-              className="object-contain w-full min-h-[600px] will-change-transform"
+              height={1126}
+              data-speed="0.5"
+              className="object-contain w-full -translate-y-36 min-h-[1126px] will-change-transform"
             />
             <div className="z-[9999] max-w-[447px] text-[#FAFAFA] absolute  bottom-[40px] right-[40px] text-right ">
               <h3 className="text-[25px] font-bold">Context Aware Chatbot</h3>
