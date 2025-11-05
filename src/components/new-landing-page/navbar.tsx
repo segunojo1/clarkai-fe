@@ -1,7 +1,5 @@
-import { ArrowRight, ArrowRightIcon, ChevronRight, Globe } from "lucide-react";
-import Image from "next/image";
+import { Globe } from "lucide-react";
 import React from "react";
-import { Button } from "../ui/button";
 import Link from "next/link";
 import GetEarlyAccessBtn from "./gea-btn";
 
