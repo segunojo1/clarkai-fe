@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form';
 import { z } from "zod"
 import { Button } from "../ui/button"
 import { Textarea } from "../ui/textarea"
-import { X, FileText, MicOff, ChevronDown, ArrowUp, Loader } from "lucide-react"
+import { X, FileText, MicOff, ChevronDown, ArrowUp, Loader, Check } from "lucide-react"
 import { useChatStore } from "@/store/chat.store"
 import { toast } from "sonner"
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs"
@@ -95,7 +95,7 @@ const ChatInputForm = ({
   
 }: ChatInputFormProps) => {
   const [selectedFiles, setSelectedFiles] = useState<Array<{ file: File; previewUrl: string }>>([])
-  const {askSource, setAskSource} = useWorkspaceStore()
+  const {askSource, setAskSource, selectedWorkspace} = useWorkspaceStore()
   // const [isCLoading, setIsCLoading] = useState(false)
   const [mode, setMode] = useState<'ask' | 'create' | 'research'>('ask')
   // const [caretPosition, setCaretPosition] = useState(0)
@@ -113,6 +113,17 @@ const ChatInputForm = ({
   // Filter tags based on search input
   const filteredTags = TAGS.filter(tag => 
     tag.label.toLowerCase().includes(tagSearch.toLowerCase())
+  )
+
+  // Aggregate and filter workspace files for inline @ suggestions
+  const workspaceFiles = selectedWorkspace?.workspace?.files
+  const allFiles = [
+    ...(workspaceFiles?.pdfFiles ?? []),
+    ...(workspaceFiles?.imageFiles ?? []),
+    ...(workspaceFiles?.youtubeVideos ?? []),
+  ]
+  const filteredFiles = allFiles.filter((f) =>
+    (f.fileName || '').toLowerCase().includes(tagSearch.toLowerCase())
   )
 
   const handleTagSelect = (tag: string) => {
@@ -143,6 +154,32 @@ const ChatInputForm = ({
       }, 0)
     }
     
+    setShowTagSuggestions(false)
+  }
+
+  const handleInlineFileTagSelect = (fileId: string, fileName?: string) => {
+    setTagPosition(prev => ({ ...prev, show: false }))
+    if (!textareaRef.current) return
+
+    const textarea = textareaRef.current
+    const startPos = textarea.selectionStart || 0
+    const text = textarea.value || ''
+    const textBeforeCursor = text.substring(0, startPos)
+    const lastAtPos = textBeforeCursor.lastIndexOf('@')
+
+    if (lastAtPos >= 0) {
+      const label = fileName ? `@file(${fileId})` : `@file(${fileId})`
+      let newText = text.substring(0, lastAtPos) + label
+      newText += ' '
+      newText += text.substring(startPos)
+      form.setValue('chat', newText, { shouldValidate: true })
+
+      setTimeout(() => {
+        const newCursorPos = lastAtPos + label.length + 1
+        textarea.setSelectionRange(newCursorPos, newCursorPos)
+      }, 0)
+    }
+
     setShowTagSuggestions(false)
   }
 
@@ -296,6 +333,13 @@ const ChatInputForm = ({
     setIsTagPopoverOpen(false)
   }
 
+  const handleFileTagSelect = (fileId: string, fileName?: string) => {
+    const currentValue = form.getValues('chat') || ''
+    const label = fileName ? `@file(${fileId})` : `@file(${fileId}) `
+    form.setValue('chat', `${currentValue} ${label}`)
+    setIsTagPopoverOpen(false)
+  }
+
   const triggerFileInput = () => {
     fileInputRef.current?.click()
   }
@@ -369,7 +413,16 @@ const ChatInputForm = ({
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       if (showTagSuggestions) {
-        // If suggestions are open, don't submit the form
+        // If suggestions are open, pick the first suggestion
+        if (filteredTags.length > 0) {
+          handleTagSelect(filteredTags[0].value)
+          return
+        }
+        if (filteredFiles.length > 0) {
+          const f = filteredFiles[0]
+          handleFileTagSelect((f as any).id, (f as any).fileName)
+          return
+        }
         return
       }
       void form.handleSubmit(handleSubmit)()
@@ -550,30 +603,49 @@ const ChatInputForm = ({
                                   </div>
                                 </TabsTrigger>
                               </PopoverTrigger>
-                              <PopoverContent className="w-48 p-0 gap-2 flex flex-col" align="start">
-                                <div className="grid">
-                                  
+                              <PopoverContent className="w-56 p-1 rounded-md border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#1F1F1F] shadow-md" align="start">
+                                <div className="flex flex-col space-y-1" role="menu" aria-label="Ask source">
                                   <PopoverClose asChild>
                                     <Button
                                       type="button"
-                                      className={`w-full text-left px-4 py-2 text-sm ${
-                                        askSource === 'materials' ? '!bg-gray-100 text-[#FF3D00]' : 'text-gray-700 hover:bg-gray-50 bg-gray-200 hover:cursor-pointer '
+                                      variant="ghost"
+                                      className={`w-full justify-start rounded-sm px-3 py-2 text-sm ${
+                                        askSource === 'materials'
+                                          ? 'bg-gray-100 dark:bg-gray-800 text-[#FF3D00]'
+                                          : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
                                       }`}
                                       onClick={() => setAskSource('materials')}
                                     >
-                                      Ask Materials
+                                      <span className="flex items-center gap-2">
+                                        {askSource === 'materials' ? (
+                                          <Check className="h-4 w-4 text-[#FF3D00]" />
+                                        ) : (
+                                          <span className="h-2 w-2 rounded-full bg-gray-300 dark:bg-gray-600 mr-[6px]" />
+                                        )}
+                                        <span>Ask Materials</span>
+                                      </span>
                                     </Button>
                                   </PopoverClose>
 
                                   <PopoverClose asChild>
                                     <Button
                                       type="button"
-                                      className={`w-full text-left px-4 py-2 text-sm ${
-                                        askSource === 'ai' ? '!bg-gray-100 text-[#FF3D00]' : 'text-gray-700 hover:bg-gray-50  bg-gray-200 '
+                                      variant="ghost"
+                                      className={`w-full justify-start rounded-sm px-3 py-2 text-sm ${
+                                        askSource === 'ai'
+                                          ? 'bg-gray-100 dark:bg-gray-800 text-[#FF3D00]'
+                                          : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
                                       }`}
                                       onClick={() => setAskSource('ai')}
                                     >
-                                      Ask AI
+                                      <span className="flex items-center gap-2">
+                                        {askSource === 'ai' ? (
+                                          <Check className="h-4 w-4 text-[#FF3D00]" />
+                                        ) : (
+                                          <span className="h-2 w-2 rounded-full bg-gray-300 dark:bg-gray-600 mr-[6px]" />
+                                        )}
+                                        <span>Ask AI</span>
+                                      </span>
                                     </Button>
                                   </PopoverClose>
                                 </div>
@@ -640,7 +712,7 @@ const ChatInputForm = ({
                                 />
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-48 p-0" align="start">
+                            <PopoverContent className="w-64 p-0" align="start">
                               <div className="grid gap-1 p-2">
                                 {TAGS.map((tag) => (
                                   <Button
@@ -652,6 +724,53 @@ const ChatInputForm = ({
                                     {tag.label}
                                   </Button>
                                 ))}
+                              </div>
+                              <div className="px-2 pb-2">
+                                <div className="text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400 px-2 mb-1">Files in workspace</div>
+                                <div className="max-h-48 overflow-auto rounded-md border border-gray-200 dark:border-gray-800">
+                                  <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                                    {selectedWorkspace?.workspace?.files && (
+                                      <>
+                                        {selectedWorkspace.workspace.files.pdfFiles?.map((f) => (
+                                          <button
+                                            key={f.id}
+                                            type="button"
+                                            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+                                            onClick={() => handleFileTagSelect(f.id, f.fileName)}
+                                          >
+                                            <span className="inline-flex h-2 w-2 rounded-full bg-red-400" />
+                                            <span className="truncate">{f.fileName}</span>
+                                          </button>
+                                        ))}
+                                        {selectedWorkspace.workspace.files.imageFiles?.map((f) => (
+                                          <button
+                                            key={f.id}
+                                            type="button"
+                                            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+                                            onClick={() => handleFileTagSelect(f.id, f.fileName)}
+                                          >
+                                            <span className="inline-flex h-2 w-2 rounded-full bg-blue-400" />
+                                            <span className="truncate">{f.fileName}</span>
+                                          </button>
+                                        ))}
+                                        {selectedWorkspace.workspace.files.youtubeVideos?.map((f) => (
+                                          <button
+                                            key={f.id}
+                                            type="button"
+                                            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+                                            onClick={() => handleFileTagSelect(f.id, f.fileName)}
+                                          >
+                                            <span className="inline-flex h-2 w-2 rounded-full bg-green-400" />
+                                            <span className="truncate">{f.fileName}</span>
+                                          </button>
+                                        ))}
+                                      </>
+                                    )}
+                                    {!selectedWorkspace?.workspace?.files && (
+                                      <div className="px-3 py-2 text-sm text-gray-500">No files found</div>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
                             </PopoverContent>
                           </Popover>
@@ -715,7 +834,7 @@ const ChatInputForm = ({
                       
                       {tagPosition.show && (
                         <div 
-                          className="fixed z-[100] w-48 bg-white dark:bg-gray-800 text-popover-foreground rounded-md border border-gray-200 dark:border-gray-700 shadow-lg p-1"
+                          className="fixed z-[100] w-full max-w-72 bg-white dark:bg-gray-800 text-popover-foreground rounded-md border border-gray-200 dark:border-gray-700 shadow-lg p-1"
                           style={{
                             top: `${tagPosition.top}px`,
                             left: `${tagPosition.left}px`,
@@ -725,12 +844,13 @@ const ChatInputForm = ({
                             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                           }}
                         >
-                          <Command>
+                          <Command className="flex flex-row">
+                            <div>
                             <CommandInput 
                               placeholder="Search tags..." 
                               value={tagSearch} 
                               onValueChange={setTagSearch} 
-                              className="h-9"
+                              className="h-9 flex"
                             />
                             <CommandEmpty>No tags found.</CommandEmpty>
                             <CommandGroup className="max-h-60 overflow-auto">
@@ -745,6 +865,22 @@ const ChatInputForm = ({
                                 </CommandItem>
                               ))}
                             </CommandGroup>
+                            </div>
+                            {filteredFiles.length > 0 && (
+                              <CommandGroup heading="Files">
+                                {filteredFiles.map((f) => (
+                                  <CommandItem
+                                    key={f.id}
+                                    value={f.fileName}
+                                    onSelect={() => handleInlineFileTagSelect(f.id, f.fileName)}
+                                    className="cursor-pointer px-2 py-1.5 text-sm rounded-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2"
+                                  >
+                                    <span className="inline-flex h-2 w-2 rounded-full bg-gray-400" />
+                                    <span className="truncate">@{f.fileName}</span>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            )}
                           </Command>
                         </div>
                       )}

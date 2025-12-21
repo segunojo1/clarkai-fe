@@ -37,13 +37,17 @@ export default function ClientLayout({
         authService.logout();
         route.push("/auth/login")
     }
+    
+    
     useEffect(() => {
         // Auth guard: redirect to login if missing token
         const token = Cookies.get('token');
-        if (token) {
-            setIsAuth(true)
-            return;
-        }
+        console.log("client layout");
+        // if (token) {
+        //     setIsAuth(true)
+        //     console.log("client layout");
+        //     return;
+        // }
         const initializeData = async () => {
             try {
                 await getAllChats(1)
@@ -53,6 +57,7 @@ export default function ClientLayout({
             }
         }
         initializeData()
+        
     }, [route, getAllChats, getWorkspaces])
     return (
         <main className="w-full h-full relative flex-1">

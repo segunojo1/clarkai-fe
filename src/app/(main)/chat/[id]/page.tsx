@@ -53,7 +53,7 @@ export default function ChatPage() {
   const handleSend = async (text: string, files?: File[]) => {
     if (!text.trim()) return
     if (id) {
-
+      toast('Sending message...')
       await sendMessage(id.toString(), text, messages, false, files)
     }
   }

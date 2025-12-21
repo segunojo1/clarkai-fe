@@ -17,6 +17,7 @@ import { useUserStore } from '@/store/user.store';
 import chatService from '@/services/chat.service';
 import { useChatStore } from '@/store/chat.store';
 import { getTimeBasedGreeting } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const HomePageContent = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -38,6 +39,7 @@ const HomePageContent = () => {
     setIsLoading(true)
     if (!text.trim()) return
     const { id } = await chatService.createChat();
+    toast('Please wait while we create your chat')
     console.log(id);
     router.push(`/chat/${id}`)
     if (id) {

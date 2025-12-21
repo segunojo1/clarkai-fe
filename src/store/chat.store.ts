@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { ChatBox, ChatMessage, ChatResponse } from '@/lib/types'
 import chatService from '@/services/chat.service'
+import { toast } from 'sonner'
 
 interface ChatStore {
   messages: ChatMessage[]
@@ -74,7 +75,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       size: null
     }
     addMessage(userMessage)
-
     try {
       setIsLoading(true)
       const formData = new FormData();
@@ -120,6 +120,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       }
       addMessage(errorMessage)
     } finally {
+      text.includes('@') ? toast('Tags work well only in workspace chat!') : null
       setIsLoading(false)
     }
   },
@@ -139,6 +140,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
   getAllChats: async (page = 1) => {
     try {
+      console.log('getting all chats');
+      
       const messages = await chatService.getChat(page)
       console.log(messages);
       set({ chats: messages.chats })
