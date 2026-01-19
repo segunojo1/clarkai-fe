@@ -167,6 +167,10 @@ const ScrollReveal = () => {
         id="txts"
         className="satoshi text-[33px] md:text-[45px]/normal font-medium flex flex-col text-[#fafafa] text-start  leading-[-1.8px]"
       >
+        <span className="reveal-text">
+          Then school made it mechanical: copy notes, memorize, forget, repeat
+          repeat repeat repeat repeatrepeatrepeat.
+        </span>
         <span className="reveal-text satoshi flex ">
           When we were kids,
           <Image
@@ -175,11 +179,11 @@ const ScrollReveal = () => {
             alt="diamond"
             width={50}
             height={30}
-          />{" "}
+          />
           learning was magical.
         </span>
         <span className="reveal-text items-center">
-          Discovering dinosaurs.{" "}
+          Discovering dinosaurs.
           <span className="flex items-start relative min-w-[170px] ">
             <Image
               className="dino brightness-75 transition-all duration-300 -left-10 absolute z-[999]"
@@ -187,9 +191,9 @@ const ScrollReveal = () => {
               alt="dino"
               width={86}
               height={86}
-            />{" "}
+            />
             <span className="asking">Asking </span>
-          </span>{" "}
+          </span>
           “why?” a hundred times. Feeling like a genius.
           <span className="relative w-[64px]">
             <Image
@@ -239,7 +243,6 @@ const ScrollReveal = () => {
         </span>
 
         <span className="reveal-text items-center ">
-          {" "}
           And Clark makes it effortless.
           <span className="relative">
             <Image

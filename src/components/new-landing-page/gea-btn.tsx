@@ -3,6 +3,7 @@
 import React, { useRef, useEffect } from "react";
 import { Button } from "../ui/button";
 import { ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface GetEarlyAccessBtnProps {
   magnetic?: boolean;
@@ -18,6 +19,8 @@ const GetEarlyAccessBtn: React.FC<GetEarlyAccessBtnProps> = ({
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const innerRef = useRef<HTMLDivElement | null>(null);
   const textRef = useRef<HTMLSpanElement | null>(null);
+
+  const route = useRouter();
 
   useEffect(() => {
     if (!magnetic || !wrapperRef.current || !innerRef.current) return;
@@ -64,10 +67,11 @@ const GetEarlyAccessBtn: React.FC<GetEarlyAccessBtnProps> = ({
       className="relative inline-block cursor-pointer select-none"
     >
       <div
+      onClick={() => route.push("/auth/signup")}
         ref={innerRef}
-        className={`flex items-center gap-[1.5px] group hover:gap-[3px] transition-all duration-300 ${magnetic && "border-[1.25px] rounded-[5px] border-white"}`}
+        className={`flex items-center cursor-pointer gap-[1.5px] group hover:gap-[3px] transition-all duration-300 ${magnetic && "border-[1.25px] rounded-[5px] border-white"}`}
       >
-        <Button className="bg-[var(--orange-primary)] dark:text-white group-hover:bg-orange-700 hover:bg-orange-700 py-[5px] px-[8.5px] rounded-l-[5px] rounded-r-[0px] relative overflow-hidden">
+        <Button className="bg-[var(--orange-primary)] cursor-pointer dark:text-white group-hover:bg-orange-700 hover:bg-orange-700 py-[5px] px-[8.5px] rounded-l-[5px] rounded-r-[0px] relative overflow-hidden">
           <span ref={textRef} className="block relative z-10">
             Get Early Access
           </span>

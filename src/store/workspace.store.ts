@@ -168,6 +168,8 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     askQuestion: async (workspaceId: string, question: string, thinking: boolean, mode: 'workspace' | 'file' | 'internet', previous_messages: ChatMessage[], fileId?: string) => {
         if (!question.trim()) return
         const { setIsLoading } = get()
+
+        const cleanedText = question.replace(/@file\(([^)]+)\)/g, '').trim();
         // Add user message
         const userMessage: ChatMessage = {
             role: 'user',
@@ -187,7 +189,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
 
         try {
             setIsLoading(true)
-            const response = await workspaceService.askQuestion(question, workspaceId, thinking, mode, previous_messages, fileId)
+            const response = await workspaceService.askQuestion(cleanedText, workspaceId, thinking, mode, previous_messages, fileId)
             
                 // Add assistant message
                 const assistantMessage: ChatMessage = {

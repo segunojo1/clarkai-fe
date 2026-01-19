@@ -444,7 +444,7 @@ export default function WorkspacePage() {
           .getState()
           .askQuestion(
             id.toString(),
-            cleanedText || text,
+            text,
             true,
             mode,
             recentMessages,
