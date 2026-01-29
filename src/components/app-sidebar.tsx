@@ -331,7 +331,7 @@ export function AppSidebar() {
           />
 
           <p className="text-[14px] font-bold group-data-[collapsible=icon]:hidden">
-            {`${user?.name?.length > 7 ? user?.name?.slice(0, 7) + "..." : user?.name || "User"}`}
+            {`${user?.name && user.name.length > 7 ? user.name.slice(0, 7) + "..." : user?.name || "User"}`}
           </p>
         </div>
 
