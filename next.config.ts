@@ -1,6 +1,6 @@
 // Ignore TypeScript errors
 // @ts-ignore
-import {withSentryConfig} from "@sentry/nextjs";
+import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
         hostname: "pub-8909402706d249d98d4c2e55de1dfd3d.r2.dev",
       },
     ],
-  }
+  },
 };
 
 export default withSentryConfig(nextConfig, {
@@ -50,5 +50,5 @@ export default withSentryConfig(nextConfig, {
   // See the following for more information:
   // https://docs.sentry.io/product/crons/
   // https://vercel.com/docs/cron-jobs
-  automaticVercelMonitors: true
+  automaticVercelMonitors: true,
 });
