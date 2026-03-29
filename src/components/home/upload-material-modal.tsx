@@ -615,6 +615,9 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                                         <Link href={`/quiz/${quiz.id}`}>
                                                             Start Quiz
                                                         </Link>
+                                                        <Link href={`/quiz/${quiz.id}/overview`}>
+                                                            Overview
+                                                        </Link>
                                                     </div>
                                                 </div>
                                                 {quiz.quizSource && (
