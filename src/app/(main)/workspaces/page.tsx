@@ -35,11 +35,16 @@ const WorkspaceDeleteDialog = ({ workspaceId }: WorkspaceDeleteDialogProps) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Trash
-          className="absolute top-4 left-4 w-4 h-4 text-gray-400 hover:text-yellow-400 cursor-pointer transition-colors group-hover:block hidden"
+                    className="absolute top-4 left-4 z-10 w-4 h-4 text-gray-400 hover:text-yellow-400 cursor-pointer transition-colors group-hover:block hidden"
           onClick={(e) => {
             e.preventDefault()
+                        e.stopPropagation()
             setOpen(true)
           }}
+                    onMouseDown={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                    }}
         />
       </DialogTrigger>
       <DialogContent>
@@ -226,30 +231,32 @@ const WorkspacesPage = () => {
                     <div className="w-full p-6">
                         <div className="space-y-4 flex items-start flex-wrap">
                             {workspaces.map((workspace) => (
-                                <Link href={`/workspaces/${workspace.enc_id}`} className="" key={workspace.enc_id}>
-                                    <div className="dark:hover:bg-[#2C2C2C] flex flex-col items-center hover:bg-[#F0F0EF] rounded-[14.6px] p-6 ">
+                                <div className="relative group" key={workspace.enc_id}>
+                                    <WorkspaceDeleteDialog workspaceId={workspace.enc_id} />
+                                    <Link href={`/workspaces/${workspace.enc_id}`} className="">
+                                        <div className="dark:hover:bg-[#2C2C2C] flex flex-col items-center hover:bg-[#F0F0EF] rounded-[14.6px] p-6 ">
 
-                                        <div className="group flex justify-center  max-w-[160px]  mb-[19.44px] relative">
-                                            <Star className="absolute top-2 right-[13px] w-4 h-4 text-gray-400 hover:text-yellow-400 cursor-pointer transition-colors" />
-                                            <WorkspaceDeleteDialog workspaceId={workspace.enc_id} />
-                                            <Image
-                                                src="/assets/file.png"
-                                                alt="File icon"
-                                                width={172}
-                                                height={138}
-                                                className="w-40 h-32"
-                                            />
-                                            <Globe className="absolute left-[9.7px] bottom-[9.9px] w-[19px] h-[19px]" color={workspace.tag ? workspace.tag : "#99a1af"} />
-                                        </div>
+                                            <div className="flex justify-center  max-w-[160px]  mb-[19.44px] relative">
+                                                <Star className="absolute top-2 right-[13px] w-4 h-4 text-gray-400 hover:text-yellow-400 cursor-pointer transition-colors" />
+                                                <Image
+                                                    src="/assets/file.png"
+                                                    alt="File icon"
+                                                    width={172}
+                                                    height={138}
+                                                    className="w-40 h-32"
+                                                />
+                                                <Globe className="absolute left-[9.7px] bottom-[9.9px] w-[19px] h-[19px]" color={workspace.tag ? workspace.tag : "#99a1af"} />
+                                            </div>
 
-                                        <div className="flex flex-col items-center">
-                                            <h3 className="dark:text-gray-300 text-black font-medium text-lg"> {workspace.name.length >= 15 ? workspace.name.slice(0, 15) + ".." : workspace.name}</h3>
-                                            {workspace.description && (
-                                                <p className="dark:text-gray-400 text-black text-sm mt-1"> {workspace.description.length >= 20 ? workspace.description.slice(0, 20) + ".." : workspace.description}</p>
-                                            )}
+                                            <div className="flex flex-col items-center">
+                                                <h3 className="dark:text-gray-300 text-black font-medium text-lg"> {workspace.name.length >= 15 ? workspace.name.slice(0, 15) + ".." : workspace.name}</h3>
+                                                {workspace.description && (
+                                                    <p className="dark:text-gray-400 text-black text-sm mt-1"> {workspace.description.length >= 20 ? workspace.description.slice(0, 20) + ".." : workspace.description}</p>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                </Link>
+                                    </Link>
+                                </div>
 
                             ))}
                         </div>
