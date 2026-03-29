@@ -18,6 +18,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 
 import {
+  CircleUserRound,
   ChevronDown,
   ChevronRight,
   Edit,
@@ -35,6 +36,7 @@ import { useUserStore } from "@/store/user.store";
 import { useChatStore } from "@/store/chat.store";
 import { WorkspaceCreationModal } from "./home/workspace-creation-modal";
 import { useWorkspaceStore } from "@/store/workspace.store";
+import { ProfileModal } from "./profile-modal";
 
 export const LatestChat = () => {
   const { chats } = useChatStore();
@@ -265,6 +267,9 @@ export function AppSidebar() {
   ];
 
   const { user } = useUserStore();
+  const planName = user?.subscription?.plan
+    ? `${user.subscription.plan.charAt(0).toUpperCase()}${user.subscription.plan.slice(1)}`
+    : "Free";
 
   return (
     <Sidebar
@@ -335,7 +340,20 @@ export function AppSidebar() {
           </p>
         </div>
 
-        <div className="bg-[#292929] rounded-[4px] p-2">Free</div>
+        <div className="flex items-center gap-2">
+          <div className="bg-[#292929] text-white rounded-[4px] px-2 py-1 text-[12px] font-semibold group-data-[collapsible=icon]:hidden">
+            {planName}
+          </div>
+          <ProfileModal>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="rounded-full text-[#525252] dark:text-[#D4D4D4] hover:bg-[#F0F0EF] dark:hover:bg-[#404040]"
+            >
+              <CircleUserRound className="h-5 w-5" />
+            </Button>
+          </ProfileModal>
+        </div>
       </SidebarFooter>
 
       <SidebarRail />
