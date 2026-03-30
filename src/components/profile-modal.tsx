@@ -394,7 +394,9 @@ export function ProfileModal({ children }: ProfileModalProps) {
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
                   <div className="flex h-full flex-col rounded-xl border border-[#7a3f24] bg-[#17191d] p-4">
                     <p className="text-xl font-semibold">Free (Solo)</p>
-                    <p className="text-sm text-[#9b9b9b]">Individual student (trial)</p>
+                    <p className="text-sm text-[#9b9b9b]">
+                      Individual student (trial)
+                    </p>
                     <ul className="mt-3 flex-1 space-y-1 text-sm text-[#d6d6d6]">
                       <li>• Workspaces: 3</li>
                       <li>• File uploads: up to 2 files</li>
@@ -412,7 +414,9 @@ export function ProfileModal({ children }: ProfileModalProps) {
                   <div className="flex h-full flex-col rounded-xl border border-[#7a3f24] bg-[#17191d] p-4">
                     <p className="text-xs text-[#ff9b6b]">Most Popular</p>
                     <p className="text-xl font-semibold">Pro (Scholar)</p>
-                    <p className="text-sm text-[#9b9b9b]">Serious individual student</p>
+                    <p className="text-sm text-[#9b9b9b]">
+                      Serious individual student
+                    </p>
                     <ul className="mt-3 flex-1 space-y-1 text-sm text-[#d6d6d6]">
                       <li>• Workspaces: 10</li>
                       <li>• File uploads: limited per workspace (5)</li>
@@ -436,8 +440,12 @@ export function ProfileModal({ children }: ProfileModalProps) {
                     </Button>
                   </div>
                   <div className="flex h-full flex-col rounded-xl border border-[#7a3f24] bg-[#17191d] p-4">
-                    <p className="text-xl font-semibold">Teams (Collaborative)</p>
-                    <p className="text-sm text-[#9b9b9b]">Study groups & teams</p>
+                    <p className="text-xl font-semibold">
+                      Teams (Collaborative)
+                    </p>
+                    <p className="text-sm text-[#9b9b9b]">
+                      Study groups & teams
+                    </p>
                     <ul className="mt-3 flex-1 space-y-1 text-sm text-[#d6d6d6]">
                       <li>• Workspaces: unlimited + sharing</li>
                       <li>• File uploads: unlimited</li>
