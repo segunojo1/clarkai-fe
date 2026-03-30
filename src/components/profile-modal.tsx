@@ -123,7 +123,7 @@ export function ProfileModal({ children }: ProfileModalProps) {
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent
-        className="min-w-[900px] border-[#232323] bg-[#0f1012] p-0 text-[#f5f5f5]"
+        className="min-w-[1100px] border-[#232323] bg-[#0f1012] p-0 text-[#f5f5f5]"
         showCloseButton
       >
         <DialogHeader className="sr-only">
@@ -392,26 +392,37 @@ export function ProfileModal({ children }: ProfileModalProps) {
                   🎓 Students get 20% off with an education email.
                 </div>
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
-                  <div className="rounded-xl border border-[#7a3f24] bg-[#17191d] p-4">
-                    <p className="text-xl font-semibold">Free</p>
-                    <p className="text-sm text-[#9b9b9b]">$0 / forever</p>
-                    <ul className="mt-3 space-y-1 text-sm text-[#d6d6d6]">
-                      <li>• Limited journals and chats</li>
-                      <li>• Limited flashcards</li>
-                      <li>• Basic knowledge integrations</li>
+                  <div className="flex h-full flex-col rounded-xl border border-[#7a3f24] bg-[#17191d] p-4">
+                    <p className="text-xl font-semibold">Free (Solo)</p>
+                    <p className="text-sm text-[#9b9b9b]">Individual student (trial)</p>
+                    <ul className="mt-3 flex-1 space-y-1 text-sm text-[#d6d6d6]">
+                      <li>• Workspaces: 3</li>
+                      <li>• File uploads: up to 2 files</li>
+                      <li>• AI PDF analysis, Q&A & explanations</li>
+                      <li>• AI-generated quizzes: Basic</li>
+                      <li>• Progress tracking: Basic</li>
+                      <li>• Sharing: none</li>
+                      <li>• Flashcards: yes</li>
+                      <li>• Material generation: summary only</li>
                     </ul>
                     <Button className="mt-4 w-full bg-[#2a2f37] hover:bg-[#343b45]">
                       Current Plan
                     </Button>
                   </div>
-                  <div className="rounded-xl border border-[#7a3f24] bg-[#17191d] p-4">
+                  <div className="flex h-full flex-col rounded-xl border border-[#7a3f24] bg-[#17191d] p-4">
                     <p className="text-xs text-[#ff9b6b]">Most Popular</p>
-                    <p className="text-xl font-semibold">Explorer</p>
-                    <p className="text-sm text-[#9b9b9b]">$12.50 / month</p>
-                    <ul className="mt-3 space-y-1 text-sm text-[#d6d6d6]">
-                      <li>• Unlimited journals and chats</li>
-                      <li>• More generations and notes</li>
-                      <li>• 5 AI grading sessions/week</li>
+                    <p className="text-xl font-semibold">Pro (Scholar)</p>
+                    <p className="text-sm text-[#9b9b9b]">Serious individual student</p>
+                    <ul className="mt-3 flex-1 space-y-1 text-sm text-[#d6d6d6]">
+                      <li>• Workspaces: 10</li>
+                      <li>• File uploads: limited per workspace (5)</li>
+                      <li>• AI PDF analysis, Q&A & explanations</li>
+                      <li>• AI-generated quizzes: same as free</li>
+                      <li>• Voice chat (Whisper): yes</li>
+                      <li>• Progress tracking: advanced insights</li>
+                      <li>• Sharing: all, up to 5 people</li>
+                      <li>• Flashcards: downloadable as zip</li>
+                      <li>• Material generation: 3 full/day</li>
                     </ul>
                     <Button
                       className="mt-4 w-full bg-[#ff6a3d] text-white hover:bg-[#f25a2a]"
@@ -424,13 +435,20 @@ export function ProfileModal({ children }: ProfileModalProps) {
                       Upgrade
                     </Button>
                   </div>
-                  <div className="rounded-xl border border-[#7a3f24] bg-[#17191d] p-4">
-                    <p className="text-xl font-semibold">Scholar</p>
-                    <p className="text-sm text-[#9b9b9b]">$20.83 / month</p>
-                    <ul className="mt-3 space-y-1 text-sm text-[#d6d6d6]">
-                      <li>• Everything in Explorer +</li>
-                      <li>• Real-time proactive AI tutor</li>
-                      <li>• Unlimited grading + history</li>
+                  <div className="flex h-full flex-col rounded-xl border border-[#7a3f24] bg-[#17191d] p-4">
+                    <p className="text-xl font-semibold">Teams (Collaborative)</p>
+                    <p className="text-sm text-[#9b9b9b]">Study groups & teams</p>
+                    <ul className="mt-3 flex-1 space-y-1 text-sm text-[#d6d6d6]">
+                      <li>• Workspaces: unlimited + sharing</li>
+                      <li>• File uploads: unlimited</li>
+                      <li>• AI PDF analysis, Q&A & explanations</li>
+                      <li>• AI-generated quizzes: advanced + sharing</li>
+                      <li>• Voice chat (Whisper): yes</li>
+                      <li>• Collaborative whiteboard: yes</li>
+                      <li>• Real-time collaboration: yes</li>
+                      <li>• Comments & mentions: yes</li>
+                      <li>• Sharing: unlimited</li>
+                      <li>• Flashcards zip + unlimited materials</li>
                     </ul>
                     <Button
                       className="mt-4 w-full bg-[#ffb089] text-[#3a1508] hover:bg-[#ffa074]"

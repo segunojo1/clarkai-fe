@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { ChevronDown, Edit, Moon, X } from "lucide-react";
+import { ChevronDown, CircleUserRound, Edit, Moon, X } from "lucide-react";
 import { SidebarTrigger, useSidebar } from "../ui/sidebar";
 import { Button } from "../ui/button";
 import authService from "@/services/auth.service";
@@ -15,55 +15,55 @@ import { SubscriptionStatus } from "../subscription/subscription-status";
 import { signOut } from "next-auth/react";
 import Cookies from "js-cookie";
 import { UploadMaterialModal } from "../home/upload-material-modal";
+import { ProfileModal } from "../profile-modal";
+import { useUserStore } from "@/store/user.store";
+import Image from "next/image";
 
 export default function ClientLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-    const { getAllChats } = useChatStore()
-    const { getWorkspaces } = useWorkspaceStore()
-    const {
-        open
-    } = useSidebar()
-    const route = useRouter()
-    const pathname = usePathname()
-    const isWorkspacePage = pathname.startsWith('/workspaces')
-    const [isAuth, setIsAuth] = useState(false);
+  const { getAllChats } = useChatStore();
+  const { getWorkspaces } = useWorkspaceStore();
+  const { user } = useUserStore();
+  const { open } = useSidebar();
+  const route = useRouter();
+  const pathname = usePathname();
+  const isWorkspacePage = pathname.startsWith("/workspaces");
+  const [isAuth, setIsAuth] = useState(false);
 
-    const logout = async () => {
-        await signOut({ redirect: false }); // prevent NextAuth auto-redirect
-        sessionStorage.clear()
-        authService.logout();
-        route.push("/auth/login")
-    }
-    
-    
-    useEffect(() => {
-        // Auth guard: redirect to login if missing token
-        const token = Cookies.get('token');
-        console.log("client layout");
-        // if (token) {
-        //     setIsAuth(true)
-        //     console.log("client layout");
-        //     return;
-        // }
-        const initializeData = async () => {
-            try {
-                await getAllChats(1)
-                await getWorkspaces()
-            } catch (error) {
-                console.error("Failed to initialize data:", error)
-            }
-        }
-        initializeData()
-        
-    }, [route, getAllChats, getWorkspaces])
-    return (
-        <main className="w-full h-full relative flex-1">
-            {(
-                <>
-                    {/* {!open && (
+  const logout = async () => {
+    await signOut({ redirect: false }); // prevent NextAuth auto-redirect
+    sessionStorage.clear();
+    authService.logout();
+    route.push("/auth/login");
+  };
+
+  useEffect(() => {
+    // Auth guard: redirect to login if missing token
+    const token = Cookies.get("token");
+    console.log("client layout");
+    // if (token) {
+    //     setIsAuth(true)
+    //     console.log("client layout");
+    //     return;
+    // }
+    const initializeData = async () => {
+      try {
+        await getAllChats(1);
+        await getWorkspaces();
+      } catch (error) {
+        console.error("Failed to initialize data:", error);
+      }
+    };
+    initializeData();
+  }, [route, getAllChats, getWorkspaces]);
+  return (
+    <main className="w-full h-full relative flex-1">
+      {
+        <>
+          {/* {!open && (
 
                         <div className="flex items-center gap-1 absolute left-[20px] top-[20px] z-[999999]">
                             <SidebarTrigger />
@@ -72,44 +72,57 @@ export default function ClientLayout({
                             </Link>
                         </div>
                     )} */}
-                    <div className=" absolute right-[20px] top-[20px] z-10">
-                        {
-                            !isWorkspacePage && (
-                                <div className="flex items-center gap-3">
+          <div className=" absolute right-[20px] top-[20px] z-10">
+            {!isWorkspacePage && (
+              <div className="flex items-center gap-3">
+                {isAuth && (
+                  <div className="flex items-center gap-3">
+                    <SubscriptionStatus />
 
-                                    {
-                                        isAuth && (
-                                            <div className="flex items-center gap-3">
-                                                <SubscriptionStatus />
+                    <Button
+                      variant="outline"
+                      onClick={logout}
+                      className="border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    >
+                      Logout
+                    </Button>
+                  </div>
+                )}
 
-                                                <Button
-                                                    variant="outline"
-                                                    onClick={logout}
-                                                    className="border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
-                                                >
-                                                    Logout
-                                                </Button>
-                                            </div>
-                                        )
-                                    }
+                <ThemeSwitcher />
+                <ProfileModal>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="rounded-full text-[#525252] dark:text-[#D4D4D4] hover:bg-[#F0F0EF] dark:hover:bg-[#404040]"
+                  >
+                    <Image
+                      src={
+                        user?.image_url && user.image_url !== ""
+                          ? user.image_url
+                          : "/assets/orange.png"
+                      }
+                      alt="user avatar"
+                      width={24}
+                      height={24}
+                      className="rounded-full w-[24px] h-[24px]"
+                    />{" "}
+                  </Button>
+                </ProfileModal>
+              </div>
+            )}
 
-                                    <ThemeSwitcher />
-                                </div>
-                            )
-                        }
-
-                        {/* <WorkspaceCreationModal>
+            {/* <WorkspaceCreationModal>
                             <Button className="bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-medium px-4 py-2 rounded-md text-sm flex items-center gap-2">
                                 <span className="text-lg">+</span>
                                 Create
                                 <ChevronDown className="w-4 h-4" />
                             </Button>
                         </WorkspaceCreationModal> */}
-
-                    </div>
-                </>
-            )}
-            {children}
-        </main>
-    )
+          </div>
+        </>
+      }
+      {children}
+    </main>
+  );
 }

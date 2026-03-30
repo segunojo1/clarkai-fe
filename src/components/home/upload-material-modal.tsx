@@ -17,7 +17,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
-import { ChevronDown, Globe, Link as LinkIcon, FileText, Scan, Loader2, X, Sparkles, Download } from "lucide-react"
+import { ChevronDown, Globe, Link as LinkIcon, FileText, Scan, Loader2, X, Sparkles, Download, Trash2 } from "lucide-react"
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import MaterialPdf from './MaterialPdf';
 import Image from "next/image"
@@ -62,7 +62,10 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
     const [selectedPdfs, setSelectedPdfs] = useState<string[]>([])
     const [wordRange, setWordRange] = useState<string>('500-1000')
     const [generatedMaterial, setGeneratedMaterial] = useState<{ text: string } | null>(null)
-    const { selectedWorkspace } = useWorkspaceStore()
+    const [deletingFileUrl, setDeletingFileUrl] = useState<string | null>(null)
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+    const [pendingDeleteFile, setPendingDeleteFile] = useState<{ url: string; name: string } | null>(null)
+    const { selectedWorkspace, selectWorkspace } = useWorkspaceStore()
 
     useEffect(() => {
         setIsMounted(true)
@@ -80,6 +83,30 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
 
     const materialLength = selectedWorkspace && selectedWorkspace?.workspace?.files?.pdfFiles.length + selectedWorkspace?.workspace?.files?.imageFiles?.length
 
+    const requestDeleteFile = (fileUrl: string, fileName: string) => {
+        setPendingDeleteFile({ url: fileUrl, name: fileName })
+        setIsDeleteDialogOpen(true)
+    }
+
+    const handleDeleteFile = async () => {
+        if (!pendingDeleteFile) return
+
+        try {
+            setDeletingFileUrl(pendingDeleteFile.url)
+            await workspaceServiceInstance.deleteFile(workspaceId, pendingDeleteFile.url)
+            const workspace = await workspaceServiceInstance.getWorkspaces(workspaceId)
+            selectWorkspace(workspace)
+            toast.success("File deleted successfully")
+            setIsDeleteDialogOpen(false)
+            setPendingDeleteFile(null)
+        } catch (error) {
+            console.error("Failed to delete file:", error)
+            toast.error("Failed to delete file")
+        } finally {
+            setDeletingFileUrl(null)
+        }
+    }
+
     // console.log(selectedWorkspace);
 
     // const { workspace } = selectedWorkspace
@@ -90,6 +117,43 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                 {children}
             </PopoverTrigger>
             <PopoverContent className="dark:bg-[#18191A] bg-[#F8F8F7] border border-[#333] text-white w-[500px] max-h-[80vh] p-0 rounded-2xl shadow-2xl overflow-y-auto" align="start" sideOffset={8}>
+                <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                    <DialogContent className="sm:max-w-[440px] bg-[#2A2A2A] border-[#444] text-white">
+                        <DialogHeader>
+                            <DialogTitle>Delete file?</DialogTitle>
+                            <DialogDescription className="text-gray-300">
+                                This will remove <span className="font-medium text-white">{pendingDeleteFile?.name}</span> from this workspace.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <DialogClose asChild>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="border-gray-600 text-white hover:bg-gray-700"
+                                    disabled={!!deletingFileUrl}
+                                >
+                                    Cancel
+                                </Button>
+                            </DialogClose>
+                            <Button
+                                type="button"
+                                className="bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white"
+                                onClick={handleDeleteFile}
+                                disabled={!!deletingFileUrl}
+                            >
+                                {deletingFileUrl ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Deleting...
+                                    </>
+                                ) : (
+                                    "Delete"
+                                )}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
                 {/* Nav Tabs */}
                 <div className="flex items-center justify-start gap-2 px-8 pt-4 pb-2">
                     <button
@@ -159,6 +223,22 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                     {selectedWorkspace?.workspace.files.pdfFiles.map((file: { id: string; filePath: string; fileName: string; size: string }) => (
                                         <div key={file.id} className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2" onClick={() => window.open(file.filePath, '_blank')}>
                                             <div className="rounded-2xl p-0 flex flex-col items-center justify-center relative" style={{ minHeight: 96 }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        requestDeleteFile(file.filePath, file.fileName)
+                                                    }}
+                                                    disabled={deletingFileUrl === file.filePath}
+                                                    className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
+                                                    aria-label={`Delete ${file.fileName}`}
+                                                >
+                                                    {deletingFileUrl === file.filePath ? (
+                                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                    ) : (
+                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                    )}
+                                                </button>
                                                 {/* File icon - no background, no border */}
                                                 <div className="flex justify-center mb-2 mt-4">
                                                     <Image
@@ -179,6 +259,22 @@ export function UploadMaterialModal({ children, workspaceId }: UploadMaterialMod
                                     {selectedWorkspace?.workspace.files.imageFiles.map((file: { id: string; filePath: string; fileName: string; size: string }) => (
                                         <div key={file.id} className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2" onClick={() => window.open(file.filePath, '_blank')}>
                                             <div className="rounded-2xl p-0 flex flex-col items-center justify-center relative" style={{ minHeight: 96 }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        requestDeleteFile(file.filePath, file.fileName)
+                                                    }}
+                                                    disabled={deletingFileUrl === file.filePath}
+                                                    className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
+                                                    aria-label={`Delete ${file.fileName}`}
+                                                >
+                                                    {deletingFileUrl === file.filePath ? (
+                                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                    ) : (
+                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                    )}
+                                                </button>
                                                 {/* File icon - no background, no border */}
                                                 <div className="flex justify-center mb-2 mt-4">
                                                     <Image

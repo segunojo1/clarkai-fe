@@ -139,6 +139,26 @@ class WorkspaceService {
         }
     }
 
+    public async deleteFile(workspaceId: string, fileUrl: string) {
+        try {
+            const response = await this.api.delete('/files', {
+                data: {
+                    workspace_id: workspaceId,
+                    file_url: fileUrl,
+                }
+            });
+
+            if (!response.data.success) {
+                throw new Error(response.data.message || 'Failed to delete file');
+            }
+
+            return response.data;
+        } catch (error) {
+            console.error('Failed to delete file:', error);
+            throw error;
+        }
+    }
+
     public async fetchWorkspaceFlashcards(workspaceId: string) {
         try {
             const response = await this.api.get('/workspaceFlashCard', {
