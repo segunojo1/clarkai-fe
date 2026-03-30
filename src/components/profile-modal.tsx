@@ -40,14 +40,35 @@ interface ProfileModalProps {
   children: React.ReactNode;
 }
 
-const tabs: Array<{ key: SettingsTab; label: string; icon: React.ReactNode }> = [
-  { key: "profile", label: "Profile", icon: <CircleUserRound className="h-4 w-4" /> },
-  { key: "billing", label: "Billing", icon: <CreditCard className="h-4 w-4" /> },
-  { key: "integrations", label: "Integrations", icon: <Link2 className="h-4 w-4" /> },
-  { key: "publishing", label: "Publishing", icon: <Send className="h-4 w-4" /> },
-  { key: "pricing", label: "View Pricing", icon: <Sparkles className="h-4 w-4" /> },
-  { key: "account", label: "Account", icon: <Shield className="h-4 w-4" /> },
-];
+const tabs: Array<{ key: SettingsTab; label: string; icon: React.ReactNode }> =
+  [
+    {
+      key: "profile",
+      label: "Profile",
+      icon: <CircleUserRound className="h-4 w-4" />,
+    },
+    {
+      key: "billing",
+      label: "Billing",
+      icon: <CreditCard className="h-4 w-4" />,
+    },
+    {
+      key: "integrations",
+      label: "Integrations",
+      icon: <Link2 className="h-4 w-4" />,
+    },
+    {
+      key: "publishing",
+      label: "Publishing",
+      icon: <Send className="h-4 w-4" />,
+    },
+    {
+      key: "pricing",
+      label: "View Pricing",
+      icon: <Sparkles className="h-4 w-4" />,
+    },
+    { key: "account", label: "Account", icon: <Shield className="h-4 w-4" /> },
+  ];
 
 const toTitle = (value?: string) => {
   if (!value) return "Free";
@@ -76,7 +97,7 @@ export function ProfileModal({ children }: ProfileModalProps) {
 
   const planName = useMemo(
     () => toTitle(user?.subscription?.plan),
-    [user?.subscription?.plan]
+    [user?.subscription?.plan],
   );
 
   const primaryEmail = user?.email || "No email attached";
@@ -123,7 +144,7 @@ export function ProfileModal({ children }: ProfileModalProps) {
                   onClick={() => setActiveTab(tab.key)}
                   className={`h-10 w-full justify-start gap-2 rounded-lg px-3 text-sm ${
                     activeTab === tab.key
-                      ? "bg-[#1f4d35] text-[#57dd8f] hover:bg-[#1f4d35]"
+                      ? "bg-[#3a2118] text-[#ff8a66] hover:bg-[#3a2118]"
                       : "text-[#c8c8c8] hover:bg-[#20242a]"
                   }`}
                 >
@@ -149,7 +170,9 @@ export function ProfileModal({ children }: ProfileModalProps) {
                   />
                   <div>
                     <p className="text-sm font-medium">Profile Photo</p>
-                    <p className="text-xs text-[#a3a3a3]">Click to upload a new photo. Max size: 10MB</p>
+                    <p className="text-xs text-[#a3a3a3]">
+                      Click to upload a new photo. Max size: 10MB
+                    </p>
                   </div>
                 </div>
 
@@ -159,17 +182,25 @@ export function ProfileModal({ children }: ProfileModalProps) {
                     <Input
                       value={profileForm.fullName}
                       onChange={(e) =>
-                        setProfileForm((prev) => ({ ...prev, fullName: e.target.value }))
+                        setProfileForm((prev) => ({
+                          ...prev,
+                          fullName: e.target.value,
+                        }))
                       }
                       className="h-10 border-[#2e2e2e] bg-[#26282d]"
                     />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs text-[#a3a3a3]">Nickname (optional)</p>
+                    <p className="text-xs text-[#a3a3a3]">
+                      Nickname (optional)
+                    </p>
                     <Input
                       value={profileForm.nickname}
                       onChange={(e) =>
-                        setProfileForm((prev) => ({ ...prev, nickname: e.target.value }))
+                        setProfileForm((prev) => ({
+                          ...prev,
+                          nickname: e.target.value,
+                        }))
                       }
                       className="h-10 border-[#2e2e2e] bg-[#26282d]"
                     />
@@ -179,27 +210,40 @@ export function ProfileModal({ children }: ProfileModalProps) {
                     <Input
                       value={profileForm.username}
                       onChange={(e) =>
-                        setProfileForm((prev) => ({ ...prev, username: e.target.value }))
+                        setProfileForm((prev) => ({
+                          ...prev,
+                          username: e.target.value,
+                        }))
                       }
                       className="h-10 border-[#2e2e2e] bg-[#26282d]"
                     />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs text-[#a3a3a3]">University / School</p>
+                    <p className="text-xs text-[#a3a3a3]">
+                      University / School
+                    </p>
                     <Input
                       value={profileForm.school}
                       onChange={(e) =>
-                        setProfileForm((prev) => ({ ...prev, school: e.target.value }))
+                        setProfileForm((prev) => ({
+                          ...prev,
+                          school: e.target.value,
+                        }))
                       }
                       className="h-10 border-[#2e2e2e] bg-[#26282d]"
                     />
                   </div>
                   <div className="space-y-1 md:col-span-2">
-                    <p className="text-xs text-[#a3a3a3]">Major (if applicable)</p>
+                    <p className="text-xs text-[#a3a3a3]">
+                      Major (if applicable)
+                    </p>
                     <Input
                       value={profileForm.major}
                       onChange={(e) =>
-                        setProfileForm((prev) => ({ ...prev, major: e.target.value }))
+                        setProfileForm((prev) => ({
+                          ...prev,
+                          major: e.target.value,
+                        }))
                       }
                       className="h-10 border-[#2e2e2e] bg-[#26282d]"
                     />
@@ -208,7 +252,7 @@ export function ProfileModal({ children }: ProfileModalProps) {
 
                 <div className="flex justify-end">
                   <Button
-                    className="bg-[#2ea45a] px-5 text-white hover:bg-[#27924f]"
+                    className="bg-[#ff6a3d] px-5 text-white hover:bg-[#f25a2a]"
                     onClick={saveProfile}
                   >
                     Save Changes
@@ -217,7 +261,8 @@ export function ProfileModal({ children }: ProfileModalProps) {
 
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm font-medium">
-                    Emails <CircleAlert className="h-3.5 w-3.5 text-[#8a8a8a]" />
+                    Emails{" "}
+                    <CircleAlert className="h-3.5 w-3.5 text-[#8a8a8a]" />
                   </div>
                   <div className="rounded-lg border border-[#2b2b2b] bg-[#23262b] p-3">
                     <p className="text-sm">{primaryEmail}</p>
@@ -249,15 +294,23 @@ export function ProfileModal({ children }: ProfileModalProps) {
                 <div className="rounded-xl border border-[#252525] bg-[#17191d] p-4">
                   <p className="text-sm text-[#9f9f9f]">Current plan</p>
                   <p className="mt-1 text-2xl font-semibold">{planName}</p>
-                  <p className="mt-1 text-xs text-[#8a8a8a]">Manage upgrades, renewals, and invoices from this panel.</p>
+                  <p className="mt-1 text-xs text-[#8a8a8a]">
+                    Manage upgrades, renewals, and invoices from this panel.
+                  </p>
                 </div>
                 <div className="rounded-xl border border-[#252525] bg-[#17191d] p-4">
                   <p className="mb-2 text-sm font-medium">Payment method</p>
-                  <p className="text-sm text-[#9f9f9f]">No payment method connected yet.</p>
+                  <p className="text-sm text-[#9f9f9f]">
+                    No payment method connected yet.
+                  </p>
                   <Button
                     variant="secondary"
                     className="mt-3 bg-[#22262c] text-[#e8e8e8] hover:bg-[#2c3139]"
-                    onClick={() => toast.info("Connect payment method when backend endpoint is ready.")}
+                    onClick={() =>
+                      toast.info(
+                        "Connect payment method when backend endpoint is ready.",
+                      )
+                    }
                   >
                     Connect card
                   </Button>
@@ -269,7 +322,8 @@ export function ProfileModal({ children }: ProfileModalProps) {
               <div className="space-y-5">
                 <h2 className="text-3xl font-semibold">Integrations</h2>
                 <p className="text-sm text-[#a2a2a2]">
-                  Connect your knowledge bases so Clark can reference and sync study material.
+                  Connect your knowledge bases so Clark can reference and sync
+                  study material.
                 </p>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   {["Google Drive", "Notion"].map((item) => (
@@ -281,7 +335,9 @@ export function ProfileModal({ children }: ProfileModalProps) {
                       <Button
                         variant="secondary"
                         className="h-8 bg-[#2d3036] text-[#f2f2f2] hover:bg-[#393d45]"
-                        onClick={() => toast.info(`${item} connection coming soon.`)}
+                        onClick={() =>
+                          toast.info(`${item} connection coming soon.`)
+                        }
                       >
                         Connect
                       </Button>
@@ -296,21 +352,32 @@ export function ProfileModal({ children }: ProfileModalProps) {
                 <h2 className="text-3xl font-semibold">Publishing</h2>
                 <div className="rounded-xl border border-[#252525] bg-[#17191d] p-4">
                   <p className="text-sm font-medium">Custom domains</p>
-                  <p className="text-sm text-[#a2a2a2]">Use your own domain when sharing journals publicly.</p>
+                  <p className="text-sm text-[#a2a2a2]">
+                    Use your own domain when sharing journals publicly.
+                  </p>
                   <Button
-                    className="mt-3 bg-[#2ea45a] text-white hover:bg-[#27924f]"
-                    onClick={() => toast.info("Domain setup wizard will be connected here.")}
+                    className="mt-3 bg-[#ff6a3d] text-white hover:bg-[#f25a2a]"
+                    onClick={() =>
+                      toast.info("Domain setup wizard will be connected here.")
+                    }
                   >
                     Set up domain
                   </Button>
                 </div>
                 <div className="rounded-xl border border-[#252525] bg-[#17191d] p-4">
                   <p className="text-sm font-medium">SEO & visibility</p>
-                  <p className="text-sm text-[#a2a2a2]">Control whether your public journals are indexed by search engines.</p>
+                  <p className="text-sm text-[#a2a2a2]">
+                    Control whether your public journals are indexed by search
+                    engines.
+                  </p>
                   <Button
                     variant="secondary"
                     className="mt-3 bg-[#22262c] text-[#e8e8e8] hover:bg-[#2c3139]"
-                    onClick={() => toast.success("Saved. Visibility preference updated locally.")}
+                    onClick={() =>
+                      toast.success(
+                        "Saved. Visibility preference updated locally.",
+                      )
+                    }
                   >
                     Keep journals private
                   </Button>
@@ -321,11 +388,11 @@ export function ProfileModal({ children }: ProfileModalProps) {
             {activeTab === "pricing" && (
               <div className="space-y-5">
                 <h2 className="text-3xl font-semibold">View Pricing</h2>
-                <div className="rounded-lg bg-[#163a27] px-4 py-2 text-sm text-[#73e3a4]">
+                <div className="rounded-lg bg-[#3a2416] px-4 py-2 text-sm text-[#ffb088]">
                   🎓 Students get 20% off with an education email.
                 </div>
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
-                  <div className="rounded-xl border border-[#2f7b52] bg-[#17191d] p-4">
+                  <div className="rounded-xl border border-[#7a3f24] bg-[#17191d] p-4">
                     <p className="text-xl font-semibold">Free</p>
                     <p className="text-sm text-[#9b9b9b]">$0 / forever</p>
                     <ul className="mt-3 space-y-1 text-sm text-[#d6d6d6]">
@@ -333,10 +400,12 @@ export function ProfileModal({ children }: ProfileModalProps) {
                       <li>• Limited flashcards</li>
                       <li>• Basic knowledge integrations</li>
                     </ul>
-                    <Button className="mt-4 w-full bg-[#2a2f37] hover:bg-[#343b45]">Current Plan</Button>
+                    <Button className="mt-4 w-full bg-[#2a2f37] hover:bg-[#343b45]">
+                      Current Plan
+                    </Button>
                   </div>
-                  <div className="rounded-xl border border-[#2f7b52] bg-[#17191d] p-4">
-                    <p className="text-xs text-[#6be09d]">Most Popular</p>
+                  <div className="rounded-xl border border-[#7a3f24] bg-[#17191d] p-4">
+                    <p className="text-xs text-[#ff9b6b]">Most Popular</p>
                     <p className="text-xl font-semibold">Explorer</p>
                     <p className="text-sm text-[#9b9b9b]">$12.50 / month</p>
                     <ul className="mt-3 space-y-1 text-sm text-[#d6d6d6]">
@@ -345,13 +414,17 @@ export function ProfileModal({ children }: ProfileModalProps) {
                       <li>• 5 AI grading sessions/week</li>
                     </ul>
                     <Button
-                      className="mt-4 w-full bg-[#2ea45a] hover:bg-[#27924f]"
-                      onClick={() => toast.info("Upgrade flow can be connected to payment initialization.")}
+                      className="mt-4 w-full bg-[#ff6a3d] text-white hover:bg-[#f25a2a]"
+                      onClick={() =>
+                        toast.info(
+                          "Upgrade flow can be connected to payment initialization.",
+                        )
+                      }
                     >
                       Upgrade
                     </Button>
                   </div>
-                  <div className="rounded-xl border border-[#2f7b52] bg-[#17191d] p-4">
+                  <div className="rounded-xl border border-[#7a3f24] bg-[#17191d] p-4">
                     <p className="text-xl font-semibold">Scholar</p>
                     <p className="text-sm text-[#9b9b9b]">$20.83 / month</p>
                     <ul className="mt-3 space-y-1 text-sm text-[#d6d6d6]">
@@ -360,8 +433,12 @@ export function ProfileModal({ children }: ProfileModalProps) {
                       <li>• Unlimited grading + history</li>
                     </ul>
                     <Button
-                      className="mt-4 w-full bg-[#f2f2f2] text-black hover:bg-white"
-                      onClick={() => toast.info("Scholar checkout can be wired to your payment provider.")}
+                      className="mt-4 w-full bg-[#ffb089] text-[#3a1508] hover:bg-[#ffa074]"
+                      onClick={() =>
+                        toast.info(
+                          "Scholar checkout can be wired to your payment provider.",
+                        )
+                      }
                     >
                       Upgrade
                     </Button>
@@ -376,29 +453,45 @@ export function ProfileModal({ children }: ProfileModalProps) {
                 <div className="space-y-3">
                   <div className="rounded-xl border border-[#252525] bg-[#17191d] p-4">
                     <p className="text-sm font-medium">Request your data</p>
-                    <p className="mb-3 text-xs text-[#9f9f9f]">Export your platform data in one package.</p>
+                    <p className="mb-3 text-xs text-[#9f9f9f]">
+                      Export your platform data in one package.
+                    </p>
                     <Button
                       variant="secondary"
                       className="w-full bg-[#f4f4f4] text-black hover:bg-white"
-                      onClick={() => toast.info("Data export request has been queued locally.")}
+                      onClick={() =>
+                        toast.info(
+                          "Data export request has been queued locally.",
+                        )
+                      }
                     >
                       Request Data
                     </Button>
                   </div>
                   <div className="rounded-xl border border-[#252525] bg-[#17191d] p-4">
                     <p className="text-sm font-medium">Reset your password</p>
-                    <p className="mb-3 text-xs text-[#9f9f9f]">A reset link will be sent to your primary email.</p>
+                    <p className="mb-3 text-xs text-[#9f9f9f]">
+                      A reset link will be sent to your primary email.
+                    </p>
                     <Button
                       variant="secondary"
                       className="w-full bg-[#f4f4f4] text-black hover:bg-white"
-                      onClick={() => toast.info("Password reset action is ready to be connected.")}
+                      onClick={() =>
+                        toast.info(
+                          "Password reset action is ready to be connected.",
+                        )
+                      }
                     >
                       Reset Password
                     </Button>
                   </div>
                   <div className="rounded-xl border border-[#252525] bg-[#17191d] p-4">
-                    <p className="text-sm font-medium">Sign out of your account</p>
-                    <p className="mb-3 text-xs text-[#9f9f9f]">You will need to sign in again to access your account.</p>
+                    <p className="text-sm font-medium">
+                      Sign out of your account
+                    </p>
+                    <p className="mb-3 text-xs text-[#9f9f9f]">
+                      You will need to sign in again to access your account.
+                    </p>
                     <Button
                       variant="secondary"
                       className="w-full bg-[#f4f4f4] text-black hover:bg-white"
