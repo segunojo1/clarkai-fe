@@ -235,6 +235,35 @@ class WorkspaceService {
       throw error;
     }
   }
+
+  public async addYoutubeVideoToWorkspace({
+    video_id,
+    workspace_id,
+  }: {
+    video_id: string;
+    workspace_id: string;
+  }) {
+    try {
+      const response = await this.api.post("/youtube", {
+        video_id,
+        workspace_id,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to add YouTube video to workspace:", error);
+      throw error;
+    }
+  }
+
+  public async testYoutubeVideo(video_id: string) {
+    try {
+      const response = await this.api.get(`/youtube/${video_id}`, {});
+      return response.data;
+    } catch (error) {
+      console.error("Failed to test YouTube video:", error);
+      throw error;
+    }
+  }
 }
 
 export default WorkspaceService.getInstance();

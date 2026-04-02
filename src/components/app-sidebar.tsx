@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import {
   Sidebar,
   SidebarContent,
@@ -41,6 +43,9 @@ import { ProfileModal } from "./profile-modal";
 export const LatestChat = () => {
   const { chats } = useChatStore();
   const { state } = useSidebar();
+  const [showAllChats, setShowAllChats] = useState(false);
+
+  const visibleChats = showAllChats ? chats : chats.slice(0, 4);
 
   // Show collapsed version when sidebar is collapsed
   if (state === "collapsed") {
@@ -77,8 +82,10 @@ export const LatestChat = () => {
       ) : (
         <div className="">
           <h2 className="text-[12px]/[22px] font-bold">Recent Chats</h2>
-          <div className="max-h-[120px] overflow-y-scroll">
-            {chats.map((chat) => (
+          <div
+            className={`${showAllChats ? "max-h-[220px]" : "max-h-[120px]"} overflow-y-scroll`}
+          >
+            {visibleChats.map((chat) => (
               <Link
                 key={chat.id}
                 href={`/chat/${chat.id}`}
@@ -88,9 +95,14 @@ export const LatestChat = () => {
               </Link>
             ))}
           </div>
-          <Button className="w-full text-[14px] font-bold dark:text-white hover:bg-[#F0F0EF] text-black dark:bg-[#404040] bg-[#F0F0EF] mt-1">
-            View all chat
-          </Button>
+          {chats.length > 4 && (
+            <Button
+              onClick={() => setShowAllChats((prev) => !prev)}
+              className="w-full text-[14px] font-bold dark:text-white hover:bg-[#F0F0EF] text-black dark:bg-[#404040] bg-[#F0F0EF] mt-1"
+            >
+              {showAllChats ? "Show less" : "View all chats"}
+            </Button>
+          )}
         </div>
       )}
     </div>

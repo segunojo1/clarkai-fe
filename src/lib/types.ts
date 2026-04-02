@@ -11,13 +11,13 @@ export interface FlashcardData {
   explanation?: string;
 }
 export interface ChatMessageMetadata {
-  type: 'flashcards';
+  type: "flashcards";
   data: FlashcardData[];
 }
 
 export interface ChatMessage {
   id?: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   text: string;
   isFile: boolean;
   fromUser: boolean;
@@ -31,6 +31,8 @@ export interface ChatMessage {
   metadata?: ChatMessageMetadata;
   isQuiz?: boolean;
   quizId?: string;
+  isGeneratedMaterial?: boolean;
+  materialTitle?: string;
 }
 
 export interface FileAttachment {
@@ -47,23 +49,23 @@ export interface ChatInfo {
 }
 
 export interface ChatResponse {
-  page: string; 
+  page: string;
   messages: ChatMessage[];
   chat: ChatInfo;
 }
-  
-  export interface Chat {
-    id: string
-    title: string
-    messages: ChatMessage[]
-    createdAt: Date
-    updatedAt: Date
-  }
 
-  export interface ChatBox {
-    createdAt: string
-    id: string
-    name: string
-    updatedAt: string
-    workspaceId: null | string
-  }
+export interface Chat {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ChatBox {
+  createdAt: string;
+  id: string;
+  name: string;
+  updatedAt: string;
+  workspaceId: null | string;
+}

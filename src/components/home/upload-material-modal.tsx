@@ -25,34 +25,23 @@ import {
   Scan,
   Loader2,
   X,
-  Sparkles,
-  Download,
+  HardDrive,
+  FolderOpen,
   Trash2,
 } from "lucide-react";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import MaterialPdf from "./MaterialPdf";
 import Image from "next/image";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { toast } from "sonner";
-import { Progress } from "@/components/ui/progress";
-import { Card, CardContent } from "@/components/ui/card";
 import workspaceServiceInstance from "@/services/workspace.service";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import UploadMaterial from "./upload-material";
 
 interface UploadMaterialModalProps {
   children: React.ReactNode;
   workspaceId: string;
 }
-
-const formatTimeLeft = (progress: number): string => {
-  if (progress === 0) return "Starting...";
-  if (progress === 100) return "Complete";
-  const timeLeft = Math.floor((100 - progress) / 10); // Assuming 10% progress per second
-  return `${timeLeft}s left`;
-};
 
 export function UploadMaterialModal({
   children,
@@ -60,22 +49,23 @@ export function UploadMaterialModal({
 }: UploadMaterialModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("Materials");
-  // const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isCreatingMaterial, setIsCreatingMaterial] = useState(false);
-  const [topic, setTopic] = useState("");
-  const [description, setDescription] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generationProgress, setGenerationProgress] = useState(0);
-  const [creationMode, setCreationMode] = useState<"topic" | "pdf">("topic");
   const [isMounted, setIsMounted] = useState(false);
-  const [selectedPdfs, setSelectedPdfs] = useState<string[]>([]);
-  const [wordRange, setWordRange] = useState<string>("500-1000");
-  const [generatedMaterial, setGeneratedMaterial] = useState<{
-    text: string;
-  } | null>(null);
   const [deletingFileUrl, setDeletingFileUrl] = useState<string | null>(null);
+  const [isYoutubeDialogOpen, setIsYoutubeDialogOpen] = useState(false);
+  const [isUploadingYoutubeLink, setIsUploadingYoutubeLink] = useState(false);
+  const [uploadedVideoPreview, setUploadedVideoPreview] = useState<{
+    title: string;
+    description?: string;
+    channelTitle?: string;
+    thumbnailUrl?: string;
+    viewCount?: string;
+    likeCount?: string;
+    commentCount?: string;
+    videoId?: string;
+  } | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [pendingDeleteFile, setPendingDeleteFile] = useState<{
     url: string;
@@ -88,19 +78,17 @@ export function UploadMaterialModal({
     return () => setIsMounted(false);
   }, []);
 
-  const wordRanges = [
-    { value: "300-500", label: "Short (300-500 words)" },
-    { value: "500-1000", label: "Normal (500-1000 words)" },
-    { value: "1000-1500", label: "Medium (1000-1500 words)" },
-    { value: "1500-2000", label: "Long (1500-2000 words)" },
-    { value: "2000-3000", label: "Detailed (2000-3000 words)" },
-    { value: "3000-5000", label: "Very Detailed (3000-5000 words)" },
-  ];
-
   const materialLength =
     selectedWorkspace &&
     selectedWorkspace?.workspace?.files?.pdfFiles.length +
       selectedWorkspace?.workspace?.files?.imageFiles?.length;
+  const youtubeVideos: Array<{
+    videoId?: string;
+    title?: string;
+    thumbnailUrl?: string;
+    filePath?: string;
+    fileName?: string;
+  }> = selectedWorkspace?.workspace?.files?.youtubeVideos ?? [];
 
   const requestDeleteFile = (fileUrl: string, fileName: string) => {
     setPendingDeleteFile({ url: fileUrl, name: fileName });
@@ -133,6 +121,81 @@ export function UploadMaterialModal({
   // console.log(selectedWorkspace);
 
   // const { workspace } = selectedWorkspace
+
+  const youtubeRegex =
+    /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)[\w-]{11}(\S*)?$/;
+
+  const [url, setUrl] = useState("");
+  const [touched, setTouched] = useState(false);
+
+  const isValid = youtubeRegex.test(url);
+  const showError = touched && url.length > 0 && !isValid;
+  const showSuccess = touched && url.length > 0 && isValid;
+
+  const extractYoutubeVideoId = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return "";
+
+    const directIdMatch = trimmed.match(/^[\w-]{11}$/);
+    if (directIdMatch) return directIdMatch[0];
+
+    const urlMatch = trimmed.match(
+      /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([\w-]{11})/,
+    );
+    return urlMatch?.[1] ?? "";
+  };
+
+  const handleUploadYoutubeLink = async () => {
+    setTouched(true);
+    if (!isValid) return;
+
+    const videoId = extractYoutubeVideoId(url);
+    if (!videoId) {
+      toast.error("Could not extract YouTube video ID");
+      return;
+    }
+
+    try {
+      setIsUploadingYoutubeLink(true);
+      const response =
+        await workspaceServiceInstance.addYoutubeVideoToWorkspace({
+          video_id: videoId,
+          workspace_id: workspaceId,
+        });
+
+      if (!response?.success) {
+        throw new Error(response?.message || "Failed to upload YouTube link");
+      }
+
+      const videoData = response.videoData;
+      setUploadedVideoPreview(
+        videoData
+          ? {
+              title: videoData.title,
+              description: videoData.description,
+              channelTitle: videoData.channelTitle,
+              thumbnailUrl: videoData.thumbnailUrl,
+              viewCount: videoData.viewCount,
+              likeCount: videoData.likeCount,
+              commentCount: videoData.commentCount,
+              videoId: videoData.videoId,
+            }
+          : null,
+      );
+
+      const workspace =
+        await workspaceServiceInstance.getWorkspaces(workspaceId);
+      selectWorkspace(workspace);
+      toast.success(response.message || "Video added successfully.");
+      setUrl("");
+      setTouched(false);
+    } catch (error) {
+      console.error("Failed to upload YouTube link:", error);
+      toast.error("Failed to upload YouTube link");
+    } finally {
+      setIsUploadingYoutubeLink(false);
+    }
+  };
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -216,261 +279,196 @@ export function UploadMaterialModal({
           >
             Quizzes
           </button>
-          {/* <button
-                        onClick={() => setActiveTab("Courses")}
-                        className={`font-medium text-base transition-colors px-4 py-2 rounded-lg ${activeTab === "Courses"
-                            ? "bg-[#232323] text-white"
-                            : "text-gray-400 hover:text-white"
-                            }`}
-                    >
-                        Courses
-                    </button> */}
         </div>
-        {/* Stats Row - conditional positioning based on active tab */}
+
         <div
           className={`flex items-center justify-start px-8 pb-2 text-[14px] text-black dark:text-gray-400 w-full ${
             activeTab === "Quizzes" ? "pt-0" : "pt-1"
           }`}
-        >
-          <div className="flex items-center gap-2 dark:bg-[#232323] bg-[#E5E5E5] px-[13px] py-1 rounded-full font-medium">
-            <span>{materialLength} Mat. Uploaded</span>
-          </div>
-          <div className="flex items-center gap-2 px-[13px] py-1">
-            <LinkIcon className="w-5 h-5" />
-            <span>0 links</span>
-          </div>
-          <div className="flex items-center gap-2 px-[13px] py-1">
-            <FileText className="w-5 h-5" />
-            <span>0 Docs</span>
-          </div>
-          <div className="flex items-center gap-2 px-[13px] py-1">
-            <Scan className="w-5 h-5" />
-            <span>0 Scans</span>
-          </div>
-        </div>
-        {/* Main Content - single column */}
+        ></div>
+
         <div className="flex flex-col items-start justify-start px-4 pb-8 pt-4 w-full h-full">
           {activeTab === "Materials" && (
             <>
-              {/* Files List */}
-              {selectedWorkspace &&
-              selectedWorkspace?.workspace?.files?.pdfFiles?.length > 0 ? (
-                <div className="flex justify-center items-center flex-wrap gap-2 mx-auto max-h-[500px] overflow-y-scroll mb-5">
-                  {selectedWorkspace?.workspace.files.pdfFiles.map(
-                    (file: {
-                      id: string;
-                      filePath: string;
-                      fileName: string;
-                      size: string;
-                    }) => (
-                      <div
-                        key={file.id}
-                        className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
-                        onClick={() => window.open(file.filePath, "_blank")}
-                      >
-                        <div
-                          className="rounded-2xl p-0 flex flex-col items-center justify-center relative"
-                          style={{ minHeight: 96 }}
-                        >
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              requestDeleteFile(file.filePath, file.fileName);
-                            }}
-                            disabled={deletingFileUrl === file.filePath}
-                            className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
-                            aria-label={`Delete ${file.fileName}`}
+              <Tabs defaultValue="materials" className="w-[400px] mx-auto">
+                <TabsList>
+                  <TabsTrigger value="materials">
+                    {materialLength} Mat. Uploaded
+                  </TabsTrigger>
+                  <TabsTrigger value="links">
+                    <LinkIcon className="w-5 h-5" />
+                    <span>{youtubeVideos.length} links</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="files">
+                    <FileText className="w-5 h-5" />
+                    <span>0 Docs</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="scans">
+                    <Scan className="w-5 h-5" />
+                    <span>0 Scans</span>
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="materials" className="mx-auto">
+                  {selectedWorkspace &&
+                  selectedWorkspace?.workspace?.files?.pdfFiles?.length > 0 ? (
+                    <div className="flex justify-center items-center flex-wrap gap-2 mx-auto max-h-[500px] overflow-y-scroll mb-5">
+                      {selectedWorkspace?.workspace.files.pdfFiles.map(
+                        (file: {
+                          id: string;
+                          filePath: string;
+                          fileName: string;
+                          size: string;
+                        }) => (
+                          <div
+                            key={file.id}
+                            className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
+                            onClick={() => window.open(file.filePath, "_blank")}
                           >
-                            {deletingFileUrl === file.filePath ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-3.5 w-3.5" />
-                            )}
-                          </button>
-                          {/* File icon - no background, no border */}
-                          <div className="flex justify-center mb-2 mt-4">
-                            <Image
-                              src="/assets/fileIcon.png"
-                              alt="File icon"
-                              width={56}
-                              height={56}
-                              className="w-14 h-14 bg-transparent"
-                              style={{ background: "none" }}
-                            />
+                            <div
+                              className="rounded-2xl p-0 flex flex-col items-center justify-center relative"
+                              style={{ minHeight: 96 }}
+                            >
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  requestDeleteFile(
+                                    file.filePath,
+                                    file.fileName,
+                                  );
+                                }}
+                                disabled={deletingFileUrl === file.filePath}
+                                className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
+                                aria-label={`Delete ${file.fileName}`}
+                              >
+                                {deletingFileUrl === file.filePath ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                )}
+                              </button>
+                              {/* File icon - no background, no border */}
+                              <div className="flex justify-center mb-2 mt-4">
+                                <Image
+                                  src="/assets/fileIcon.png"
+                                  alt="File icon"
+                                  width={56}
+                                  height={56}
+                                  className="w-14 h-14 bg-transparent"
+                                  style={{ background: "none" }}
+                                />
+                              </div>
+                              <div className="text-center max-w-[130px] w-[130px] h-[50px]">
+                                <p className="dark:text-gray-300  text-[#737373] text-xs font-medium leading-tight break-words">
+                                  {file.fileName}
+                                  <br />
+                                  {file.size}
+                                </p>
+                              </div>
+                            </div>
                           </div>
-                          <div className="text-center max-w-[130px] w-[130px] h-[50px]">
-                            <p className="dark:text-gray-300  text-[#737373] text-xs font-medium leading-tight break-words">
-                              {file.fileName}
-                              <br />
-                              {file.size}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ),
-                  )}
-                  {selectedWorkspace?.workspace.files.imageFiles.map(
-                    (file: {
-                      id: string;
-                      filePath: string;
-                      fileName: string;
-                      size: string;
-                    }) => (
-                      <div
-                        key={file.id}
-                        className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
-                        onClick={() => window.open(file.filePath, "_blank")}
-                      >
-                        <div
-                          className="rounded-2xl p-0 flex flex-col items-center justify-center relative"
-                          style={{ minHeight: 96 }}
-                        >
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              requestDeleteFile(file.filePath, file.fileName);
-                            }}
-                            disabled={deletingFileUrl === file.filePath}
-                            className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
-                            aria-label={`Delete ${file.fileName}`}
+                        ),
+                      )}
+                      {selectedWorkspace?.workspace.files.imageFiles.map(
+                        (file: {
+                          id: string;
+                          filePath: string;
+                          fileName: string;
+                          size: string;
+                        }) => (
+                          <div
+                            key={file.id}
+                            className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
+                            onClick={() => window.open(file.filePath, "_blank")}
                           >
-                            {deletingFileUrl === file.filePath ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-3.5 w-3.5" />
-                            )}
-                          </button>
-                          {/* File icon - no background, no border */}
-                          <div className="flex justify-center mb-2 mt-4">
-                            <Image
-                              src="/assets/fileIcon.png"
-                              alt="File icon"
-                              width={56}
-                              height={56}
-                              className="w-14 h-14 bg-transparent"
-                              style={{ background: "none" }}
-                            />
+                            <div
+                              className="rounded-2xl p-0 flex flex-col items-center justify-center relative"
+                              style={{ minHeight: 96 }}
+                            >
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  requestDeleteFile(
+                                    file.filePath,
+                                    file.fileName,
+                                  );
+                                }}
+                                disabled={deletingFileUrl === file.filePath}
+                                className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
+                                aria-label={`Delete ${file.fileName}`}
+                              >
+                                {deletingFileUrl === file.filePath ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                )}
+                              </button>
+                              {/* File icon - no background, no border */}
+                              <div className="flex justify-center mb-2 mt-4">
+                                <Image
+                                  src="/assets/fileIcon.png"
+                                  alt="File icon"
+                                  width={56}
+                                  height={56}
+                                  className="w-14 h-14 bg-transparent"
+                                  style={{ background: "none" }}
+                                />
+                              </div>
+                              <div className="text-center max-w-[130px] w-[130px] h-[50px]">
+                                <p className="text-gray-300 text-xs font-medium leading-tight break-words">
+                                  {file.fileName}
+                                  <br />
+                                  {file.size}
+                                </p>
+                              </div>
+                            </div>
                           </div>
-                          <div className="text-center max-w-[130px] w-[130px] h-[50px]">
-                            <p className="text-gray-300 text-xs font-medium leading-tight break-words">
-                              {file.fileName}
-                              <br />
-                              {file.size}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ),
-                  )}
-                </div>
-              ) : (
-                <div className="flex flex-col items-start justify-start mb-8">
-                  <div
-                    className="rounded-2xl p-0 w-24 h-28 flex flex-col items-center justify-center relative"
-                    style={{ minHeight: 96 }}
-                  >
-                    {/* File icon - no background, no border */}
-                    <div className="flex justify-center mb-2 mt-4">
-                      <Image
-                        src="/assets/fileIcon.png"
-                        alt="File icon"
-                        width={56}
-                        height={56}
-                        className="w-14 h-14 bg-transparent"
-                        style={{ background: "none" }}
-                      />
+                        ),
+                      )}
                     </div>
+                  ) : (
+                    <div className="flex flex-col items-start justify-start mb-8">
+                      <div
+                        className="rounded-2xl p-0 w-24 h-28 flex flex-col items-center justify-center relative"
+                        style={{ minHeight: 96 }}
+                      >
+                        <div className="flex justify-center mb-2 mt-4">
+                          <Image
+                            src="/assets/fileIcon.png"
+                            alt="File icon"
+                            width={56}
+                            height={56}
+                            className="w-14 h-14 bg-transparent"
+                            style={{ background: "none" }}
+                          />
+                        </div>
 
-                    <div className="text-left w-full pl-4">
-                      <p className="dark:text-gray-300 text-[#737373] text-xs font-medium leading-tight">
-                        Your Material
-                        <br />
-                        goes here
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-              {/* File Preview */}
-              {uploadedFile && (
-                <div className="mt-4 p-4 bg-[#232323] rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-sm font-medium text-white">
-                        {uploadedFile.name}
-                      </h3>
-                      <p className="text-xs text-gray-400">
-                        {uploadedFile.size}
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setUploadedFile(null);
-                        setUploadProgress(0);
-                      }}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-              {/* Upload Section */}
-              <div className="w-full flex flex-col items-start">
-                {selectedWorkspace?.workspace?.files?.pdfFiles?.length == 0 && (
-                  <>
-                    <div className="text-left mb-8 w-full">
-                      <h2 className="text-3xl font-normal dark:text-white text-black flex items-center gap-3 mb-4">
-                        Upload your First Material
-                        <Globe className="w-7 h-7 text-gray-400" />
-                      </h2>
-                    </div>
-                    <div className="space-y-6 text-base dark:text-gray-300 text-black leading-relaxed mb-8 w-full max-w-xl text-left break-words">
-                      <p>
-                        Upload PDFs, videos, or notes to start building your
-                        learning flow.
-                      </p>
-                      <p>
-                        We help you organize every material you add—so
-                        everything stays structured, easy to access, and focused
-                        on what matters.
-                      </p>
-                      <div className="border-l-2 border-[#5A5A5A] pl-4">
-                        <p className="break-words whitespace-normal text-sm">
-                          You&apos;ll also be able to reference them in chats
-                          using the{" "}
-                          <span className="bg-[#FF3D00] text-white px-2 py-1 rounded text-xs font-medium">
-                            @materials
-                          </span>{" "}
-                          and{" "}
-                          <span className="bg-[#FF3D00] text-white px-2 py-1 rounded text-xs font-medium">
-                            @update
-                          </span>{" "}
-                          tags to ask questions about them,
-                          <br />
-                          and turn them into flashcards, quizzes, and more.
-                        </p>
+                        <div className="text-left w-full pl-4">
+                          <p className="dark:text-gray-300 text-[#737373] text-xs font-medium leading-tight">
+                            Your Material
+                            <br />
+                            goes here
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </>
-                )}
-                {uploadedFile ? (
-                  <Card className="w-full">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
+                  )}
+
+                  {uploadedFile && (
+                    <div className="mt-4 p-4 bg-[#232323] rounded-lg">
+                      <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-lg font-medium text-white mb-1">
+                          <h3 className="text-sm font-medium text-white">
                             {uploadedFile.name}
                           </h3>
-                          <p className="text-sm text-gray-400">
+                          <p className="text-xs text-gray-400">
                             {uploadedFile.size}
                           </p>
                         </div>
                         <Button
                           variant="ghost"
+                          size="icon"
                           onClick={() => {
                             setUploadedFile(null);
                             setUploadProgress(0);
@@ -479,401 +477,179 @@ export function UploadMaterialModal({
                           <X className="w-4 h-4" />
                         </Button>
                       </div>
-                      <div className="space-y-4">
-                        <Progress value={uploadProgress} className="h-2" />
-                        <div className="flex justify-between text-sm text-gray-400">
-                          <span>{uploadProgress}%</span>
-                          <span>{formatTimeLeft(uploadProgress)}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="flex flex-col gap-2 items-center justify-center  w-full">
-                    <FileUploadButton workspaceId={workspaceId} />
-                    <p className="text-[17px] font-bold dark:text-white text-black">
-                      OR
-                    </p>
-                    <Dialog
-                      open={isCreatingMaterial}
-                      onOpenChange={setIsCreatingMaterial}
-                    >
-                      <DialogTrigger asChild>
-                        <Button className="bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-medium text-lg px-[100px] py-[10px] cursor-pointer rounded-[5px] transition-colors ml-4 w-96">
-                          Create Material
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[500px] bg-[#2A2A2A] border-[#444] text-white">
-                        <DialogHeader>
-                          <DialogTitle className="text-2xl font-bold">
-                            Create New Material
-                          </DialogTitle>
-                          <DialogDescription className="text-gray-300">
-                            Choose how you&apos;d like to create your study
-                            material.
-                          </DialogDescription>
-                        </DialogHeader>
+                    </div>
+                  )}
 
-                        <div className="grid gap-4 py-4">
-                          {/* Mode Selection */}
-                          <div className="grid grid-cols-2 gap-4 mb-4">
-                            <button
-                              type="button"
-                              onClick={() => setCreationMode("topic")}
-                              className={`p-4 rounded-lg border-2 transition-all ${creationMode === "topic" ? "border-[#FF3D00] bg-[#FF3D00]/10" : "border-[#444] hover:border-[#666]"}`}
-                            >
-                              <div className="flex flex-col items-center text-center">
-                                <FileText className="h-6 w-6 mb-2" />
-                                <span className="font-medium">From Topic</span>
-                                <p className="text-xs text-gray-400 mt-1">
-                                  Generate from a topic and description
-                                </p>
-                              </div>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setCreationMode("pdf")}
-                              className={`p-4 rounded-lg border-2 transition-all ${creationMode === "pdf" ? "border-[#FF3D00] bg-[#FF3D00]/10" : "border-[#444] hover:border-[#666]"}`}
-                            >
-                              <div className="flex flex-col items-center text-center">
-                                <FileText className="h-6 w-6 mb-2" />
-                                <span className="font-medium">From PDF</span>
-                                <p className="text-xs text-gray-400 mt-1">
-                                  Generate from an existing PDF
-                                </p>
-                              </div>
-                            </button>
-                          </div>
-
-                          {creationMode === "topic" ? (
-                            <>
-                              <div className="space-y-2">
-                                <Label htmlFor="topic" className="text-white">
-                                  Topic *
-                                </Label>
-                                <Input
-                                  id="topic"
-                                  placeholder="Enter a topic (e.g., 'Introduction to Quantum Mechanics')"
-                                  value={topic}
-                                  onChange={(e) => setTopic(e.target.value)}
-                                  className="bg-[#333] border-[#444] text-white placeholder-gray-400"
-                                />
-                              </div>
-
-                              <div className="">
-                                <div className="space-y-2 min-w-full">
-                                  <Label
-                                    htmlFor="word-range"
-                                    className="text-white"
-                                  >
-                                    Length
-                                  </Label>
-                                  <select
-                                    id="word-range"
-                                    value={wordRange}
-                                    onChange={(e) =>
-                                      setWordRange(e.target.value)
-                                    }
-                                    className="w-full p-2 bg-[#333] border border-[#444] rounded-md text-white"
-                                  >
-                                    {wordRanges.map((range) => (
-                                      <option
-                                        key={range.value}
-                                        value={range.value}
-                                      >
-                                        {range.label}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
-                              </div>
-                              <div className="space-y-2">
-                                <Label
-                                  htmlFor="description"
-                                  className="text-white"
-                                >
-                                  Additional Context (Optional)
-                                </Label>
-                                <Textarea
-                                  id="description"
-                                  placeholder="Provide more details about what you want to learn..."
-                                  rows={3}
-                                  value={description}
-                                  onChange={(e) =>
-                                    setDescription(e.target.value)
-                                  }
-                                  className="bg-[#333] border-[#444] text-white placeholder-gray-400"
-                                />
-                              </div>
-                            </>
-                          ) : (
-                            <div className="space-y-4">
-                              <div className="space-y-2">
-                                <Label className="text-white">
-                                  Select PDFs from Workspace
-                                </Label>
-                                <div className="space-y-2 max-h-40 overflow-y-auto p-2 bg-[#2a2a2a] rounded-md">
-                                  {isMounted &&
-                                    selectedWorkspace?.workspace?.files?.pdfFiles
-                                      ?.filter((m) =>
-                                        m.fileName.endsWith(".pdf"),
-                                      )
-                                      .map((material) => (
-                                        <div
-                                          key={material.id}
-                                          className="flex items-center space-x-2"
-                                        >
-                                          <input
-                                            type="checkbox"
-                                            id={`pdf-${material.id}`}
-                                            checked={selectedPdfs.includes(
-                                              material.id,
-                                            )}
-                                            onChange={(e) => {
-                                              if (e.target.checked) {
-                                                setSelectedPdfs([
-                                                  ...selectedPdfs,
-                                                  material.id,
-                                                ]);
-                                              } else {
-                                                setSelectedPdfs(
-                                                  selectedPdfs.filter(
-                                                    (id) => id !== material.id,
-                                                  ),
-                                                );
-                                              }
-                                            }}
-                                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                          />
-                                          <label
-                                            htmlFor={`pdf-${material.id}`}
-                                            className="text-sm text-gray-300 cursor-pointer"
-                                          >
-                                            {material.fileName}
-                                          </label>
-                                        </div>
-                                      ))}
-                                </div>
-                                <p className="text-xs text-gray-400 mt-1">
-                                  {selectedWorkspace?.workspace?.files?.pdfFiles?.filter(
-                                    (m) => m.fileName.endsWith(".pdf"),
-                                  ).length === 0
-                                    ? "No PDFs found in your workspace. Please upload a PDF first."
-                                    : selectedPdfs.length > 0
-                                      ? `${selectedPdfs.length} PDF${selectedPdfs.length > 1 ? "s" : ""} selected`
-                                      : "Select one or more PDFs to generate material from."}
-                                </p>
-                              </div>
-
-                              <div className="space-y-2">
-                                <Label
-                                  htmlFor="pdf-description"
-                                  className="text-white"
-                                >
-                                  Additional Instructions (Optional)
-                                </Label>
-                                <Textarea
-                                  id="pdf-description"
-                                  placeholder="Any specific focus or requirements for the generated material..."
-                                  rows={2}
-                                  value={description}
-                                  onChange={(e) =>
-                                    setDescription(e.target.value)
-                                  }
-                                  className="bg-[#333] border-[#444] text-white placeholder-gray-400"
-                                />
-                              </div>
-                            </div>
-                          )}
-
-                          {isGenerating && (
-                            <div className="space-y-2 pt-2">
-                              <div className="flex items-center gap-2 text-blue-400">
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                <span>Generating your material...</span>
-                              </div>
-                              <Progress
-                                value={generationProgress}
-                                className="h-2"
-                              />
-                              <p className="text-xs text-gray-400 text-right">
-                                This may take a moment. Please don&apos;t close
-                                this window.
-                              </p>
-                            </div>
-                          )}
-                        </div>
-
-                        <DialogFooter className="sm:justify-between">
-                          <DialogClose asChild>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className="border-gray-600 text-white hover:bg-gray-700"
-                              disabled={isGenerating}
-                            >
-                              Cancel
-                            </Button>
-                          </DialogClose>
-                          <Button
-                            type="submit"
-                            className="bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white"
-                            disabled={
-                              isGenerating ||
-                              (creationMode === "topic"
-                                ? !topic.trim()
-                                : selectedPdfs.length === 0)
+                  <UploadMaterial
+                    isMounted={isMounted}
+                    setIsCreatingMaterial={setIsCreatingMaterial}
+                    workspaceId={workspaceId}
+                    isCreatingMaterial={isCreatingMaterial}
+                    uploadedFile={uploadedFile}
+                    setUploadedFile={setUploadedFile}
+                    setUploadProgress={setUploadProgress}
+                    uploadProgress={uploadProgress}
+                  />
+                </TabsContent>
+                <TabsContent value="links">
+                  {youtubeVideos.length > 0 ? (
+                    <div className="flex justify-center items-center flex-wrap gap-2 mx-auto max-h-[500px] overflow-y-scroll mb-5">
+                      {youtubeVideos.map(
+                        (file: {
+                          videoId?: string;
+                          title?: string;
+                          thumbnailUrl?: string;
+                          filePath?: string;
+                          fileName?: string;
+                        }) => (
+                          <div
+                            key={file.videoId || file.filePath || file.fileName}
+                            className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
+                            onClick={() =>
+                              window.open(
+                                file.filePath ||
+                                  (file.videoId
+                                    ? `https://www.youtube.com/watch?v=${file.videoId}`
+                                    : ""),
+                                "_blank",
+                              )
                             }
-                            onClick={async () => {
-                              if (
-                                (creationMode === "topic" && !topic.trim()) ||
-                                (creationMode === "pdf" &&
-                                  selectedPdfs.length === 0)
-                              ) {
-                                return;
-                              }
-
-                              try {
-                                setIsGenerating(true);
-                                // Simulate generation progress
-                                const interval = setInterval(() => {
-                                  setGenerationProgress((prev) => {
-                                    if (prev >= 90) {
-                                      clearInterval(interval);
-                                      return prev;
-                                    }
-                                    return prev + 10;
-                                  });
-                                }, 500);
-
-                                // TODO: Replace with actual API call to generate material
-                                // The API endpoint will be different based on the creation mode
-                                // const payload = creationMode === 'topic'
-                                //     ? {
-                                //         topic,
-                                //         description,
-                                //         type: 'topic',
-                                //         words_range: wordRange,
-                                //         is_tag: true
-                                //       }
-                                //     : {
-                                //         pdfId: selectedPdf,
-                                //         instructions: description,
-                                //         type: 'pdf',
-                                //         words_range: wordRange
-                                //       };
-
-                                const workspace =
-                                  await workspaceServiceInstance.generateMaterial(
-                                    creationMode === "topic" ? topic : "",
-                                    wordRange,
-                                    true,
-                                    description,
-                                    creationMode === "pdf"
-                                      ? selectedPdfs
-                                      : undefined,
-                                  );
-
-                                console.log(
-                                  "Generating material with:",
-                                  workspace,
-                                );
-
-                                clearInterval(interval);
-                                setGenerationProgress(100);
-
-                                // Simulate completion
-                                await new Promise((resolve) =>
-                                  setTimeout(resolve, 500),
-                                );
-
-                                if (
-                                  workspace?.pdfGenerated &&
-                                  workspace?.text
-                                ) {
-                                  setGeneratedMaterial({
-                                    text: workspace.text,
-                                  });
-                                  // Auto-download the markdown
-                                  // PDF download will be handled by the PDFDownloadLink component
-                                  toast.success(
-                                    "Material generated and downloaded successfully!",
-                                  );
-                                } else {
-                                  toast.error(
-                                    "Failed to generate material. Please try again.",
-                                  );
-                                }
-
-                                // setShowCreateDialog(false);
-                                setTopic("");
-                                setDescription("");
-                                setSelectedPdfs([]);
-                                setGenerationProgress(0);
-                                setIsGenerating(false);
-                                setCreationMode("topic");
-                              } catch (error) {
-                                console.error(
-                                  "Error generating material:",
-                                  error,
-                                );
-                                toast.error(
-                                  "Failed to generate material. Please try again.",
-                                );
-                              } finally {
-                                setIsGenerating(false);
-                              }
-                            }}
                           >
-                            <Sparkles className="mr-2 h-4 w-4" />
-                            {isGenerating
-                              ? "Generating..."
-                              : "Generate Material"}
-                          </Button>
-                        </DialogFooter>
-                        {generatedMaterial && (
-                          <div className="p-4 mt-4 bg-gray-800 rounded-md">
-                            <div className="flex flex-col space-y-4">
-                              <div className="flex justify-between items-center">
-                                <span className="text-white">
-                                  Material Ready!
-                                </span>
-                                {generatedMaterial?.text && (
-                                  <PDFDownloadLink
-                                    document={
-                                      <MaterialPdf
-                                        content={generatedMaterial.text}
-                                        title={`Material - ${new Date().toISOString().slice(0, 10)}`}
-                                      />
+                            <div
+                              className="rounded-2xl p-0 flex flex-col items-center justify-center"
+                              style={{ minHeight: 96 }}
+                            >
+                              <div className="flex justify-center mb-2 mt-4">
+                                {file.thumbnailUrl ? (
+                                  <Image
+                                    src={file.thumbnailUrl}
+                                    alt={
+                                      file.title ||
+                                      file.fileName ||
+                                      "YouTube thumbnail"
                                     }
-                                    fileName={`material-${new Date().toISOString().slice(0, 10)}.pdf`}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center"
-                                  >
-                                    {({ loading }) => (
-                                      <>
-                                        <Download className="mr-2 h-4 w-4" />
-                                        {loading
-                                          ? "Generating PDF..."
-                                          : "Download PDF"}
-                                      </>
-                                    )}
-                                  </PDFDownloadLink>
+                                    width={56}
+                                    height={56}
+                                    className="w-14 h-14 rounded-md object-cover"
+                                  />
+                                ) : (
+                                  <Globe className="w-14 h-14 text-[#737373]" />
                                 )}
                               </div>
-                              {generatedMaterial?.text && (
-                                <div className="text-xs text-gray-400">
-                                  If the download doesn&apos;t start
-                                  automatically, click the button above.
+                              <div className="text-center max-w-[130px] w-[130px] h-[50px]">
+                                <p className="dark:text-gray-300 text-[#737373] text-xs font-medium leading-tight break-words">
+                                  {file.title ||
+                                    file.fileName ||
+                                    "YouTube Video"}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-gray-400">No links yet.</div>
+                  )}
+                  <Dialog
+                    open={isYoutubeDialogOpen}
+                    onOpenChange={setIsYoutubeDialogOpen}
+                  >
+                    <DialogTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="mt-2 border-gray-600 text-white hover:bg-gray-700"
+                      >
+                        Upload new Youtube Video Link
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Upload Youtube Video Link</DialogTitle>
+                      </DialogHeader>
+                      <div className="flex flex-col gap-3">
+                        <Input
+                          value={url}
+                          type="url"
+                          placeholder="https://www.youtube.com/watch?v=..."
+                          onChange={(e) => setUrl(e.target.value)}
+                          onBlur={() => setTouched(true)}
+                        />
+
+                        <Button
+                          type="button"
+                          onClick={handleUploadYoutubeLink}
+                          disabled={!isValid || isUploadingYoutubeLink}
+                          className={` ${showError ? "border-red-500 focus:ring-red-200" : ""} bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-medium text-lg px-[100px] py-[10px] cursor-pointer rounded-[5px] transition-colors ml-4 w-full mx-auto`}
+                        >
+                          {isUploadingYoutubeLink ? (
+                            <span className="flex items-center justify-center gap-2">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Uploading...
+                            </span>
+                          ) : (
+                            "Upload Link"
+                          )}
+                        </Button>
+
+                        {showError && (
+                          <p className="text-red-500 text-sm">
+                            Please enter a valid YouTube URL.
+                          </p>
+                        )}
+                        {showSuccess && (
+                          <p className="text-green-500 text-sm">
+                            ✓ Valid YouTube URL
+                          </p>
+                        )}
+
+                        {uploadedVideoPreview && (
+                          <div className="mt-4 rounded-lg border border-[#3a3a3a] p-3">
+                            <p className="mb-2 text-xs text-gray-400">
+                              Preview from uploaded result
+                            </p>
+                            <div className="flex gap-3">
+                              {uploadedVideoPreview.thumbnailUrl ? (
+                                <Image
+                                  src={uploadedVideoPreview.thumbnailUrl}
+                                  alt={uploadedVideoPreview.title}
+                                  width={120}
+                                  height={68}
+                                  className="h-[68px] w-[120px] rounded-md object-cover"
+                                />
+                              ) : (
+                                <div className="flex h-[68px] w-[120px] items-center justify-center rounded-md bg-[#232323]">
+                                  <Globe className="h-6 w-6 text-[#737373]" />
                                 </div>
                               )}
+                              <div className="min-w-0 flex-1">
+                                <p className="line-clamp-2 text-sm font-medium text-white">
+                                  {uploadedVideoPreview.title}
+                                </p>
+                                <p className="mt-1 text-xs text-gray-400">
+                                  {uploadedVideoPreview.channelTitle}
+                                </p>
+                                <p className="mt-1 text-[11px] text-gray-500">
+                                  {uploadedVideoPreview.viewCount} views •
+                                  {uploadedVideoPreview.likeCount} likes •
+                                  {uploadedVideoPreview.commentCount} comments
+                                </p>
+                              </div>
                             </div>
                           </div>
                         )}
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                )}
-              </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </TabsContent>
+                <TabsContent value="files">
+                  Change your password here.
+                </TabsContent>
+                <TabsContent value="scans">
+                  Change your password here.
+                </TabsContent>
+              </Tabs>
             </>
           )}
           {activeTab === "Quizzes" && (
@@ -1008,94 +784,249 @@ export function UploadMaterialModal({
               )}
             </>
           )}
-          {/* {activeTab === "Courses" && (
-                        <div className="w-full flex flex-col items-start justify-start" style={{ minHeight: 400 }}>
-                            <div className="rounded-2xl w-[29rem] h-28 flex flex-col items-center justify-center relative ml-0 border-2 border-dashed border-[#A3A3A3]/40 bg-[#232323]/40" style={{ minHeight: 96, marginLeft: '-6%' }}>
-                                <div className="text-center w-full px-2">
-                                    <p className="text-gray-400 text-xs font-medium leading-tight italic">No courses yet...</p>
-                                </div>
-                            </div>
-                        </div>
-                    )} */}
         </div>
       </PopoverContent>
     </Popover>
   );
 }
 
+function loadScript(src: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) return resolve();
+    const script = document.createElement("script");
+    script.src = src;
+    script.onload = () => resolve();
+    script.onerror = reject;
+    document.body.appendChild(script);
+  });
+}
+
+const GOOGLE_API_KEY =
+  process.env.NEXT_PUBLIC_GOOGLE_API_KEY ||
+  process.env.NEXT_PUBLIC_GOOGLE_DEVELOPER_KEY;
+const GOOGLE_CLIENT_ID =
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+  process.env.NEXT_PUBLIC_GOOGLE_DRIVE_CLIENT_ID;
+
+declare global {
+  interface Window {
+    gapi: any;
+    google: any;
+  }
+}
+
+interface GooglePickerResponse {
+  action: string;
+  docs: Array<{ id: string; name: string; mimeType: string }>;
+}
+
 export function FileUploadButton({ workspaceId }: { workspaceId: string }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     console.log(files);
     if (!files || files.length == 0) return;
 
-    const fileArray = Array.from(files);
+    await runUpload(Array.from(files));
+  };
 
-    // const file = e.target.files?.[0]
-    // if (!file) return
-
+  const runUpload = async (fileArray: File[]) => {
     setUploading(true);
     setUploadProgress(0);
 
+    const interval = setInterval(() => {
+      setUploadProgress((prev) => {
+        const next = prev + 10;
+        if (next >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return next;
+      });
+    }, 500);
+
     try {
-      // Simulate upload progress
-      const interval = setInterval(() => {
-        setUploadProgress((prev) => {
-          const next = prev + 10;
-          if (next >= 100) {
-            clearInterval(interval);
-            return 100;
-          }
-          return next;
-        });
-      }, 500);
-
       await useWorkspaceStore.getState().uploadFile(fileArray, workspaceId);
-      console.log("heyyy");
-
       const workspace =
         await workspaceServiceInstance.getWorkspaces(workspaceId);
-
       useWorkspaceStore.getState().selectWorkspace(workspace);
       clearInterval(interval);
       setUploading(false);
       toast.success("File uploaded successfully");
-    } catch (err) {
+    } catch (error) {
+      clearInterval(interval);
       setUploading(false);
       setUploadProgress(0);
-      console.log(err);
-
+      console.error(error);
       toast.error("Failed to upload file");
+    }
+  };
+  const openGooglePicker = async () => {
+    setShowDropdown(false);
+
+    try {
+      if (!GOOGLE_CLIENT_ID) {
+        toast.error(
+          "Missing Google Client ID. Set NEXT_PUBLIC_GOOGLE_CLIENT_ID and restart the dev server.",
+        );
+        console.error(
+          "Google Drive Picker config missing: NEXT_PUBLIC_GOOGLE_CLIENT_ID",
+        );
+        return;
+      }
+
+      if (!GOOGLE_API_KEY) {
+        toast.error(
+          "Missing Google API key. Set NEXT_PUBLIC_GOOGLE_API_KEY and restart the dev server.",
+        );
+        console.error(
+          "Google Drive Picker config missing: NEXT_PUBLIC_GOOGLE_API_KEY",
+        );
+        return;
+      }
+
+      // Load Google APIs
+      await loadScript("https://apis.google.com/js/api.js");
+      await loadScript("https://accounts.google.com/gsi/client");
+
+      // Get OAuth token via Google Identity Services
+      const token = await new Promise<string>((resolve, reject) => {
+        const client = window.google.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID,
+          scope: "https://www.googleapis.com/auth/drive.readonly",
+          callback: (response: { access_token?: string; error?: string }) => {
+            if (response.error) reject(new Error(response.error));
+            else resolve(response.access_token!);
+          },
+        });
+        client.requestAccessToken();
+      });
+
+      // Load picker API
+      await new Promise<void>((resolve) => {
+        window.gapi.load("picker", resolve);
+      });
+
+      // Build and show picker
+      const picker = new window.google.picker.PickerBuilder()
+        .addView(
+          new window.google.picker.DocsView()
+            .setIncludeFolders(false)
+            .setMimeTypes(
+              "application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,image/jpeg,image/png,image/gif,video/mp4,video/webm",
+            ),
+        )
+        .setOAuthToken(token)
+        .setDeveloperKey(GOOGLE_API_KEY)
+        .setCallback(async (data: GooglePickerResponse) => {
+          if (data.action !== window.google.picker.Action.PICKED) return;
+
+          const driveFiles = data.docs;
+          setUploading(true);
+          setUploadProgress(0);
+
+          try {
+            const fileArray: File[] = await Promise.all(
+              driveFiles.map(async (doc) => {
+                const res = await fetch(
+                  `https://www.googleapis.com/drive/v3/files/${doc.id}?alt=media`,
+                  { headers: { Authorization: `Bearer ${token}` } },
+                );
+                const blob = await res.blob();
+                return new File([blob], doc.name, { type: doc.mimeType });
+              }),
+            );
+
+            await runUpload(fileArray);
+          } catch (err) {
+            console.error(err);
+            setUploading(false);
+            setUploadProgress(0);
+            toast.error("Failed to import from Google Drive");
+          }
+        })
+        .build();
+
+      picker.setVisible(true);
+    } catch (err) {
+      console.error(err);
+      const errMessage = err instanceof Error ? err.message : "";
+      if (errMessage.includes("client_id")) {
+        toast.error(
+          "Google Drive config error: invalid/missing Client ID. Check NEXT_PUBLIC_GOOGLE_CLIENT_ID.",
+        );
+      } else {
+        toast.error("Could not open Google Drive picker");
+      }
     }
   };
 
   return (
-    <>
-      <button
-        onClick={() => fileInputRef.current?.click()}
-        className="bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-medium text-lg px-[100px] py-[10px] cursor-pointer rounded-[5px] transition-colors ml-4 w-96"
-      >
-        {uploading ? (
-          <div className="flex items-center gap-2">
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Uploading... {uploadProgress}%
-          </div>
-        ) : (
-          "Upload Materials"
-        )}
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          className="hidden"
-          accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.mp4,.webm"
-          multiple
-        />
-      </button>
-    </>
+    <div className="relative ml-4">
+      <div className="flex">
+        {/* Main button */}
+        <button
+          onClick={() => {
+            setShowDropdown(false);
+            fileInputRef.current?.click();
+          }}
+          disabled={uploading}
+          className="bg-[#FF3D00] hover:bg-[#FF3D00]/90 disabled:opacity-70 text-white font-medium text-lg px-10 py-[10px] cursor-pointer rounded-l-[5px] transition-colors w-80"
+        >
+          {uploading ? (
+            <span className="flex items-center justify-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Uploading... {uploadProgress}%
+            </span>
+          ) : (
+            "Upload Materials"
+          )}
+        </button>
+
+        {/* Dropdown toggle */}
+        <button
+          onClick={() => setShowDropdown((v) => !v)}
+          disabled={uploading}
+          className="bg-[#FF3D00] hover:bg-[#d63400] disabled:opacity-70 text-white px-3 py-[10px] rounded-r-[5px] border-l border-white/20 transition-colors cursor-pointer"
+        >
+          <ChevronDown className="w-4 h-4" />
+        </button>
+      </div>
+
+      {showDropdown && (
+        <div className="absolute top-full mt-1 right-0 bg-white border border-gray-200 rounded-[5px] shadow-lg z-50 w-56 overflow-hidden">
+          <button
+            onClick={() => {
+              setShowDropdown(false);
+              fileInputRef.current?.click();
+            }}
+            className="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <HardDrive className="w-4 h-4 text-gray-500" />
+            Upload from Computer
+          </button>
+          <button
+            onClick={openGooglePicker}
+            className="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors border-t border-gray-100"
+          >
+            <FolderOpen className="w-4 h-4 text-[#4285F4]" />
+            Import from Google Drive
+          </button>
+        </div>
+      )}
+
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        className="hidden"
+        accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.mp4,.webm"
+        multiple
+      />
+    </div>
   );
 }

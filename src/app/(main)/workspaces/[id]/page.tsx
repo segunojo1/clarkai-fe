@@ -16,16 +16,9 @@ import Image from "next/image";
 import { SlidingPanel } from "@/components/ui/sliding-panel";
 import { Loader2 } from "lucide-react";
 import quizService from "@/services/quiz.service";
-
-// Helper function to format flashcards as markdown
-// const formatFlashcards = (flashcards: Array<{ question: string, answer: string, explanation?: string }>) => {
-//   return flashcards.map((card, index) =>
-//     `### Flashcard ${index + 1}\n` +
-//     `**Q:** ${card.question}\n` +
-//     `**A:** ${card.answer}\n` +
-//     (card.explanation ? `*${card.explanation}*\n\n` : '\n')
-//   ).join('\n');
-// };
+import UserAvatar from "@/components/user-avatar";
+import { pdf } from "@react-pdf/renderer";
+import MaterialPdf from "@/components/home/MaterialPdf";
 
 export default function WorkspacePage() {
   const { setCurrentChatId, setChatDetails, setIsLoading, isLoading } =
@@ -36,6 +29,7 @@ export default function WorkspacePage() {
     askQuestion,
     isQuizPanelOpen,
     setIsQuizPanelOpen,
+    selectedWorkspace,
   } = useWorkspaceStore();
   // const [isLoading, setIsLoading] = useState(false)
   const [loadChats, setLoadChats] = useState(false);
@@ -73,7 +67,7 @@ export default function WorkspacePage() {
         try {
           setLoadChats(true);
           const workspace = await workspaceServiceInstance.getWorkspaces(
-            id.toString()
+            id.toString(),
           );
 
           // Set workspace in store
@@ -174,7 +168,7 @@ export default function WorkspacePage() {
           id,
           10, // Default number of flashcards
           true,
-          context
+          context,
         );
 
         const flashcardResponse = response as unknown as FlashcardResponse;
@@ -186,7 +180,7 @@ export default function WorkspacePage() {
               question: card.question,
               answer: card.answer,
               explanation: card.explanation || "",
-            })
+            }),
           );
 
           // Add assistant message with flashcard data
@@ -224,7 +218,7 @@ export default function WorkspacePage() {
 
         // Update messages by removing the loading message
         updatedMessages = updatedMessages.filter(
-          (msg) => msg.id !== loadingMessageId
+          (msg) => msg.id !== loadingMessageId,
         );
         setMessages(updatedMessages);
 
@@ -233,7 +227,7 @@ export default function WorkspacePage() {
         setIsLoading(false);
       }
     },
-    [id, messages, setIsLoading, setMessages]
+    [id, messages, setIsLoading, setMessages],
   );
 
   const handleGenerateMaterials = useCallback(
@@ -285,20 +279,36 @@ export default function WorkspacePage() {
           "500-1000",
           true,
           context,
-          undefined
+          undefined,
         );
 
         if (response?.text) {
+          const materialTitle = `Generated Material - ${new Date().toLocaleDateString()}`;
+          const materialPdfBlob = await pdf(
+            <MaterialPdf content={response.text} title={materialTitle} />,
+          ).toBlob();
+          const materialPdfUrl = URL.createObjectURL(materialPdfBlob);
+
           const assistantMessage: ChatMessage = {
             createdAt: new Date(),
             role: "assistant",
-            text: response.text,
+            text: "Material generated successfully.",
             fromUser: false,
             isFile: false,
             updatedAt: new Date(),
             flashcardId: "",
             size: 0,
             isFlashcard: false,
+            isGeneratedMaterial: true,
+            materialTitle,
+            attachments: [
+              {
+                name: `${materialTitle}.pdf`,
+                type: "application/pdf",
+                url: materialPdfUrl,
+                size: materialPdfBlob.size,
+              },
+            ],
           };
 
           updatedMessages = [
@@ -309,7 +319,7 @@ export default function WorkspacePage() {
         } else {
           toast.error("Failed to generate material");
           updatedMessages = updatedMessages.filter(
-            (msg) => msg.id !== loadingMessageId
+            (msg) => msg.id !== loadingMessageId,
           );
           setMessages(updatedMessages);
         }
@@ -319,7 +329,7 @@ export default function WorkspacePage() {
         console.error("Error generating materials:", error);
         toast.error("Failed to generate materials");
         updatedMessages = updatedMessages.filter(
-          (msg) => msg.id !== loadingMessageId
+          (msg) => msg.id !== loadingMessageId,
         );
         setMessages(updatedMessages);
         return Promise.reject(error);
@@ -327,7 +337,7 @@ export default function WorkspacePage() {
         setIsLoading(false);
       }
     },
-    [id, messages, setIsLoading, setMessages]
+    [id, messages, setIsLoading, setMessages],
   );
 
   const handleGenerateQuiz = async (messageText: string) => {
@@ -412,7 +422,7 @@ export default function WorkspacePage() {
     } catch (err) {
       console.error("Failed to generate quiz:", err);
       updatedMessages = updatedMessages.filter(
-        (msg) => msg.id !== loadingMessageId
+        (msg) => msg.id !== loadingMessageId,
       );
       setMessages(updatedMessages);
       toast.error("Failed to generate quiz");
@@ -427,29 +437,24 @@ export default function WorkspacePage() {
     if (id) {
       try {
         setIsLoading(true);
-        // Detect @file(<id>) tag and extract fileId
+        // Detect @file(<id>) tag and extract fileId....
         const fileTagMatch = text.match(/@file\(([^)]+)\)/);
         const fileId = fileTagMatch?.[1];
         // Remove the file tag from the text sent to the API
-        const cleanedText = text.replace(/@file\(([^)]+)\)/g, '').trim();
+        const cleanedText = text.replace(/@file\(([^)]+)\)/g, "").trim();
 
         // Trim messages to the last 10 messages to limit context length
         const recentMessages = messages.slice(-10);
 
-        const mode: 'workspace' | 'file' | 'internet' = fileId
-          ? 'file'
-          : (askSource == 'ai' ? 'internet' : 'workspace');
+        const mode: "workspace" | "file" | "internet" = fileId
+          ? "file"
+          : askSource == "ai"
+            ? "internet"
+            : "workspace";
 
         const resp = await useWorkspaceStore
           .getState()
-          .askQuestion(
-            id.toString(),
-            text,
-            true,
-            mode,
-            recentMessages,
-            fileId
-          );
+          .askQuestion(id.toString(), text, true, mode, recentMessages, fileId);
         console.log(resp);
       } catch (error) {
         console.error("Error sending message:", error);
@@ -467,6 +472,12 @@ export default function WorkspacePage() {
           isQuizPanelOpen ? "" : "min-w-full"
         }`}
       >
+        <div className="flex gap-4 items-center h-[150px] justify-start w-3xl mx-auto">
+          <UserAvatar />
+          <h1 className="text-2xl  font-bold text-white">
+            Workspace - {selectedWorkspace?.workspace?.name}
+          </h1>
+        </div>
         <div className="absolute top-10 right-10 ">
           <UploadMaterialModal workspaceId={id.toString()}>
             <button className="p-1 border-2 rounded-full border-[#ffffff] transition-colors">
