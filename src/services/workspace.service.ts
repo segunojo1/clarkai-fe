@@ -301,6 +301,34 @@ class WorkspaceService {
       throw error;
     }
   }
+
+  public async updateUserDetails({
+    fullName,
+    nickname,
+    username,
+    school,
+    major
+  }: {
+    fullName?: string;
+    nickname?: string;
+    username?: string;
+    school?: string;
+    major?: string;
+  }) {
+    try {
+      const response = await this.api.patch("/updateUserDetails", {
+        fullName,
+        nickname,
+        username,
+        school,
+        major
+      });
+      return response.data;
+    }catch(error){
+      console.error("Failed to update user details:", error);
+      throw error;
+    }
+  }
 }
 
 export default WorkspaceService.getInstance();

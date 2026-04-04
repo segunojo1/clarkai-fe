@@ -369,7 +369,4 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
       throw error;
     }
   },
-  // getWorkspace: (id: string) => {
-  //     return get().workspaces.workspaces.find((workspace) => workspace.enc_id === id)
-  // }
 }));

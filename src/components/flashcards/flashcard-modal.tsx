@@ -6,6 +6,27 @@ import { Button } from '@/components/ui/button'
 import { Flashcard } from './flashcard'
 import { FlashcardData } from '@/lib/types'
 
+function downloadFile(filename: string, data: string, type = 'application/json') {
+  const blob = new Blob([data], { type })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
+
+function flashcardsToCSV(flashcards: FlashcardData[]) {
+  const header = ['Question', 'Answer', 'Explanation']
+  const rows = flashcards.map((f) => [f.question, f.answer, f.explanation || ''])
+  const csv = [header, ...rows]
+    .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))
+    .join('\n')
+  return csv
+}
+
 interface FlashcardModalProps {
   isOpen: boolean
   onClose: () => void
@@ -44,21 +65,44 @@ export function FlashcardModal({ isOpen, onClose, flashcards }: FlashcardModalPr
           />
         </div>
 
-        <div className="flex justify-between mt-4">
-          <Button 
-            variant="outline" 
-            onClick={handlePrevious}
-            disabled={currentIndex === 0}
-          >
-            Previous
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={handleNext}
-            disabled={currentIndex === flashcards.length - 1}
-          >
-            Next
-          </Button>
+        <div className="flex justify-between mt-4 items-center">
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={handlePrevious}
+              disabled={currentIndex === 0}
+            >
+              Previous
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleNext}
+              disabled={currentIndex === flashcards.length - 1}
+            >
+              Next
+            </Button>
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                const json = JSON.stringify(flashcards, null, 2)
+                downloadFile('flashcards.json', json, 'application/json')
+              }}
+            >
+              Download JSON
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                const csv = flashcardsToCSV(flashcards)
+                downloadFile('flashcards.csv', csv, 'text/csv')
+              }}
+            >
+              Download CSV
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

@@ -86,6 +86,8 @@ export function ProfileModal({ children }: ProfileModalProps) {
     school: "",
     major: "",
   });
+  const { updateUserDetails } = useUserStore();
+
 
   useEffect(() => {
     setProfileForm((prev) => ({
@@ -102,8 +104,9 @@ export function ProfileModal({ children }: ProfileModalProps) {
 
   const primaryEmail = user?.email || "No email attached";
 
-  const saveProfile = () => {
-    toast.success("Profile updated locally. Connect API to persist changes.");
+  const saveProfile = async () => {
+    await updateUserDetails(profileForm);
+    toast.success("Profile updated successfully.");
   };
 
   const addEmail = () => {
@@ -261,7 +264,7 @@ export function ProfileModal({ children }: ProfileModalProps) {
 
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm font-medium">
-                    Emails{" "}
+                    Emails
                     <CircleAlert className="h-3.5 w-3.5 text-[#8a8a8a]" />
                   </div>
                   <div className="rounded-lg border border-[#2b2b2b] bg-[#23262b] p-3">

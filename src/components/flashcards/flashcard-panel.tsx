@@ -224,6 +224,50 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
         </Button>
       </div>
 
+      <div className="p-4 flex gap-2">
+        <Button
+          variant="outline"
+          onClick={() => {
+            const questions = flashcardData?.questions || [];
+            const json = JSON.stringify(questions, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${flashcardData?.id || 'flashcards'}.json`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+          }}
+        >
+          Download JSON
+        </Button>
+
+        <Button
+          variant="outline"
+          onClick={() => {
+            const questions = flashcardData?.questions || [];
+            const header = ['Question', 'Answer', 'Explanation'];
+            const rows = questions.map((f) => [f.question, f.answer, f.explanation || '']);
+            const csv = [header, ...rows]
+              .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))
+              .join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${flashcardData?.id || 'flashcards'}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+          }}
+        >
+          Download CSV
+        </Button>
+      </div>
+
       <div className='text-[15px] rounded-[4px] mx-[10px] mb-[10px] font-normal dark:text-white text-black px-[30px] py-[10px] dark:bg-[#ff3c0027] bg-[#F9E5DE]'>
         You can also generate a quiz based on this set — just type @quiz or generate another Flashcard set using
       </div>
