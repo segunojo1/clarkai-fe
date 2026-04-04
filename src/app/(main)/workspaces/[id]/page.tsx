@@ -1,9 +1,8 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import ChatInputForm from "@/components/home/chat-input-form";
-import { WelcomeScreen } from "@/components/chat/welcome-screen";
 import { ChatMessageList } from "@/components/chat/message-list";
 import { useChatStore } from "@/store/chat.store";
 import { toast } from "sonner";
@@ -14,7 +13,7 @@ import { useWorkspaceStore } from "@/store/workspace.store";
 import { UploadMaterialModal } from "@/components/home/upload-material-modal";
 import Image from "next/image";
 import { SlidingPanel } from "@/components/ui/sliding-panel";
-import { Loader2 } from "lucide-react";
+import { Edit, Loader2 } from "lucide-react";
 import quizService from "@/services/quiz.service";
 import UserAvatar from "@/components/user-avatar";
 import { pdf } from "@react-pdf/renderer";
@@ -30,14 +29,20 @@ export default function WorkspacePage() {
     isQuizPanelOpen,
     setIsQuizPanelOpen,
     selectedWorkspace,
+    renameWorkspace,
+    suggestedQuestions,
+    fetchSuggestedQuestions,
   } = useWorkspaceStore();
   // const [isLoading, setIsLoading] = useState(false)
   const [loadChats, setLoadChats] = useState(false);
+  const [isRenamingWorkspace, setIsRenamingWorkspace] = useState(false);
+  const [workspaceNameInput, setWorkspaceNameInput] = useState("");
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   // const searchParams = useSearchParams()
   // const [isQuizPanelOpen, setIsQuizPanelOpen] = useState(false)
   const [askSource, setAskSource] = useState<"ai" | "materials">("materials");
+  const fetchedWorkspaceRef = useRef<string | null>(null);
 
   useEffect(() => {
     const handleQuizPanelEvent = (event: Event) => {
@@ -59,47 +64,60 @@ export default function WorkspacePage() {
   useEffect(() => {
     setCurrentChatId(id as string | null);
   }, [id, setCurrentChatId]);
-  console.log(messages);
 
   useEffect(() => {
     if (id) {
-      const getWorkspaceChat = async () => {
-        try {
-          setLoadChats(true);
-          const workspace = await workspaceServiceInstance.getWorkspaces(
-            id.toString(),
-          );
-
-          // Set workspace in store
-          useWorkspaceStore.getState().selectWorkspace(workspace);
-
-          // Set chat details from workspace
-          console.log(workspace);
-
-          // Get messages using chat ID from workspace response
-          const chatId = workspace.chat?.id;
-          if (!chatId) {
-            throw new Error("No chat ID found for workspace");
-          }
-
-          const response = await chatServiceInstance.getChat(1, chatId);
-          console.log(response);
-          setLoadChats(false);
-          setChatDetails(response);
-          if (response.messages) {
-            setMessages(response.messages);
-          } else {
-            throw new Error("Failed to fetch messages");
-          }
-        } catch (error) {
-          toast("Error: Cant find workspace chat");
-          console.error(error);
-          router.push("/workspaces");
-        }
-      };
-
-      getWorkspaceChat();
+      fetchSuggestedQuestions(id.toString());
     }
+  }, [id, fetchSuggestedQuestions]);
+
+  console.log(messages);
+
+  useEffect(() => {
+    if (!id) return;
+
+    // If we've already successfully fetched this workspace, skip refetching.
+    if (fetchedWorkspaceRef.current === id) return;
+
+    const getWorkspaceChat = async () => {
+      try {
+        setLoadChats(true);
+        const workspace = await workspaceServiceInstance.getWorkspaces(
+          id.toString(),
+        );
+
+        // Set workspace in store
+        useWorkspaceStore.getState().selectWorkspace(workspace);
+
+        // Set chat details from workspace
+        console.log(workspace);
+
+        // Get messages using chat ID from workspace response
+        const chatId = workspace.chat?.id;
+        if (!chatId) {
+          throw new Error("No chat ID found for workspace");
+        }
+
+        const response = await chatServiceInstance.getChat(1, chatId);
+        console.log(response);
+        setChatDetails(response);
+        if (response.messages) {
+          setMessages(response.messages);
+          // mark as fetched successfully for this workspace
+          fetchedWorkspaceRef.current = id;
+        } else {
+          throw new Error("Failed to fetch messages");
+        }
+      } catch (error) {
+        toast("Error: Cant find workspace chat");
+        console.error(error);
+        router.push("/workspaces");
+      } finally {
+        setLoadChats(false);
+      }
+    };
+
+    getWorkspaceChat();
   }, [id, askQuestion]);
 
   interface FlashcardQuestion {
@@ -163,18 +181,13 @@ export default function WorkspacePage() {
         setMessages(updatedMessages);
 
         // Call the API to generate flashcards
-        const response = await useWorkspaceStore.getState().generateFlashcards(
-          "workspace",
-          id,
-          10, // Default number of flashcards
-          true,
-          context,
-        );
+        const response = await useWorkspaceStore
+          .getState()
+          .generateFlashcards("workspace", id, 10, true, context);
 
         const flashcardResponse = response as unknown as FlashcardResponse;
 
         if (flashcardResponse.success && flashcardResponse.questions) {
-          // Create structured flashcard data
           const flashcards = flashcardResponse.questions.map(
             (card: FlashcardQuestion) => ({
               question: card.question,
@@ -183,7 +196,6 @@ export default function WorkspacePage() {
             }),
           );
 
-          // Add assistant message with flashcard data
           const assistantMessage: ChatMessage = {
             createdAt: new Date(),
             filePath: null,
@@ -437,13 +449,18 @@ export default function WorkspacePage() {
     if (id) {
       try {
         setIsLoading(true);
+
+        // Remove suggested questions message from the list
+        setMessages(
+          messages.filter((msg) => msg.id !== "suggested-questions-prompt"),
+        );
+
         // Detect @file(<id>) tag and extract fileId....
         const fileTagMatch = text.match(/@file\(([^)]+)\)/);
         const fileId = fileTagMatch?.[1];
         // Remove the file tag from the text sent to the API
         const cleanedText = text.replace(/@file\(([^)]+)\)/g, "").trim();
 
-        // Trim messages to the last 10 messages to limit context length
         const recentMessages = messages.slice(-10);
 
         const mode: "workspace" | "file" | "internet" = fileId
@@ -456,6 +473,7 @@ export default function WorkspacePage() {
           .getState()
           .askQuestion(id.toString(), text, true, mode, recentMessages, fileId);
         console.log(resp);
+        await fetchSuggestedQuestions(id.toString());
       } catch (error) {
         console.error("Error sending message:", error);
         toast("Error: Failed to send message");
@@ -465,20 +483,93 @@ export default function WorkspacePage() {
     }
   };
 
+  const handleRenameWorkspace = async () => {
+    if (!workspaceNameInput.trim() || !id) {
+      toast.error("Workspace name cannot be empty");
+      return;
+    }
+
+    try {
+      await renameWorkspace(id.toString(), workspaceNameInput.trim());
+      toast.success("Workspace renamed successfully!");
+      setIsRenamingWorkspace(false);
+      setWorkspaceNameInput("");
+    } catch (error) {
+      console.error("Error renaming workspace:", error);
+      toast.error("Failed to rename workspace");
+    }
+  };
+
+  const suggestedPromptMessage: ChatMessage | null =
+    messages.length > 0 && suggestedQuestions.length > 0
+      ? {
+          id: "suggested-questions-prompt",
+          role: "assistant",
+          text: "You can continue with one of these:",
+          fromUser: false,
+          isFile: false,
+          isFlashcard: false,
+          flashcardId: null,
+          size: null,
+          follow_up_suggestions: suggestedQuestions,
+        }
+      : null;
+
   return (
-    <div className="flex h-full w-full !max-w-[calc(100vw-235px)] overflow-hidden">
-      <div
-        className={`flex flex-col h-full  justify-between pb-12 w-full ${
-          isQuizPanelOpen ? "" : "min-w-full"
-        }`}
-      >
-        <div className="flex gap-4 items-center h-[150px] justify-start w-3xl mx-auto">
-          <UserAvatar />
-          <h1 className="text-2xl  font-bold text-white">
-            Workspace - {selectedWorkspace?.workspace?.name}
-          </h1>
-        </div>
-        <div className="absolute top-10 right-10 ">
+    <div className="flex flex-col h-screen w-full">
+      <div className={`flex flex-col h-screen justify-between pb-12 w-full`}>
+        <div className="flex items-center h-fit p-4 justify-between w-full bg-[#1a1a1a] border-b border-gray-700">
+          <div className="items-center gap-4 flex ">
+            <UserAvatar />
+            {isRenamingWorkspace ? (
+              <div className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  value={workspaceNameInput}
+                  onChange={(e) => setWorkspaceNameInput(e.target.value)}
+                  placeholder={
+                    selectedWorkspace?.workspace?.name || "Workspace name"
+                  }
+                  className="text-2xl font-bold bg-gray-700 text-white px-3 py-2 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleRenameWorkspace();
+                    if (e.key === "Escape") setIsRenamingWorkspace(false);
+                  }}
+                />
+                <button
+                  onClick={handleRenameWorkspace}
+                  className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => setIsRenamingWorkspace(false)}
+                  className="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2 items-center">
+                <h1 className="text-2xl font-bold text-white">
+                  Workspace - {selectedWorkspace?.workspace?.name}
+                </h1>
+                <button
+                  onClick={() => {
+                    setIsRenamingWorkspace(true);
+                    setWorkspaceNameInput(
+                      selectedWorkspace?.workspace?.name || "",
+                    );
+                  }}
+                  className="text-gray-400 hover:text-gray-200 transition-colors"
+                  title="Click to rename workspace"
+                >
+                  <Edit />
+                </button>
+              </div>
+            )}
+          </div>
           <UploadMaterialModal workspaceId={id.toString()}>
             <button className="p-1 border-2 rounded-full border-[#ffffff] transition-colors">
               <Image
@@ -491,35 +582,34 @@ export default function WorkspacePage() {
             </button>
           </UploadMaterialModal>
         </div>
-        {/* <SlidingPanel
-        isOpen={isQuizPanelOpen}
-        onClose={handleCloseQuizPanel}
-        workspaceId={id.toString()}
-            /> */}
         {loadChats ? (
-          <div className="flex items-center justify-center min-h-screen">
+          <div className="flex-1 flex items-center justify-center">
             <Loader2 className="w-8 h-8 animate-spin" />
           </div>
         ) : (
-          <div className="">
-            {messages.length === 0 ? (
-              <div className="mt-16">
-                <WelcomeScreen onSend={handleSend} />
-              </div>
-            ) : (
-              <ChatMessageList messages={messages} isLoading={isLoading} />
-            )}
+          <div className="flex-1 overflow-y-auto pb-32">
+            <ChatMessageList
+              messages={
+                suggestedPromptMessage
+                  ? [...messages, suggestedPromptMessage]
+                  : messages
+              }
+              isLoading={isLoading}
+              onSuggestedQuestionClick={handleSend}
+            />
           </div>
         )}
-        <ChatInputForm
-          askSource={askSource}
-          setAskSource={setAskSource}
-          onSend={handleSend}
-          onGenerateFlashcards={handleGenerateFlashcards}
-          disabled={isLoading}
-          onGenerateMaterial={handleGenerateMaterials}
-          onGenerateQuiz={handleGenerateQuiz}
-        />
+        <div className="flex-none sticky bottom-0 z-20 bg-transparent">
+          <ChatInputForm
+            askSource={askSource}
+            setAskSource={setAskSource}
+            onSend={handleSend}
+            onGenerateFlashcards={handleGenerateFlashcards}
+            disabled={isLoading}
+            onGenerateMaterial={handleGenerateMaterials}
+            onGenerateQuiz={handleGenerateQuiz}
+          />
+        </div>
       </div>
       <SlidingPanel
         isOpen={isQuizPanelOpen}

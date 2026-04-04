@@ -264,14 +264,14 @@ const WorkspacesPage = () => {
 
                       <div className="flex flex-col items-center">
                         <h3 className="dark:text-gray-300 text-black font-medium text-lg">
-                          {" "}
+                          
                           {workspace.name.length >= 15
                             ? workspace.name.slice(0, 15) + ".."
                             : workspace.name}
                         </h3>
                         {workspace.description && (
                           <p className="dark:text-gray-400 text-black text-sm mt-1">
-                            {" "}
+                            
                             {workspace.description.length >= 20
                               ? workspace.description.slice(0, 20) + ".."
                               : workspace.description}

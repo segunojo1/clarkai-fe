@@ -215,10 +215,12 @@ const markdownToPlainText = (md: string): string => {
 export function ChatMessageList({
   messages,
   isLoading,
+  onSuggestedQuestionClick,
   className,
 }: {
   messages: ChatMessage[];
   isLoading: boolean;
+  onSuggestedQuestionClick?: (question: string) => void;
   className?: string;
 }) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -230,11 +232,6 @@ export function ChatMessageList({
     isQuizPanelOpen,
     setIsQuizPanelOpen,
   } = useWorkspaceStore();
-
-  // Auto-scroll to bottom when messages change
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]); // Dependency on messages array
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -254,7 +251,6 @@ export function ChatMessageList({
       return;
     }
     const synth = window.speechSynthesis;
-    // If already speaking something else, stop first
     if (synth.speaking) synth.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 1;
@@ -266,20 +262,19 @@ export function ChatMessageList({
     synth.speak(utterance);
   };
 
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   return (
     <div
       className={cn(
-        "w-full max-w-3xl mx-auto px-4 flex flex-col space-y-4 overflow-y-auto h-[calc(100vh-350px)]",
+        "w-full max-w-[734px] px-4 flex flex-col space-y-4 mx-auto flex-1 min-h-0",
         className,
       )}
     >
-      {/* <div className='absolute left-5'>
-        <UserAvatar />
-      </div> */}
-
-      {messages.length > 0 && <div className="h-[140px]"></div>}
-      <div className="max-w-3xl w-full mx-auto">
-        {messages.map((message) => {
+      <div className="w-full">
+        {messages.map((message, index) => {
           const isFlashcardMessage =
             message.metadata?.type === "flashcards" ||
             (message.fromUser && message.text.includes("@flashcard")) ||
@@ -291,7 +286,7 @@ export function ChatMessageList({
 
           return (
             <div
-              key={`${message.role}`}
+              key={`${message.role}-${index}`}
               className={cn({
                 " rounded-lg transition-colors": isFlashcardMessage,
               })}
@@ -318,11 +313,8 @@ export function ChatMessageList({
                       <FileAttachmentPreview
                         file={{
                           name: message.text,
-                          // Provide a safe default MIME type; filePath is a path/URL, not a MIME type
                           type: "application/octet-stream",
-                          // Ensure we don't pass null where a string | undefined is expected
                           url: message.filePath ?? undefined,
-                          // Coerce null size to undefined to satisfy the optional number type
                           size: message.size ?? undefined,
                         }}
                       />
@@ -335,7 +327,6 @@ export function ChatMessageList({
                       {message.fromUser ? (
                         <p className="whitespace-pre-wrap break-words max-w-full">
                           {message.text.split(/(@\w+)/).map((part, i) => {
-                            // Only process non-empty parts
                             if (!part) return null;
                             return part.startsWith("@") ? (
                               <span
@@ -355,7 +346,6 @@ export function ChatMessageList({
                         </div>
                       )}
 
-                      {/* Action buttons */}
                       <div className="absolute right-0 mt-1 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => copyToClipboard(message.text)}
@@ -385,6 +375,22 @@ export function ChatMessageList({
                     </div>
                   )}
 
+                  {message.follow_up_suggestions &&
+                    message.follow_up_suggestions.length > 0 &&
+                    onSuggestedQuestionClick && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {message.follow_up_suggestions.map((suggestion, i) => (
+                          <button
+                            key={i}
+                            onClick={() => onSuggestedQuestionClick(suggestion)}
+                            className="text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-600 bg-white dark:bg-[#333] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-[#FF3D00] hover:text-[#FF3D00] transition-colors"
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
                   {isMaterialMessage && (
                     <div className="mt-1 mb-2 w-full max-w-md rounded-[10px] border border-[#d4d4d439] bg-[#BCB3B0] p-4 dark:bg-[#2C2C2C]">
                       <h4 className="mb-2 text-sm font-bold text-gray-900 dark:text-[#D4D4D4]">
@@ -401,18 +407,15 @@ export function ChatMessageList({
                   )}
                 </div>
               </div>
+
               {isFlashcardMessage &&
                 message.isFlashcard &&
                 message.flashcardId && (
                   <div
                     className="mt-2 ml-14 mb-4 cursor-pointer"
                     onClick={() => {
-                      console.log(
-                        "Opening flashcard with ID:",
-                        message.flashcardId,
-                      );
                       setSelectedFlashcards([]);
-                      setSelectedFlashcardId(message.flashcardId);
+                      setSelectedFlashcardId(message.flashcardId as string);
                       setIsFlashcardModalOpen(true);
                       setIsQuizPanelOpen(false);
                     }}
@@ -434,11 +437,7 @@ export function ChatMessageList({
               {message.isQuiz && message.quizId && (
                 <div
                   className="mt-2 ml-14 mb-4 cursor-pointer "
-                  onClick={() => {
-                    console.log("Opening flashcard with ID:", message.quizId);
-
-                    setIsQuizPanelOpen(false);
-                  }}
+                  onClick={() => setIsQuizPanelOpen(false)}
                 >
                   <div className=" bg-[#BCB3B0] min-w-[200px] p-4 border border-[#d4d4d439] w-fit rounded-[10px] dark:bg-[#2C2C2C] dark:hover:bg-gray-100 hover:bg-[#4a4a4a] transition-colors">
                     <h4 className="text-sm font-bold text-gray-900 dark:text-[#D4D4D4] mb-2">
@@ -450,7 +449,6 @@ export function ChatMessageList({
                           href={`/quiz/${message.quizId}`}
                           className="flex items-center gap-1"
                         >
-                          {" "}
                           <LinkIcon width={16} className="mr-1" /> Open
                           Quiz{" "}
                         </Link>{" "}
@@ -465,20 +463,7 @@ export function ChatMessageList({
                   <div className="bg-gray-50 p-4 rounded-lg dark:bg-[#404040] flex flex-col items-center gap-2">
                     <div className="flex-1 flex gap-2 min-w-0">
                       <div className="bg-primary/10 text-primary p-1.5 rounded-md">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M21 12c0 5.5-4.5 10-10 10S1 17.5 1 12 5.5 2 11 2 21 6.5 21 12z"></path>
-                          <circle cx="11" cy="12" r="2"></circle>
-                        </svg>
+                        ...
                       </div>
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                         Flashcards are being generated...
@@ -492,7 +477,7 @@ export function ChatMessageList({
         })}
 
         {isLoading && (
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center py-4">
             <div className="flex gap-2">
               <div className="w-4 h-4 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse"></div>
               <div className="w-4 h-4 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse delay-100"></div>
@@ -501,17 +486,6 @@ export function ChatMessageList({
           </div>
         )}
 
-        {/* <FlashcardPanel 
-          isOpen={isFlashcardModalOpen} 
-          onClose={() => {
-            setIsFlashcardModalOpen(false);
-            setSelectedFlashcardId(null);
-          }} 
-          flashcards={selectedFlashcards}
-          flashcardId={selectedFlashcardId}
-        /> */}
-
-        {/* This empty div will be used for auto-scrolling */}
         <div ref={messagesEndRef} />
       </div>
     </div>

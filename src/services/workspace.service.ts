@@ -95,6 +95,7 @@ class WorkspaceService {
 
       return {
         answer: response.data.answer,
+        follow_up_suggestions: response.data.follow_up_suggestions || [],
       };
     } catch (error) {
       console.error("Failed to ask question:", error);
@@ -261,6 +262,42 @@ class WorkspaceService {
       return response.data;
     } catch (error) {
       console.error("Failed to test YouTube video:", error);
+      throw error;
+    }
+  }
+
+  public async suggestWorkspaceQuestion(workspaceId: string) {
+    try {
+      const response = await this.api.post("/suggestQuestion", {
+        workspace_id: workspaceId,
+        mode: "workspace",
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to suggest workspace question:", error);
+      throw error;
+    }
+  }
+
+  public async renameChat(chatId: string, newName: string) {
+    try {
+      const response = await this.api.patch("/renameChat", { chatId, newName });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to rename chat:", error);
+      throw error;
+    }
+  }
+
+  public async renameWorkspace(workspaceId: string, newName: string) {
+    try {
+      const response = await this.api.patch("/renameWorkspace", {
+        workspaceId,
+        newName,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to rename workspace:", error);
       throw error;
     }
   }

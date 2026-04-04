@@ -73,6 +73,10 @@ interface WorkspaceStore {
   error: string | null;
   askSource: string;
   isQuizPanelOpen: boolean;
+  suggestedQuestions: string[];
+  setSuggestedQuestions: (questions: string[]) => void;
+  fetchSuggestedQuestions: (workspaceId: string) => Promise<void>;
+  renameWorkspace: (workspaceId: string, newName: string) => Promise<void>;
   setIsQuizPanelOpen: (open: boolean) => void;
   setAskSource: (source: "ai" | "materials") => void;
   getWorkspaces: () => Promise<void>;
@@ -121,6 +125,10 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   selectedFlashcardId: null,
   askSource: "materials",
   isQuizPanelOpen: false,
+  suggestedQuestions: [],
+  setSuggestedQuestions: (questions: string[]) => {
+    set({ suggestedQuestions: questions });
+  },
   setIsQuizPanelOpen: (open: boolean) => {
     set({ isQuizPanelOpen: open });
   },
@@ -244,6 +252,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
         isFlashcard: false,
         flashcardId: null,
         size: null,
+        follow_up_suggestions: response.follow_up_suggestions || [],
       };
       get().addMessage(assistantMessage);
       console.log(get().messages);
@@ -317,6 +326,47 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
       console.error("Error fetching flashcards:", error);
       set({ error: "Failed to fetch flashcards" });
       return null;
+    }
+  },
+
+  fetchSuggestedQuestions: async (workspaceId: string) => {
+    try {
+      const response =
+        await workspaceService.suggestWorkspaceQuestion(workspaceId);
+      const questions = Array.isArray(response)
+        ? response
+        : response?.follow_up_suggestions ||
+          response?.suggested_questions ||
+          [];
+      set({ suggestedQuestions: questions });
+    } catch (error) {
+      console.error("Error fetching suggested questions:", error);
+      set({ error: "Failed to fetch suggested questions" });
+    }
+  },
+
+  renameWorkspace: async (workspaceId: string, newName: string) => {
+    try {
+      await workspaceService.renameWorkspace(workspaceId, newName);
+      // Update the selected workspace with the new name
+      const currentWorkspace = get().selectedWorkspace;
+      if (currentWorkspace) {
+        set({
+          selectedWorkspace: {
+            ...currentWorkspace,
+            workspace: {
+              ...currentWorkspace.workspace,
+              name: newName,
+            },
+          },
+        });
+      }
+      // Refresh workspaces to keep the list in sync
+      await get().getWorkspaces();
+    } catch (error) {
+      console.error("Error renaming workspace:", error);
+      set({ error: "Failed to rename workspace" });
+      throw error;
     }
   },
   // getWorkspace: (id: string) => {

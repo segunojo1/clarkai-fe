@@ -33,6 +33,7 @@ export interface ChatMessage {
   quizId?: string;
   isGeneratedMaterial?: boolean;
   materialTitle?: string;
+  follow_up_suggestions?: string[];
 }
 
 export interface FileAttachment {

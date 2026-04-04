@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { X, Edit } from "lucide-react"
 import { useWorkspaceStore } from "@/store/workspace.store"
 import quizService from "@/services/quiz.service"
@@ -39,6 +39,7 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
     const [currentStep, setCurrentStep] = useState(1)
     const [isGenerating, setIsGenerating] = useState(false)
     const [generatedQuiz, setGeneratedQuiz] = useState<{ id: string } | null>(null)
+    const [isMounted, setIsMounted] = useState(false)
     const [formData, setFormData] = useState<QuizFormData>({
         step1: {
             topic: '',
@@ -709,9 +710,24 @@ export function SlidingPanel({ isOpen, onClose, workspaceId }: SlidingPanelProps
         }
     }
 
+    useEffect(() => {
+        if (isOpen) {
+            const timer = setTimeout(() => setIsMounted(true), 10)
+            return () => clearTimeout(timer)
+        }
+
+        setIsMounted(false)
+    }, [isOpen])
+
     return (
-        <div className={`h-full min-w-[542px] dark:bg-[#2C2C2C] bg-[#F8F8F7] z-[9999999] border-l dark:border-[#333] transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'
-            }`}>
+        <div
+            className={`h-screen transition-all absolute min-w-[542px] dark:bg-[#2C2C2C] bg-[#F8F8F7] z-[9999999] border-l dark:border-[#333] shadow-xl flex flex-col pointer-events-auto`}
+            style={{
+                transition: 'transform 300ms cubic-bezier(0.16, 1, 0.3, 1)',
+                willChange: 'transform',
+                right: isMounted ? '0' : '-100%',
+            }}
+        >
             <div className="flex flex-col h-full">
                 <div className="flex justify-between items-center p-4 dark:border-b border-[#333]">
                     <h2 className="text-lg font-medium dark:text-white text-black">Create Quiz</h2>

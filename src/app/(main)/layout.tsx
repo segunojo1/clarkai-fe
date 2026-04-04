@@ -17,9 +17,9 @@ export default function RootLayout({
 }>) {
   return (
     <SidebarWrapper>
-      <div className="flex min-h-screen h-full w-full">
+      <div className="flex overflow-hidden w-full">
         <AppSidebar />
-        <SidebarInset className="flex-1">
+        <SidebarInset className="max-h-screen overflow-hidden flex-1">
           <ClientLayout>
             {children}
           </ClientLayout>
