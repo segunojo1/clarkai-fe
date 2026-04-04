@@ -63,7 +63,7 @@ const ClarkFeatures = () => {
           </div>
 
           <div className="col-span-2 row-span-5 flex items-start justify-start overflow-hidden relative group">
-            <div className="absolute inset-0 bg-[#262626] opacity-0 group-hover:opacity-50 transition-opacity duration-300 z-[2]" />
+            <div className="absolute inset-0 bg-[#262626] opacity-0  transition-opacity duration-300 z-[2]" />
             <Image
               src="/assets/bento2.png"
               alt="bento2"

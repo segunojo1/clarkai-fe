@@ -356,8 +356,6 @@ export default function WorkspacePage() {
     const loadingMessageId = `loading-${Date.now()}`;
     let updatedMessages = [...messages];
     try {
-      // Default or parsed parameters (you could parse quizName, numQuestions, etc. from the message)
-      const quizName = "New Quiz";
       const numQuestions = 5;
       const difficulty: "easy" | "medium" | "hard" = "medium";
       const mode: "workspace" | "file" = "workspace";

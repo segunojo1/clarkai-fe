@@ -1,13 +1,12 @@
-'use client'
+"use client";
 
-import { useState, useCallback, useEffect } from 'react'
-import { X, AlertCircle, RefreshCw } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { useState, useCallback, useEffect } from "react";
+import { X, AlertCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 // Remove unused Flashcard import since we're not using it anymore
-import { useWorkspaceStore } from '@/store/workspace.store'
-import { Flashcard } from './flashcard'
-import { FlashcardData } from '@/lib/types'
-
+import { useWorkspaceStore } from "@/store/workspace.store";
+import { Flashcard } from "./flashcard";
+import { FlashcardData } from "@/lib/types";
 
 interface FlashcardResponse {
   success: boolean;
@@ -28,7 +27,12 @@ interface FlashcardPanelProps {
   flashcardId: string | null;
 }
 
-export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initialFlashcards = [] }: FlashcardPanelProps) {
+export function FlashcardPanel({
+  isOpen,
+  onClose,
+  flashcardId,
+  flashcards: initialFlashcards = [],
+}: FlashcardPanelProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -36,7 +40,7 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
   const [flashcardData, setFlashcardData] = useState<{
     id: string;
     workspaceId: string;
-    
+
     questions: FlashcardData[];
     createdAt: string;
     updatedAt: string;
@@ -47,26 +51,28 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
   useEffect(() => {
     const fetchFlashcards = async () => {
       if (!flashcardId || !isOpen) return;
-      
+
       try {
         setLoading(true);
         setError(null);
-        const response = (await fetchFlashcard(flashcardId)) as unknown as FlashcardResponse;
+        const response = (await fetchFlashcard(
+          flashcardId,
+        )) as unknown as FlashcardResponse;
         console.log(showingAnswer);
-        
+
         if (response?.success && response.flashcard) {
           setFlashcardData({
             ...response.flashcard,
-            questions: response.questions || []
+            questions: response.questions || [],
           });
           setCurrentIndex(0);
           setShowingAnswer(false);
         } else {
-          setError('Failed to load flashcard data');
+          setError("Failed to load flashcard data");
         }
       } catch (err) {
-        console.error('Failed to fetch flashcards:', err);
-        setError('Failed to load flashcard. Please try again.');
+        console.error("Failed to fetch flashcards:", err);
+        setError("Failed to load flashcard. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -74,15 +80,15 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
 
     if (flashcardId) {
       fetchFlashcards().catch((err) => {
-        console.error('Error in fetchFlashcards:', err);
+        console.error("Error in fetchFlashcards:", err);
       });
     } else if (initialFlashcards?.length) {
       setFlashcardData({
-        id: 'local-flashcard',
-        workspaceId: '',
+        id: "local-flashcard",
+        workspaceId: "",
         questions: initialFlashcards,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       });
       setCurrentIndex(0);
       setShowingAnswer(false);
@@ -136,17 +142,19 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
     <div
       className={`h-screen bg-white dark:bg-[#2C2C2C] shadow-xl flex flex-col pointer-events-auto border-l border-gray-200 dark:border-gray-700`}
       style={{
-        transition: 'transform 300ms cubic-bezier(0.16, 1, 0.3, 1)',
-        willChange: 'transform',
-        transform: isMounted ? 'translateX(0)' : 'translateX(100%)'
+        transition: "transform 300ms cubic-bezier(0.16, 1, 0.3, 1)",
+        willChange: "transform",
+        transform: isMounted ? "translateX(0)" : "translateX(100%)",
       }}
     >
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 p-4">
-        <h2 className="text-lg font-semibold text-black dark:text-white">Flashcards</h2>
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <h2 className="text-lg font-semibold text-black dark:text-white">
+          Flashcards
+        </h2>
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={onClose}
           className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
         >
@@ -161,7 +169,9 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
           <div className="flex-1 flex items-center justify-center">
             <div className="flex flex-col items-center gap-4">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-              <p className="text-gray-600 dark:text-gray-400">Loading flashcards...</p>
+              <p className="text-gray-600 dark:text-gray-400">
+                Loading flashcards...
+              </p>
             </div>
           </div>
         ) : error ? (
@@ -171,8 +181,8 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
                 <AlertCircle className="h-8 w-8 mx-auto" />
               </div>
               <p className="text-gray-700 dark:text-gray-300">{error}</p>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="mt-4"
                 onClick={() => flashcardId && fetchFlashcard(flashcardId)}
               >
@@ -203,7 +213,9 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
           </div>
         ) : (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-gray-500 dark:text-gray-400">No flashcards available</p>
+            <p className="text-gray-500 dark:text-gray-400">
+              No flashcards available
+            </p>
           </div>
         )}
       </div>
@@ -230,11 +242,11 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
           onClick={() => {
             const questions = flashcardData?.questions || [];
             const json = JSON.stringify(questions, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
+            const blob = new Blob([json], { type: "application/json" });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            const a = document.createElement("a");
             a.href = url;
-            a.download = `${flashcardData?.id || 'flashcards'}.json`;
+            a.download = `${flashcardData?.id || "flashcards"}.json`;
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -248,16 +260,22 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
           variant="outline"
           onClick={() => {
             const questions = flashcardData?.questions || [];
-            const header = ['Question', 'Answer', 'Explanation'];
-            const rows = questions.map((f) => [f.question, f.answer, f.explanation || '']);
+            const header = ["Question", "Answer", "Explanation"];
+            const rows = questions.map((f) => [
+              f.question,
+              f.answer,
+              f.explanation || "",
+            ]);
             const csv = [header, ...rows]
-              .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))
-              .join('\n');
-            const blob = new Blob([csv], { type: 'text/csv' });
+              .map((r) =>
+                r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","),
+              )
+              .join("\n");
+            const blob = new Blob([csv], { type: "text/csv" });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            const a = document.createElement("a");
             a.href = url;
-            a.download = `${flashcardData?.id || 'flashcards'}.csv`;
+            a.download = `${flashcardData?.id || "flashcards"}.csv`;
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -268,10 +286,10 @@ export function FlashcardPanel({ isOpen, onClose, flashcardId, flashcards: initi
         </Button>
       </div>
 
-      <div className='text-[15px] rounded-[4px] mx-[10px] mb-[10px] font-normal dark:text-white text-black px-[30px] py-[10px] dark:bg-[#ff3c0027] bg-[#F9E5DE]'>
-        You can also generate a quiz based on this set — just type @quiz or generate another Flashcard set using
+      <div className="text-[15px] rounded-[4px] mx-[10px] mb-[10px] font-normal dark:text-white text-black px-[30px] py-[10px] dark:bg-[#ff3c0027] bg-[#F9E5DE]">
+        You can also generate a quiz based on this set — just type @quiz or
+        generate another Flashcard set using
       </div>
     </div>
-  )
+  );
 }
-                                     

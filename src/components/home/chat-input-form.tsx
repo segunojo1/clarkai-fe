@@ -428,7 +428,6 @@ const ChatInputForm = ({
     const currentValue = textarea.value;
     const textBeforeCursor = currentValue.substring(0, cursorPosition);
     const lastAtPos = textBeforeCursor.lastIndexOf("@");
-    console.log(currentValue);
 
     // Close suggestions when backspacing past @
     if (
@@ -441,7 +440,6 @@ const ChatInputForm = ({
       return;
     }
 
-    // Check if @ was just typed or if we're in the middle of a tag
     if (
       lastAtPos >= 0 &&
       (textBeforeCursor.length === lastAtPos + 1 ||
@@ -499,48 +497,6 @@ const ChatInputForm = ({
     }
   };
 
-  // const renderTextWithTags = (text: string) => {
-  //   if (!text) return null
-
-  //   const parts: JSX.Element[] = []
-  //   let lastIndex = 0
-  //   const regex = /@(\w+)/g
-  //   let match
-
-  //   // If there's no @ symbol, return null to use the default text
-  //   if (text.indexOf('@') === -1) return null
-
-  //   while ((match = regex.exec(text)) !== null) {
-  //     // Add text before the tag
-  //     if (match.index > lastIndex) {
-  //       parts.push(<span key={lastIndex}>{text.substring(lastIndex, match.index)}</span>)
-  //     }
-
-  //     // Add the tag with special styling
-  //     const tag = match[1]
-  //     const isTagValid = TAGS.some(t => t.value === tag)
-  //     parts.push(
-  //       <span
-  //         key={match.index}
-  //         className={cn(
-  //           'font-medium',
-  //           isTagValid ? 'text-blue-500' : 'text-red-500'
-  //         )}
-  //       >
-  //         @{tag}
-  //       </span>
-  //     )
-
-  //     lastIndex = match.index + match[0].length
-  //   }
-
-  //   // Add remaining text
-  //   if (lastIndex < text.length) {
-  //     parts.push(<span key={lastIndex}>{text.substring(lastIndex)}</span>)
-  //   }
-
-  //   return parts
-  // }
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4">
