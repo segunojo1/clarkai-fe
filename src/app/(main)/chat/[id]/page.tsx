@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import workspaceService from "@/services/workspace.service";
 import { Edit } from "lucide-react";
+import { ParamValue } from "next/dist/server/request/params";
 // import ChatInputForm from '@/components/home/ChatInputForm'
 
 export default function ChatPage() {
@@ -27,7 +28,7 @@ export default function ChatPage() {
   const { id } = useParams();
   const [currentChat, setCurrentChat] = useState();
 
-  const getChatById = (id: string) => {
+  const getChatById = (id: ParamValue) => {
     const chat = chats?.find((c) => c.id === id);
     console.log(chat);
     return chat;

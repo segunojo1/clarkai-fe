@@ -329,6 +329,25 @@ class WorkspaceService {
       throw error;
     }
   }
+
+  public async search({
+    s
+  }: {
+    s: string;
+  }) {
+    try {
+      const response = await this.api.get("/search", {
+        params: {
+          s
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to perform search:", error);
+        throw error;
+    }
+  }
+
 }
 
 export default WorkspaceService.getInstance();

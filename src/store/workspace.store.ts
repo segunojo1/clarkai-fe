@@ -369,4 +369,8 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
       throw error;
     }
   },
+
+  search: async () => {
+    
+  }
 }));
