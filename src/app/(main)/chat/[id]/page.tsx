@@ -105,7 +105,9 @@ export default function ChatPage() {
     if (!text.trim()) return;
     if (id) {
       toast("Sending message...");
-      setMessages(messages.filter((m) => m.id !== 'suggested-questions-prompt'));
+      setMessages(
+        messages.filter((m) => m.id !== "suggested-questions-prompt"),
+      );
       await sendMessage(id.toString(), text, messages, false, files);
     }
   };
