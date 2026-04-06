@@ -194,7 +194,9 @@ const Calendar = () => {
       });
 
       if (newEvents.length > 0) {
-        toast.success(`Synced ${newEvents.length} event(s) from Google Calendar`);
+        toast.success(
+          `Synced ${newEvents.length} event(s) from Google Calendar`,
+        );
       }
     } catch (error) {
       console.error("Failed to sync Google Calendar:", error);

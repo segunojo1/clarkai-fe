@@ -27,10 +27,7 @@ export function TaskFloatingWidget() {
       );
   }, [tasks]);
 
-  const closestTask = useMemo(
-    () => sortedFutureTasks[0],
-    [sortedFutureTasks],
-  );
+  const closestTask = useMemo(() => sortedFutureTasks[0], [sortedFutureTasks]);
 
   const dueSoonCount = useMemo(() => {
     const now = Date.now();
@@ -79,9 +76,7 @@ export function TaskFloatingWidget() {
                 <p className="truncate text-xs font-semibold">
                   {closestTask.title}
                 </p>
-                <p className="text-[11px] opacity-80">
-                  {timeText}
-                </p>
+                <p className="text-[11px] opacity-80">{timeText}</p>
               </div>
               <ChevronUp className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
             </div>

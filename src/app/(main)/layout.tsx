@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  children, 
+  children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
@@ -21,9 +21,7 @@ export default function RootLayout({
       <div className="flex overflow-hidden w-full">
         <AppSidebar />
         <SidebarInset className="max-h-screen overflow-hidden flex-1">
-          <ClientLayout>
-            {children}
-          </ClientLayout>
+          <ClientLayout>{children}</ClientLayout>
         </SidebarInset>
       </div>
       <TaskFloatingWidget />
