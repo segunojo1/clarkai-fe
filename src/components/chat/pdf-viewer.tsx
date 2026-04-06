@@ -85,7 +85,7 @@ export function PDFViewer({ file, onClose }: PDFViewerProps) {
     if (!text.trim()) return
     if (id) {
 
-      await sendMessage(id.toString(), text, messages, true, files)
+      await sendMessage(text, messages, true, files, id.toString())
     }
   }
 
