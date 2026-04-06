@@ -85,7 +85,7 @@ const HomePageContent = () => {
             <p className='text-sm font-medium'>Events</p>
           </div>
         </div>
-        <div className='flex bg-white dark:bg-[#2C2C2C] p-4 rounded-md items-center justify-between w-full'>
+        <div className='flex bg-white dark:bg-[#2C2C2C] p-4 rounded-md items-start justify-between w-full'>
           <Streaks />
           <div className='w-[1px] h-[226px] bg-[#F0F0EF] dark:bg-[#404040] mx-[24px]'></div>
           <Calendar />

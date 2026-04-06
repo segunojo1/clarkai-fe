@@ -28,19 +28,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useUserStore } from "@/store/user.store";
+import { useTaskStore, type StudyTask } from "@/store/task.store";
 
 declare global {
   interface Window {
     google: any;
   }
 }
-
-type StudyTask = {
-  id: string;
-  title: string;
-  deadline: string;
-  eventLink?: string;
-};
 
 const GOOGLE_CLIENT_ID =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
@@ -65,30 +59,15 @@ const STORAGE_TASKS_KEY = "clark-calendar-study-tasks";
 const Calendar = () => {
   const { googleCalendarConnected, setGoogleCalendarConnected } =
     useUserStore();
+  const { tasks, setTasks, addTask } = useTaskStore();
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSavingTask, setIsSavingTask] = useState(false);
+  const [isSyncingCalendar, setIsSyncingCalendar] = useState(false);
 
   const [taskTitle, setTaskTitle] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
   const [taskDate, setTaskDate] = useState<Date | undefined>(undefined);
   const [taskTime, setTaskTime] = useState("09:00");
-  const [tasks, setTasks] = useState<StudyTask[]>([]);
-
-  useEffect(() => {
-    const storedTasks = localStorage.getItem(STORAGE_TASKS_KEY);
-    if (storedTasks) {
-      try {
-        const parsed = JSON.parse(storedTasks) as StudyTask[];
-        setTasks(Array.isArray(parsed) ? parsed : []);
-      } catch {
-        setTasks([]);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_TASKS_KEY, JSON.stringify(tasks));
-  }, [tasks]);
 
   const sortedFutureTasks = useMemo(() => {
     const now = Date.now();
@@ -167,11 +146,61 @@ const Calendar = () => {
       await getAccessToken();
       setGoogleCalendarConnected(true);
       toast.success("Google Calendar connected.");
+      await handleSyncGoogleCalendar();
     } catch (error) {
       console.error("Failed to connect Google Calendar:", error);
       toast.error("Failed to connect Google Calendar");
     } finally {
       setIsConnecting(false);
+    }
+  };
+
+  const handleSyncGoogleCalendar = async () => {
+    try {
+      setIsSyncingCalendar(true);
+      const token = await getAccessToken();
+
+      const response = await fetch(
+        "https://www.googleapis.com/calendar/v3/calendars/primary/events?orderBy=startTime&singleEvents=true&timeMin=" +
+          new Date().toISOString(),
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result?.error?.message || "Failed to sync calendar");
+      }
+
+      const calendarEvents = (result.items || []).map((event: any) => ({
+        id: event.id,
+        title: event.summary,
+        deadline: event.start?.dateTime || event.start?.date,
+        eventLink: event.htmlLink,
+        description: event.description,
+      }));
+
+      const existingIds = new Set(tasks.map((t) => t.id));
+      const newEvents = calendarEvents.filter(
+        (e: StudyTask) => !existingIds.has(e.id),
+      );
+
+      newEvents.forEach((event: StudyTask) => {
+        addTask(event);
+      });
+
+      if (newEvents.length > 0) {
+        toast.success(`Synced ${newEvents.length} event(s) from Google Calendar`);
+      }
+    } catch (error) {
+      console.error("Failed to sync Google Calendar:", error);
+      toast.error("Could not sync calendar events");
+    } finally {
+      setIsSyncingCalendar(false);
     }
   };
 
@@ -232,8 +261,9 @@ const Calendar = () => {
         title: taskTitle,
         deadline: startAt.toISOString(),
         eventLink: result.htmlLink,
+        description: taskDescription,
       };
-      setTasks((prev) => [newTask, ...prev]);
+      addTask(newTask);
 
       setTaskTitle("");
       setTaskDescription("");
@@ -262,19 +292,32 @@ const Calendar = () => {
       </CardHeader>
 
       <CardContent className="space-y-3 px-[15px] pb-[15px] pt-0">
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={handleConnectGoogleCalendar}
-          disabled={googleCalendarConnected || isConnecting}
-          className="h-auto justify-start p-0 text-[14px] font-medium text-[#FF3D00] hover:bg-transparent hover:text-[#e53600] dark:text-[#FE8228]"
-        >
-          {googleCalendarConnected
-            ? "Google Calendar Connected"
-            : isConnecting
-              ? "Connecting..."
-              : "Connect Google Calendar"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleConnectGoogleCalendar}
+            disabled={googleCalendarConnected || isConnecting}
+            className="flex-1 h-auto justify-start p-0 text-[14px] font-medium text-[#FF3D00] hover:bg-transparent hover:text-[#e53600] dark:text-[#FE8228]"
+          >
+            {googleCalendarConnected
+              ? "Google Calendar Connected"
+              : isConnecting
+                ? "Connecting..."
+                : "Connect Google Calendar"}
+          </Button>
+          {googleCalendarConnected && (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleSyncGoogleCalendar}
+              disabled={isSyncingCalendar}
+              className="h-auto px-2 py-0 text-xs text-[#9f9f9f] hover:text-[#f5f5f5]"
+            >
+              {isSyncingCalendar ? "Syncing..." : "Sync"}
+            </Button>
+          )}
+        </div>
 
         {(tasks.length > 0 || dueSoonTasks.length > 0) && (
           <div className="flex items-center justify-between rounded-xl border border-border/60 bg-white/60 px-3 py-2 text-[11px] dark:bg-[#2f2f2f]">

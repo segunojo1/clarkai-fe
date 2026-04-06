@@ -4,6 +4,7 @@ import ClientLayout from "@/components/layout/client-layout";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarWrapper } from "@/components/sidebar-wrapper";
+import { TaskFloatingWidget } from "@/components/task-floating-widget";
 
 export const metadata: Metadata = {
   title: "Clark",
@@ -25,6 +26,7 @@ export default function RootLayout({
           </ClientLayout>
         </SidebarInset>
       </div>
+      <TaskFloatingWidget />
     </SidebarWrapper>
   );
 }
