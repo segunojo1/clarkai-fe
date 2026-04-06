@@ -195,15 +195,6 @@ export function SlidingPanel({
       const mode = isWorkspaceMode ? ("workspace" as const) : ("file" as const);
       const fileId = !isWorkspaceMode ? source : undefined;
 
-      console.log("Generating quiz with params:", {
-        workspace_id: workspaceId,
-        size: numQuestions,
-        name: quizName,
-        mode,
-        file_id: fileId,
-        difficulty,
-        duration,
-      });
 
       // Run the quiz generation in the background
       const response = await quizService.generateQuiz({
@@ -216,7 +207,6 @@ export function SlidingPanel({
         duration,
       });
 
-      console.log("Quiz generated successfully:", response);
       setGeneratedQuiz({ id: response.quiz_id });
       setCurrentStep(5); // Move to success step (case 5)
     } catch (err: unknown) {

@@ -40,7 +40,6 @@ const HomePageContent = () => {
     if (!text.trim()) return
     const { id } = await chatService.createChat();
     toast('Please wait while we create your chat')
-    console.log(id);
     router.push(`/chat/${id}`)
     if (id) {
       await sendMessage(id, text, [], false, files)

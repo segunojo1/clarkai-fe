@@ -255,7 +255,6 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
         follow_up_suggestions: response.follow_up_suggestions || [],
       };
       get().addMessage(assistantMessage);
-      console.log(get().messages);
     } catch (error) {
       console.error("Error asking question:", error);
       // Add error message

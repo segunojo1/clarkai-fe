@@ -27,7 +27,6 @@ const StudyVibe = ({ onSuccess }: StudyVibeProps) => {
     })
 
     function onSubmit(values: z.infer<typeof studyVibeSchema>) {
-        console.log('Selected study vibes:', values.study_vibe);
         onSuccess(values);
     }
 

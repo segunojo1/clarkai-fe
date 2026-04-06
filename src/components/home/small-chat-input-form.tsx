@@ -66,7 +66,6 @@ const ChatInputForm2 = ({
         }
 
         setSelectedFile(file)
-        console.log(selectedFile);
 
         setPreviewUrl(URL.createObjectURL(file))
     }

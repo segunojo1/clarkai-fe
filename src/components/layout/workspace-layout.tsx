@@ -73,7 +73,6 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
     };
 
     fetchWorkspaces();
-    console.log(workspaces);
   }, []);
 
   useEffect(() => {

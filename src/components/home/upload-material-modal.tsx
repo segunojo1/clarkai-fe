@@ -1060,7 +1060,6 @@ export function FileUploadButton({ workspaceId }: { workspaceId: string }) {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    console.log(files);
     if (!files || files.length == 0) return;
 
     await runUpload(Array.from(files));

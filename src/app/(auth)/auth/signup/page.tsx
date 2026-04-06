@@ -100,7 +100,6 @@ const SignUpPage = () => {
   });
 
   const { data: session, status } = useSession();
-  console.log(session, status);
   useEffect(() => {
 
   if (status === "authenticated" && session?.user?.backendAccessToken) {
@@ -108,7 +107,6 @@ const SignUpPage = () => {
     sessionStorage.setItem("google_oauth_token", session.user.backendAccessToken);
     sessionStorage.setItem("is_oauth_signup", "true");
 
-    // Update your local step state
     currentStepName = 'about-you';
   }
 }, [status, session]);

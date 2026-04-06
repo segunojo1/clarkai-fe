@@ -71,12 +71,10 @@ export default function WorkspacePage() {
     }
   }, [id, fetchSuggestedQuestions]);
 
-  console.log(messages);
 
   useEffect(() => {
     if (!id) return;
 
-    // If we've already successfully fetched this workspace, skip refetching.
     if (fetchedWorkspaceRef.current === id) return;
 
     const getWorkspaceChat = async () => {
@@ -89,9 +87,6 @@ export default function WorkspacePage() {
         // Set workspace in store
         useWorkspaceStore.getState().selectWorkspace(workspace);
 
-        // Set chat details from workspace
-        console.log(workspace);
-
         // Get messages using chat ID from workspace response
         const chatId = workspace.chat?.id;
         if (!chatId) {
@@ -99,7 +94,7 @@ export default function WorkspacePage() {
         }
 
         const response = await chatServiceInstance.getChat(1, chatId);
-        console.log(response);
+        
         setChatDetails(response);
         if (response.messages) {
           setMessages(response.messages);
@@ -221,7 +216,6 @@ export default function WorkspacePage() {
           ];
           setMessages(updatedMessages);
         }
-        console.log(messages);
 
         return Promise.resolve();
       } catch (error) {
@@ -470,7 +464,6 @@ export default function WorkspacePage() {
         const resp = await useWorkspaceStore
           .getState()
           .askQuestion(id.toString(), text, true, mode, recentMessages, fileId);
-        console.log(resp);
         await fetchSuggestedQuestions(id.toString());
       } catch (error) {
         console.error("Error sending message:", error);

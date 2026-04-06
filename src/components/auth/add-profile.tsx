@@ -66,9 +66,7 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
       setIsLoading(true);
       
       const { currentStep: _, confirmPassword: __, otp: ___, emailVerified: ____, ...signupDataWithoutStep } = signupData;      
-      // Ensure all required fields are present
-      console.log(_, __, ___, ____);
-      console.log(signupDataWithoutStep);
+      
       
       if (!signupDataWithoutStep.name || !signupDataWithoutStep.email) {
         throw new Error('Missing required fields');
@@ -79,7 +77,6 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
       if (selectedFile) {
         userImageUrl = await fileToDataUrl(selectedFile);
       }
-      console.log(status);
 
       // Create the payload with all required fields
       const payload: CompleteSignupPayload = {
@@ -98,7 +95,6 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
       const userStr = Cookies.get('user')
       
         useUserStore.getState().setUser(JSON.parse(userStr as string));
-      console.log(user);
       
       
       // Clean up OAuth session storage after successful registration

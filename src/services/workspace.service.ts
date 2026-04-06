@@ -132,7 +132,6 @@ class WorkspaceService {
   public async uploadFile(files: File[], workspaceId: string) {
     try {
       const formData = new FormData();
-      console.log(files);
 
       files.forEach((file) => {
         formData.append("files", file);

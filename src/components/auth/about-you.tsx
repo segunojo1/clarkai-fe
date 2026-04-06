@@ -32,7 +32,6 @@ const AboutYou = ({ onSuccess }: AboutYouProps) => {
 
     function onSubmit(values: z.infer<typeof aboutSchema>) {
 
-        console.log(values)
         onSuccess(values)
     }
 

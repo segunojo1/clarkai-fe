@@ -55,8 +55,6 @@ const Quiz = () => {
   useEffect(() => {
     const token = Cookies.get('token');
     setIsAuthenticated(!!token);
-    console.log(isAuthenticated);
-    
     
     const fetchQuiz = async () => {
       try {

@@ -30,7 +30,6 @@ export default function ChatPage() {
 
   const getChatById = (id: ParamValue) => {
     const chat = chats?.find((c) => c.id === id);
-    console.log(chat);
     return chat;
   };
 
@@ -40,7 +39,6 @@ export default function ChatPage() {
   const { getMessages } = useChatStore();
   const router = useRouter();
   useEffect(() => {
-    console.log(id);
 
     setCurrentChatId(id as string | null);
   }, [id, setCurrentChatId]);
@@ -51,7 +49,6 @@ export default function ChatPage() {
       const getAllMessages = async () => {
         try {
           const retrievedMessages = await getMessages(1, id.toString());
-          console.log(retrievedMessages);
           setChatDetails(retrievedMessages);
           setMessages(retrievedMessages.messages);
         } catch (error) {
@@ -98,9 +95,6 @@ export default function ChatPage() {
     }
   };
 
-  useEffect(() => {
-    console.log(messages);
-  }, [messages]);
 
   const handleSend = async (text: string, files?: File[]) => {
     if (!text.trim()) return;

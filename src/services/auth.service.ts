@@ -207,7 +207,7 @@ class AuthService {
   }
 
   public async register(data: CompleteSignupPayload) {
-    console.log("Starting registration process");
+   
      
     // Check if it's an OAuth signup
     const isOauth = sessionStorage.getItem("is_oauth_signup") === "true";
@@ -256,17 +256,10 @@ class AuthService {
         },
       });
 
-      console.log("Registration response:", {
-        user: response.data.user,
-        token: "[TOKEN_PRESENT]"
-      });
-
-      // Set auth token and user data in cookies
       if (response.data.token) {
         Cookies.set('token', response.data.token, this.COOKIE_OPTIONS);
         Cookies.set('user', JSON.stringify(response.data.user), this.COOKIE_OPTIONS);
         this.api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
-        console.log("Stored auth token in cookies:", "[TOKEN_PRESENT]");
       }
 
 
