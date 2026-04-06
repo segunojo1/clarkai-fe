@@ -140,7 +140,9 @@ export const LatestChat = () => {
                 className="group flex w-full items-center justify-between gap-2 px-[11px] py-1 dark:hover:bg-gray-800 hover:bg-gray-300"
               >
                 <Link href={`/chat/${chat.id}`} className="min-w-0 flex-1">
-                  <p className="truncate text-[14px] font-medium">{chat.name}</p>
+                  <p className="truncate text-[14px] font-medium">
+                    {chat.name}
+                  </p>
                 </Link>
                 <button
                   type="button"
@@ -761,7 +763,10 @@ export function AppSidebar() {
                   ) : (
                     <ul className="space-y-2">
                       {pdfResults.map((p: any, i: number) => (
-                        <li key={i} className="flex items-center justify-between gap-3 p-3 border rounded">
+                        <li
+                          key={i}
+                          className="flex items-center justify-between gap-3 p-3 border rounded"
+                        >
                           <div className="min-w-0">
                             <div className="text-sm font-medium truncate">
                               {p.fileName || p.name || "PDF"}
