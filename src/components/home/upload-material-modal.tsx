@@ -108,7 +108,8 @@ export function UploadMaterialModal({
   const [youtubePreviewError, setYoutubePreviewError] = useState<string | null>(
     null,
   );
-  const [uploadedVideoPreview, setUploadedVideoPreview] = useState<YouTubeVideoPreview | null>(null);
+  const [uploadedVideoPreview, setUploadedVideoPreview] =
+    useState<YouTubeVideoPreview | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [pendingDeleteFile, setPendingDeleteFile] = useState<{
     url: string;
@@ -161,6 +162,37 @@ export function UploadMaterialModal({
     }
   };
 
+  const handleDeleteYoutubeLink = async (
+    videoId: string,
+    videoTitle?: string,
+  ) => {
+    if (!videoId) {
+      toast.error("Could not determine YouTube video ID");
+      return;
+    }
+
+    try {
+      setDeletingFileUrl(videoId);
+      const response = await workspaceServiceInstance.deleteYtVideoFromWorkspace({
+        video_id: videoId,
+        workspace_id: workspaceId,
+      });
+
+      if (!response?.success) {
+        throw new Error(response?.message || "Failed to delete YouTube link");
+      }
+
+      const workspace = await workspaceServiceInstance.getWorkspaces(workspaceId);
+      selectWorkspace(workspace);
+      toast.success(videoTitle ? `Deleted ${videoTitle}` : "YouTube link deleted");
+    } catch (error) {
+      console.error("Failed to delete YouTube link:", error);
+      toast.error("Failed to delete YouTube link");
+    } finally {
+      setDeletingFileUrl(null);
+    }
+  };
+
   // console.log(selectedWorkspace);
 
   // const { workspace } = selectedWorkspace
@@ -198,12 +230,15 @@ export function UploadMaterialModal({
 
     const timeoutId = window.setTimeout(async () => {
       try {
-        const response = await workspaceServiceInstance.testYoutubeVideo(videoId);
+        const response =
+          await workspaceServiceInstance.testYoutubeVideo(videoId);
 
         if (!isActive) return;
 
         if (!response?.success || !response?.videoData) {
-          throw new Error(response?.message || "Failed to retrieve video preview");
+          throw new Error(
+            response?.message || "Failed to retrieve video preview",
+          );
         }
 
         setUploadedVideoPreview(response.videoData);
@@ -363,9 +398,10 @@ export function UploadMaterialModal({
             <>
               <Tabs defaultValue="files" className="w-[400px] mx-auto">
                 <TabsList>
-            <span className="text-gray-400 dark:text-gray-500 px-2">
-              {materialLength ?? 0} mat{materialLength === 1 ? "" : "s"}. Uploaded
-              </span>
+                  <span className="text-gray-400 dark:text-gray-500 px-2">
+                    {materialLength ?? 0} mat{materialLength === 1 ? "" : "s"}.
+                    Uploaded
+                  </span>
                   {/* <TabsTrigger value="materials">
                     
                   </TabsTrigger> */}
@@ -375,194 +411,22 @@ export function UploadMaterialModal({
                   </TabsTrigger>
                   <TabsTrigger value="files">
                     <FileText className="w-5 h-5" />
-                    <span>{selectedWorkspace?.workspace?.files?.pdfFiles?.length || 0} Docs</span>
+                    <span>
+                      {selectedWorkspace?.workspace?.files?.pdfFiles?.length ||
+                        0}{" "}
+                      Docs
+                    </span>
                   </TabsTrigger>
                   <TabsTrigger value="scans">
                     <Scan className="w-5 h-5" />
-                    <span>{selectedWorkspace?.workspace?.files?.imageFiles?.length || 0} Scans</span>
+                    <span>
+                      {selectedWorkspace?.workspace?.files?.imageFiles
+                        ?.length || 0}{" "}
+                      Scans
+                    </span>
                   </TabsTrigger>
                 </TabsList>
-                {/* <TabsContent value="files" className="mx-auto">
-                  {selectedWorkspace &&
-                  selectedWorkspace?.workspace?.files?.pdfFiles?.length > 0 ? (
-                    <div className="flex justify-center items-center flex-wrap gap-2 mx-auto max-h-[500px] overflow-y-scroll mb-5">
-                      {selectedWorkspace?.workspace.files.pdfFiles.map(
-                        (file: {
-                          id: string;
-                          filePath: string;
-                          fileName: string;
-                          size: string;
-                        }) => (
-                          <div
-                            key={file.id}
-                            className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
-                            onClick={() => window.open(file.filePath, "_blank")}
-                          >
-                            <div
-                              className="rounded-2xl p-0 flex flex-col items-center justify-center relative"
-                              style={{ minHeight: 96 }}
-                            >
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  requestDeleteFile(
-                                    file.filePath,
-                                    file.fileName,
-                                  );
-                                }}
-                                disabled={deletingFileUrl === file.filePath}
-                                className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
-                                aria-label={`Delete ${file.fileName}`}
-                              >
-                                {deletingFileUrl === file.filePath ? (
-                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                ) : (
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                )}
-                              </button>
-                              <div className="flex justify-center mb-2 mt-4">
-                                <Image
-                                  src="/assets/fileIcon.png"
-                                  alt="File icon"
-                                  width={56}
-                                  height={56}
-                                  className="w-14 h-14 bg-transparent"
-                                  style={{ background: "none" }}
-                                />
-                              </div>
-                              <div className="text-center max-w-[130px] w-[130px] h-[50px]">
-                                <p className="dark:text-gray-300  text-[#737373] text-xs font-medium leading-tight break-words">
-                                  {file.fileName}
-                                  <br />
-                                  {file.size}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        ),
-                      )}
-                      {selectedWorkspace?.workspace.files.imageFiles.map(
-                        (file: {
-                          id: string;
-                          filePath: string;
-                          fileName: string;
-                          size: string;
-                        }) => (
-                          <div
-                            key={file.id}
-                            className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
-                            onClick={() => window.open(file.filePath, "_blank")}
-                          >
-                            <div
-                              className="rounded-2xl p-0 flex flex-col items-center justify-center relative"
-                              style={{ minHeight: 96 }}
-                            >
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  requestDeleteFile(
-                                    file.filePath,
-                                    file.fileName,
-                                  );
-                                }}
-                                disabled={deletingFileUrl === file.filePath}
-                                className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
-                                aria-label={`Delete ${file.fileName}`}
-                              >
-                                {deletingFileUrl === file.filePath ? (
-                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                ) : (
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                )}
-                              </button>
-                              <div className="flex justify-center mb-2 mt-4">
-                                <Image
-                                  src="/assets/fileIcon.png"
-                                  alt="File icon"
-                                  width={56}
-                                  height={56}
-                                  className="w-14 h-14 bg-transparent"
-                                  style={{ background: "none" }}
-                                />
-                              </div>
-                              <div className="text-center max-w-[130px] w-[130px] h-[50px]">
-                                <p className="text-gray-300 text-xs font-medium leading-tight break-words">
-                                  {file.fileName}
-                                  <br />
-                                  {file.size}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        ),
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-start justify-start mb-8">
-                      <div
-                        className="rounded-2xl p-0 w-24 h-28 flex flex-col items-center justify-center relative"
-                        style={{ minHeight: 96 }}
-                      >
-                        <div className="flex justify-center mb-2 mt-4">
-                          <Image
-                            src="/assets/fileIcon.png"
-                            alt="File icon"
-                            width={56}
-                            height={56}
-                            className="w-14 h-14 bg-transparent"
-                            style={{ background: "none" }}
-                          />
-                        </div>
-
-                        <div className="text-left w-full pl-4">
-                          <p className="dark:text-gray-300 text-[#737373] text-xs font-medium leading-tight">
-                            Your Material
-                            <br />
-                            goes here
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {uploadedFile && (
-                    <div className="mt-4 p-4 bg-[#232323] rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-sm font-medium text-white">
-                            {uploadedFile.name}
-                          </h3>
-                          <p className="text-xs text-gray-400">
-                            {uploadedFile.size}
-                          </p>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setUploadedFile(null);
-                            setUploadProgress(0);
-                          }}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  <UploadMaterial
-                    isMounted={isMounted}
-                    setIsCreatingMaterial={setIsCreatingMaterial}
-                    workspaceId={workspaceId}
-                    isCreatingMaterial={isCreatingMaterial}
-                    uploadedFile={uploadedFile}
-                    setUploadedFile={setUploadedFile}
-                    setUploadProgress={setUploadProgress}
-                    uploadProgress={uploadProgress}
-                  />
-                </TabsContent> */}
+                
                 <TabsContent value="links">
                   {youtubeVideos.length > 0 ? (
                     <div className="flex justify-center items-center flex-wrap gap-2 mx-auto max-h-[500px] overflow-y-scroll mb-5">
@@ -573,51 +437,81 @@ export function UploadMaterialModal({
                           thumbnailUrl?: string;
                           filePath?: string;
                           fileName?: string;
-                        }) => (
-                          <div
-                            key={file.videoId || file.filePath || file.fileName}
-                            className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
-                            onClick={() =>
-                              window.open(
-                                file.filePath ||
-                                  (file.videoId
-                                    ? `https://www.youtube.com/watch?v=${file.videoId}`
-                                    : ""),
-                                "_blank",
-                              )
-                            }
-                          >
+                        }, index) => {
+                          const resolvedVideoId =
+                            file.videoId || extractYoutubeVideoId(file.filePath || "");
+                          const itemKey =
+                            file.videoId || file.filePath || file.fileName || `yt-${index}`;
+
+                          return (
                             <div
-                              className="rounded-2xl p-0 flex flex-col items-center justify-center"
-                              style={{ minHeight: 96 }}
+                              key={itemKey}
+                              className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
+                              onClick={() =>
+                                window.open(
+                                  file.filePath ||
+                                    (resolvedVideoId
+                                      ? `https://www.youtube.com/watch?v=${resolvedVideoId}`
+                                      : ""),
+                                  "_blank",
+                                )
+                              }
                             >
-                              <div className="flex justify-center mb-2 mt-4">
-                                {file.thumbnailUrl ? (
-                                  <Image
-                                    src={file.thumbnailUrl}
-                                    alt={
-                                      file.title ||
-                                      file.fileName ||
-                                      "YouTube thumbnail"
+                              <div
+                                className="rounded-2xl p-0 flex flex-col items-center justify-center relative"
+                                style={{ minHeight: 96 }}
+                              >
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (resolvedVideoId) {
+                                      handleDeleteYoutubeLink(
+                                        resolvedVideoId,
+                                        file.title || file.fileName,
+                                      );
+                                    } else {
+                                      toast.error("Could not determine YouTube video ID");
                                     }
-                                    width={56}
-                                    height={56}
-                                    className="w-14 h-14 rounded-md object-cover"
-                                  />
-                                ) : (
-                                  <Globe className="w-14 h-14 text-[#737373]" />
-                                )}
-                              </div>
-                              <div className="text-center max-w-[130px] w-[130px] h-[50px]">
-                                <p className="dark:text-gray-300 text-[#737373] text-xs font-medium leading-tight break-words">
-                                  {file.title ||
-                                    file.fileName ||
-                                    "YouTube Video"}
-                                </p>
+                                  }}
+                                  disabled={
+                                    !resolvedVideoId || deletingFileUrl === resolvedVideoId
+                                  }
+                                  className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
+                                  aria-label={`Delete ${file.title || file.fileName || "YouTube link"}`}
+                                >
+                                  {deletingFileUrl === resolvedVideoId ? (
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  )}
+                                </button>
+                                <div className="flex justify-center mb-2 mt-4">
+                                  {file.thumbnailUrl ? (
+                                    <Image
+                                      src={file.thumbnailUrl}
+                                      alt={
+                                        file.title ||
+                                        file.fileName ||
+                                        "YouTube thumbnail"
+                                      }
+                                      width={56}
+                                      height={56}
+                                      className="w-14 h-14 rounded-md object-cover"
+                                    />
+                                  ) : (
+                                    <Globe className="w-14 h-14 text-[#737373]" />
+                                  )}
+                                </div>
+                                <div className="text-center max-w-[130px] w-[130px] h-[50px]">
+                                  <p className="dark:text-gray-300 text-[#737373] text-xs font-medium leading-tight break-words">
+                                    {file.title || file.fileName || "YouTube Video"}
+                                  </p>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ),
+                          );
+                        },
                       )}
                     </div>
                   ) : (
@@ -699,14 +593,20 @@ export function UploadMaterialModal({
                               Video preview
                             </p>
                             <div className="flex gap-3">
-                              {uploadedVideoPreview.snippet.thumbnails?.high?.url ||
-                              uploadedVideoPreview.snippet.thumbnails?.medium?.url ||
-                              uploadedVideoPreview.snippet.thumbnails?.default?.url ? (
+                              {uploadedVideoPreview.snippet.thumbnails?.high
+                                ?.url ||
+                              uploadedVideoPreview.snippet.thumbnails?.medium
+                                ?.url ||
+                              uploadedVideoPreview.snippet.thumbnails?.default
+                                ?.url ? (
                                 <Image
                                   src={
-                                    uploadedVideoPreview.snippet.thumbnails?.high?.url ||
-                                    uploadedVideoPreview.snippet.thumbnails?.medium?.url ||
-                                    uploadedVideoPreview.snippet.thumbnails?.default?.url ||
+                                    uploadedVideoPreview.snippet.thumbnails
+                                      ?.high?.url ||
+                                    uploadedVideoPreview.snippet.thumbnails
+                                      ?.medium?.url ||
+                                    uploadedVideoPreview.snippet.thumbnails
+                                      ?.default?.url ||
                                     ""
                                   }
                                   alt={uploadedVideoPreview.snippet.title}
@@ -728,15 +628,18 @@ export function UploadMaterialModal({
                                 </p>
                                 <p className="mt-1 text-[11px] text-gray-500">
                                   {abbreviateNumber(
-                                    uploadedVideoPreview.statistics?.viewCount ?? 0,
+                                    uploadedVideoPreview.statistics
+                                      ?.viewCount ?? 0,
                                   )}{" "}
                                   views •
                                   {abbreviateNumber(
-                                    uploadedVideoPreview.statistics?.likeCount ?? 0,
+                                    uploadedVideoPreview.statistics
+                                      ?.likeCount ?? 0,
                                   )}{" "}
                                   likes •
                                   {abbreviateNumber(
-                                    uploadedVideoPreview.statistics?.commentCount ?? 0,
+                                    uploadedVideoPreview.statistics
+                                      ?.commentCount ?? 0,
                                   )}{" "}
                                   comments
                                 </p>
@@ -809,7 +712,6 @@ export function UploadMaterialModal({
                           </div>
                         ),
                       )}
-                      
                     </div>
                   ) : (
                     <div className="flex flex-col items-start justify-start mb-8">
@@ -877,64 +779,61 @@ export function UploadMaterialModal({
                 </TabsContent>
                 <TabsContent value="scans">
                   {selectedWorkspace?.workspace.files.imageFiles.map(
-                        (file: {
-                          id: string;
-                          filePath: string;
-                          fileName: string;
-                          size: string;
-                        }) => (
-                          <div
-                            key={file.id}
-                            className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
-                            onClick={() => window.open(file.filePath, "_blank")}
+                    (file: {
+                      id: string;
+                      filePath: string;
+                      fileName: string;
+                      size: string;
+                    }) => (
+                      <div
+                        key={file.id}
+                        className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
+                        onClick={() => window.open(file.filePath, "_blank")}
+                      >
+                        <div
+                          className="rounded-2xl p-0 flex flex-col items-center justify-center relative"
+                          style={{ minHeight: 96 }}
+                        >
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              requestDeleteFile(file.filePath, file.fileName);
+                            }}
+                            disabled={deletingFileUrl === file.filePath}
+                            className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
+                            aria-label={`Delete ${file.fileName}`}
                           >
-                            <div
-                              className="rounded-2xl p-0 flex flex-col items-center justify-center relative"
-                              style={{ minHeight: 96 }}
-                            >
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  requestDeleteFile(
-                                    file.filePath,
-                                    file.fileName,
-                                  );
-                                }}
-                                disabled={deletingFileUrl === file.filePath}
-                                className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
-                                aria-label={`Delete ${file.fileName}`}
-                              >
-                                {deletingFileUrl === file.filePath ? (
-                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                ) : (
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                )}
-                              </button>
+                            {deletingFileUrl === file.filePath ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-3.5 w-3.5" />
+                            )}
+                          </button>
 
-                              <div className="flex justify-center mb-2 mt-4">
-                                <Image
-                                  src="/assets/fileIcon.png"
-                                  alt="File icon"
-                                  width={56}
-                                  height={56}
-                                  className="w-14 h-14 bg-transparent"
-                                  style={{ background: "none" }}
-                                />
-                              </div>
-                              <div className="text-center max-w-[130px] w-[130px] h-[50px]">
-                                <p className="text-gray-300 text-xs font-medium leading-tight break-words">
-                                  {file.fileName}
-                                  <br />
-                                  {file.size}
-                                </p>
-                              </div>
-                            </div>
+                          <div className="flex justify-center mb-2 mt-4">
+                            <Image
+                              src="/assets/fileIcon.png"
+                              alt="File icon"
+                              width={56}
+                              height={56}
+                              className="w-14 h-14 bg-transparent"
+                              style={{ background: "none" }}
+                            />
                           </div>
-                        ),
-                      )}
+                          <div className="text-center max-w-[130px] w-[130px] h-[50px]">
+                            <p className="text-gray-300 text-xs font-medium leading-tight break-words">
+                              {file.fileName}
+                              <br />
+                              {file.size}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ),
+                  )}
 
-                      {uploadedFile && (
+                  {uploadedFile && (
                     <div className="mt-4 p-4 bg-[#232323] rounded-lg">
                       <div className="flex items-center justify-between">
                         <div>

@@ -348,6 +348,26 @@ class WorkspaceService {
     }
   }
 
+  public async deleteYtVideoFromWorkspace({
+    video_id,
+    workspace_id,
+  }: {
+    video_id: string;
+    workspace_id: string;
+  }) {
+    try {
+      const response = await this.api.delete("/youtube", {
+        params: {
+          video_id,
+          workspace_id,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to delete YouTube video from workspace:", error);
+      throw error;
+    }
+  }
 }
 
 export default WorkspaceService.getInstance();

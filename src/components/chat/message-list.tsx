@@ -372,15 +372,21 @@ export function ChatMessageList({
                           Suggested follow-ups
                         </p>
                         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                        {message.follow_up_suggestions.map((suggestion, i) => (
-                          <button
-                            key={i}
-                            onClick={() => onSuggestedQuestionClick(suggestion)}
-                            className="group w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-left text-xs font-medium text-gray-700 transition-all hover:-translate-y-[1px] hover:border-[#FF3D00] hover:text-[#FF3D00] hover:shadow-sm dark:border-gray-600 dark:bg-[#333] dark:text-gray-300 dark:hover:bg-[#3a3a3a]"
-                          >
-                            <span className="line-clamp-2">{suggestion}</span>
-                          </button>
-                        ))}
+                          {message.follow_up_suggestions.map(
+                            (suggestion, i) => (
+                              <button
+                                key={i}
+                                onClick={() =>
+                                  onSuggestedQuestionClick(suggestion)
+                                }
+                                className="group w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-left text-xs font-medium text-gray-700 transition-all hover:-translate-y-[1px] hover:border-[#FF3D00] hover:text-[#FF3D00] hover:shadow-sm dark:border-gray-600 dark:bg-[#333] dark:text-gray-300 dark:hover:bg-[#3a3a3a]"
+                              >
+                                <span className="line-clamp-2">
+                                  {suggestion}
+                                </span>
+                              </button>
+                            ),
+                          )}
                         </div>
                       </div>
                     )}
@@ -443,8 +449,7 @@ export function ChatMessageList({
                           href={`/quiz/${message.quizId}`}
                           className="flex items-center gap-1"
                         >
-                          <LinkIcon width={16} className="mr-1" /> Open
-                          Quiz
+                          <LinkIcon width={16} className="mr-1" /> Open Quiz
                         </Link>
                       </div>
                     </div>
