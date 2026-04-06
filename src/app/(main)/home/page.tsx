@@ -42,7 +42,7 @@ const HomePageContent = () => {
     toast('Please wait while we create your chat')
     router.push(`/chat/${id}`)
     if (id) {
-      await sendMessage(id, text, [], false, files)
+      await sendMessage(text, [], false, files, id)
     }
     // await sendMessage(message) 
   }
