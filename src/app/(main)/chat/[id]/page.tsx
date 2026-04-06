@@ -109,7 +109,7 @@ export default function ChatPage() {
       setMessages(
         messages.filter((m) => m.id !== "suggested-questions-prompt"),
       );
-      await sendMessage(id.toString(), text, messages, false, files);
+      await sendMessage(text, messages, false, files, id.toString());
     }
   };
 
@@ -165,7 +165,9 @@ export default function ChatPage() {
       {!id && messages.length === 0 ? (
         <WelcomeScreen onSend={handleSend} />
       ) : (
-        <ChatMessageList messages={messages} isLoading={isLoading} />
+        <div className="flex-1 overflow-y-auto pb-32">
+          <ChatMessageList messages={messages} isLoading={isLoading} />
+        </div>
       )}
       <ChatInputForm onSend={handleSend} disabled={isLoading} />
     </div>

@@ -59,7 +59,7 @@ const WorkspaceDeleteDialog = ({ workspaceId }: WorkspaceDeleteDialogProps) => {
         <DialogHeader>
           <DialogTitle>Delete Workspace</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete this workspace?
+            Are you sure you want to delete this workspace? Once deleted this workspace cannot be retrieved
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -81,10 +81,6 @@ const WorkspacesPage = () => {
   const { workspaces } = useWorkspaceStore();
   const route = useRouter();
 
-  const logout = () => {
-    authService.logout();
-    route.push("/auth/login");
-  };
 
   useEffect(() => {
     // Fetch workspaces when component mounts
@@ -111,24 +107,6 @@ const WorkspacesPage = () => {
               <ChevronDown className="w-4 h-4" />
             </Button>
           </WorkspaceCreationModal>
-          {/* <UploadMaterialModal >
-                                            <button className="p-2 hover:bg-gray-700 rounded-md transition-colors">
-                                                <Image 
-                                                    src="/globe.svg" 
-                                                    alt="Globe" 
-                                                    width={20} 
-                                                    height={20}
-                                                    className="w-5 h-5"
-                                                />
-                                            </button>
-                                        </UploadMaterialModal> */}
-          <Button
-            variant="outline"
-            className="text-black dark:text-white"
-            onClick={logout}
-          >
-            Logout
-          </Button>
 
           <ThemeSwitcher />
         </div>

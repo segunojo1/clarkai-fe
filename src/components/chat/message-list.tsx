@@ -13,24 +13,11 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PDFViewer } from "./pdf-viewer";
-import UserAvatar from "../user-avatar";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "../ui/sidebar";
 import MarkdownRenderer from "../markdown-renderer";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import Link from "next/link";
-
-// const isFile = (obj: unknown): obj is File => {
-//   if (obj instanceof File) return true;
-//   if (typeof obj !== 'object' || obj === null) return false;
-
-//   const fileLike = obj as Record<keyof File, unknown>;
-//   return (
-//     typeof fileLike.name === 'string' &&
-//     typeof fileLike.size === 'number' &&
-//     typeof fileLike.type === 'string'
-//   );
-// };
 
 const FileAttachmentPreview = ({
   file,
@@ -41,7 +28,6 @@ const FileAttachmentPreview = ({
   const fileUrlRef = useRef<string>("");
   const { setOpen } = useSidebar();
 
-  // Create object URL for the file
   useEffect(() => {
     const createObjectUrl = () => {
       // Clean up previous URL if it exists
@@ -331,12 +317,14 @@ export function ChatMessageList({
                             return part.startsWith("@") ? (
                               <span
                                 key={i}
-                                className="bg-[#FCC095] bg-opacity-10 text-[#FF3C00] px-1.5 py-0.5 rounded-[2.8px] font-bold"
+                                className="bg-[#FCC095] satoshi bg-opacity-10 text-[#FF3C00] px-1.5 py-0.5 rounded-[2.8px] font-bold"
                               >
                                 {part}
                               </span>
                             ) : (
-                              <span key={i}>{part}</span>
+                              <span key={i} className="satoshi">
+                                {part}
+                              </span>
                             );
                           })}
                         </p>
@@ -377,17 +365,23 @@ export function ChatMessageList({
 
                   {message.follow_up_suggestions &&
                     message.follow_up_suggestions.length > 0 &&
-                    onSuggestedQuestionClick && (
-                      <div className="flex flex-wrap gap-2 mt-2">
+                    onSuggestedQuestionClick &&
+                    !isLoading && (
+                      <div className="mt-3 w-full max-w-[680px] rounded-2xl border border-gray-200/70 bg-gray-50/70 p-3 dark:border-gray-700 dark:bg-[#2f2f2f]/60">
+                        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                          Suggested follow-ups
+                        </p>
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                         {message.follow_up_suggestions.map((suggestion, i) => (
                           <button
                             key={i}
                             onClick={() => onSuggestedQuestionClick(suggestion)}
-                            className="text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-600 bg-white dark:bg-[#333] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-[#FF3D00] hover:text-[#FF3D00] transition-colors"
+                            className="group w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-left text-xs font-medium text-gray-700 transition-all hover:-translate-y-[1px] hover:border-[#FF3D00] hover:text-[#FF3D00] hover:shadow-sm dark:border-gray-600 dark:bg-[#333] dark:text-gray-300 dark:hover:bg-[#3a3a3a]"
                           >
-                            {suggestion}
+                            <span className="line-clamp-2">{suggestion}</span>
                           </button>
                         ))}
+                        </div>
                       </div>
                     )}
 
@@ -450,8 +444,8 @@ export function ChatMessageList({
                           className="flex items-center gap-1"
                         >
                           <LinkIcon width={16} className="mr-1" /> Open
-                          Quiz{" "}
-                        </Link>{" "}
+                          Quiz
+                        </Link>
                       </div>
                     </div>
                   </div>

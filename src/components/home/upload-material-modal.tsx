@@ -43,6 +43,53 @@ interface UploadMaterialModalProps {
   workspaceId: string;
 }
 
+interface YouTubeVideoPreview {
+  id: string;
+  snippet: {
+    title: string;
+    description?: string;
+    channelTitle?: string;
+    thumbnails?: {
+      default?: { url: string };
+      medium?: { url: string };
+      high?: { url: string };
+      standard?: { url: string };
+      maxres?: { url: string };
+    };
+  };
+  statistics?: {
+    viewCount?: string;
+    likeCount?: string;
+    commentCount?: string;
+  };
+}
+
+// Helper function to abbreviate large numbers
+const abbreviateNumber = (num: string | number): string => {
+  if (!num) return "0";
+  const numValue =
+    typeof num === "string" ? parseInt(num.replace(/,/g, ""), 10) : num;
+  if (isNaN(numValue)) return "0";
+  if (numValue >= 1_000_000)
+    return (numValue / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+  if (numValue >= 1_000)
+    return (numValue / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+  return numValue.toString();
+};
+
+const extractYoutubeVideoId = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+
+  const directIdMatch = trimmed.match(/^[\w-]{11}$/);
+  if (directIdMatch) return directIdMatch[0];
+
+  const urlMatch = trimmed.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([\w-]{11})/,
+  );
+  return urlMatch?.[1] ?? "";
+};
+
 export function UploadMaterialModal({
   children,
   workspaceId,
@@ -56,16 +103,12 @@ export function UploadMaterialModal({
   const [deletingFileUrl, setDeletingFileUrl] = useState<string | null>(null);
   const [isYoutubeDialogOpen, setIsYoutubeDialogOpen] = useState(false);
   const [isUploadingYoutubeLink, setIsUploadingYoutubeLink] = useState(false);
-  const [uploadedVideoPreview, setUploadedVideoPreview] = useState<{
-    title: string;
-    description?: string;
-    channelTitle?: string;
-    thumbnailUrl?: string;
-    viewCount?: string;
-    likeCount?: string;
-    commentCount?: string;
-    videoId?: string;
-  } | null>(null);
+  const [isFetchingYoutubePreview, setIsFetchingYoutubePreview] =
+    useState(false);
+  const [youtubePreviewError, setYoutubePreviewError] = useState<string | null>(
+    null,
+  );
+  const [uploadedVideoPreview, setUploadedVideoPreview] = useState<YouTubeVideoPreview | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [pendingDeleteFile, setPendingDeleteFile] = useState<{
     url: string;
@@ -132,24 +175,65 @@ export function UploadMaterialModal({
   const showError = touched && url.length > 0 && !isValid;
   const showSuccess = touched && url.length > 0 && isValid;
 
-  const extractYoutubeVideoId = (value: string) => {
-    const trimmed = value.trim();
-    if (!trimmed) return "";
+  useEffect(() => {
+    const videoId = extractYoutubeVideoId(url);
 
-    const directIdMatch = trimmed.match(/^[\w-]{11}$/);
-    if (directIdMatch) return directIdMatch[0];
+    if (!url.trim()) {
+      setUploadedVideoPreview(null);
+      setYoutubePreviewError(null);
+      setIsFetchingYoutubePreview(false);
+      return;
+    }
 
-    const urlMatch = trimmed.match(
-      /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([\w-]{11})/,
-    );
-    return urlMatch?.[1] ?? "";
-  };
+    if (!isValid || !videoId) {
+      setUploadedVideoPreview(null);
+      setYoutubePreviewError(null);
+      setIsFetchingYoutubePreview(false);
+      return;
+    }
+
+    let isActive = true;
+    setIsFetchingYoutubePreview(true);
+    setYoutubePreviewError(null);
+
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        const response = await workspaceServiceInstance.testYoutubeVideo(videoId);
+
+        if (!isActive) return;
+
+        if (!response?.success || !response?.videoData) {
+          throw new Error(response?.message || "Failed to retrieve video preview");
+        }
+
+        setUploadedVideoPreview(response.videoData);
+      } catch (error) {
+        if (!isActive) return;
+        console.error("Failed to load YouTube preview:", error);
+        setUploadedVideoPreview(null);
+        setYoutubePreviewError(
+          error instanceof Error
+            ? error.message
+            : "Failed to load video preview",
+        );
+      } finally {
+        if (isActive) {
+          setIsFetchingYoutubePreview(false);
+        }
+      }
+    }, 250);
+
+    return () => {
+      isActive = false;
+      window.clearTimeout(timeoutId);
+    };
+  }, [url, isValid]);
 
   const handleUploadYoutubeLink = async () => {
     setTouched(true);
-    if (!isValid) return;
+    if (!isValid || isFetchingYoutubePreview || !uploadedVideoPreview) return;
 
-    const videoId = extractYoutubeVideoId(url);
+    const videoId = uploadedVideoPreview.id || extractYoutubeVideoId(url);
     if (!videoId) {
       toast.error("Could not extract YouTube video ID");
       return;
@@ -167,28 +251,15 @@ export function UploadMaterialModal({
         throw new Error(response?.message || "Failed to upload YouTube link");
       }
 
-      const videoData = response.videoData;
-      setUploadedVideoPreview(
-        videoData
-          ? {
-              title: videoData.title,
-              description: videoData.description,
-              channelTitle: videoData.channelTitle,
-              thumbnailUrl: videoData.thumbnailUrl,
-              viewCount: videoData.viewCount,
-              likeCount: videoData.likeCount,
-              commentCount: videoData.commentCount,
-              videoId: videoData.videoId,
-            }
-          : null,
-      );
-
       const workspace =
         await workspaceServiceInstance.getWorkspaces(workspaceId);
       selectWorkspace(workspace);
       toast.success(response.message || "Video added successfully.");
       setUrl("");
       setTouched(false);
+      setUploadedVideoPreview(null);
+      setYoutubePreviewError(null);
+      setIsYoutubeDialogOpen(false);
     } catch (error) {
       console.error("Failed to upload YouTube link:", error);
       toast.error("Failed to upload YouTube link");
@@ -290,25 +361,28 @@ export function UploadMaterialModal({
         <div className="flex flex-col items-start justify-start px-4 pb-8 pt-4 w-full h-full">
           {activeTab === "Materials" && (
             <>
-              <Tabs defaultValue="materials" className="w-[400px] mx-auto">
+              <Tabs defaultValue="files" className="w-[400px] mx-auto">
                 <TabsList>
-                  <TabsTrigger value="materials">
-                    {materialLength} Mat. Uploaded
-                  </TabsTrigger>
+            <span className="text-gray-400 dark:text-gray-500 px-2">
+              {materialLength ?? 0} mat{materialLength === 1 ? "" : "s"}. Uploaded
+              </span>
+                  {/* <TabsTrigger value="materials">
+                    
+                  </TabsTrigger> */}
                   <TabsTrigger value="links">
                     <LinkIcon className="w-5 h-5" />
                     <span>{youtubeVideos.length} links</span>
                   </TabsTrigger>
                   <TabsTrigger value="files">
                     <FileText className="w-5 h-5" />
-                    <span>0 Docs</span>
+                    <span>{selectedWorkspace?.workspace?.files?.pdfFiles?.length || 0} Docs</span>
                   </TabsTrigger>
                   <TabsTrigger value="scans">
                     <Scan className="w-5 h-5" />
-                    <span>0 Scans</span>
+                    <span>{selectedWorkspace?.workspace?.files?.imageFiles?.length || 0} Scans</span>
                   </TabsTrigger>
                 </TabsList>
-                <TabsContent value="materials" className="mx-auto">
+                {/* <TabsContent value="files" className="mx-auto">
                   {selectedWorkspace &&
                   selectedWorkspace?.workspace?.files?.pdfFiles?.length > 0 ? (
                     <div className="flex justify-center items-center flex-wrap gap-2 mx-auto max-h-[500px] overflow-y-scroll mb-5">
@@ -347,7 +421,6 @@ export function UploadMaterialModal({
                                   <Trash2 className="h-3.5 w-3.5" />
                                 )}
                               </button>
-                              {/* File icon - no background, no border */}
                               <div className="flex justify-center mb-2 mt-4">
                                 <Image
                                   src="/assets/fileIcon.png"
@@ -404,7 +477,6 @@ export function UploadMaterialModal({
                                   <Trash2 className="h-3.5 w-3.5" />
                                 )}
                               </button>
-                              {/* File icon - no background, no border */}
                               <div className="flex justify-center mb-2 mt-4">
                                 <Image
                                   src="/assets/fileIcon.png"
@@ -490,7 +562,7 @@ export function UploadMaterialModal({
                     setUploadProgress={setUploadProgress}
                     uploadProgress={uploadProgress}
                   />
-                </TabsContent>
+                </TabsContent> */}
                 <TabsContent value="links">
                   {youtubeVideos.length > 0 ? (
                     <div className="flex justify-center items-center flex-wrap gap-2 mx-auto max-h-[500px] overflow-y-scroll mb-5">
@@ -577,19 +649,31 @@ export function UploadMaterialModal({
                           onBlur={() => setTouched(true)}
                         />
 
+                        {!showError && isFetchingYoutubePreview && (
+                          <div className="flex items-center gap-2 rounded-lg border border-[#3a3a3a] bg-[#232323] px-3 py-2 text-sm text-gray-300">
+                            <Loader2 className="h-4 w-4 animate-spin text-[#FF3D00]" />
+                            Loading video preview...
+                          </div>
+                        )}
+
                         <Button
                           type="button"
                           onClick={handleUploadYoutubeLink}
-                          disabled={!isValid || isUploadingYoutubeLink}
+                          disabled={
+                            !isValid ||
+                            isUploadingYoutubeLink ||
+                            isFetchingYoutubePreview ||
+                            !uploadedVideoPreview
+                          }
                           className={` ${showError ? "border-red-500 focus:ring-red-200" : ""} bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white font-medium text-lg px-[100px] py-[10px] cursor-pointer rounded-[5px] transition-colors ml-4 w-full mx-auto`}
                         >
                           {isUploadingYoutubeLink ? (
                             <span className="flex items-center justify-center gap-2">
                               <Loader2 className="h-4 w-4 animate-spin" />
-                              Uploading...
+                              Adding to workspace...
                             </span>
                           ) : (
-                            "Upload Link"
+                            "Upload Video"
                           )}
                         </Button>
 
@@ -598,22 +682,34 @@ export function UploadMaterialModal({
                             Please enter a valid YouTube URL.
                           </p>
                         )}
+                        {youtubePreviewError && !showError && (
+                          <p className="text-red-500 text-sm">
+                            {youtubePreviewError}
+                          </p>
+                        )}
                         {showSuccess && (
                           <p className="text-green-500 text-sm">
-                            ✓ Valid YouTube URL
+                            ✓ Valid YouTube URL — preview loaded
                           </p>
                         )}
 
                         {uploadedVideoPreview && (
                           <div className="mt-4 rounded-lg border border-[#3a3a3a] p-3">
                             <p className="mb-2 text-xs text-gray-400">
-                              Preview from uploaded result
+                              Video preview
                             </p>
                             <div className="flex gap-3">
-                              {uploadedVideoPreview.thumbnailUrl ? (
+                              {uploadedVideoPreview.snippet.thumbnails?.high?.url ||
+                              uploadedVideoPreview.snippet.thumbnails?.medium?.url ||
+                              uploadedVideoPreview.snippet.thumbnails?.default?.url ? (
                                 <Image
-                                  src={uploadedVideoPreview.thumbnailUrl}
-                                  alt={uploadedVideoPreview.title}
+                                  src={
+                                    uploadedVideoPreview.snippet.thumbnails?.high?.url ||
+                                    uploadedVideoPreview.snippet.thumbnails?.medium?.url ||
+                                    uploadedVideoPreview.snippet.thumbnails?.default?.url ||
+                                    ""
+                                  }
+                                  alt={uploadedVideoPreview.snippet.title}
                                   width={120}
                                   height={68}
                                   className="h-[68px] w-[120px] rounded-md object-cover"
@@ -625,15 +721,24 @@ export function UploadMaterialModal({
                               )}
                               <div className="min-w-0 flex-1">
                                 <p className="line-clamp-2 text-sm font-medium text-white">
-                                  {uploadedVideoPreview.title}
+                                  {uploadedVideoPreview.snippet.title}
                                 </p>
                                 <p className="mt-1 text-xs text-gray-400">
-                                  {uploadedVideoPreview.channelTitle}
+                                  {uploadedVideoPreview.snippet.channelTitle}
                                 </p>
                                 <p className="mt-1 text-[11px] text-gray-500">
-                                  {uploadedVideoPreview.viewCount} views •
-                                  {uploadedVideoPreview.likeCount} likes •
-                                  {uploadedVideoPreview.commentCount} comments
+                                  {abbreviateNumber(
+                                    uploadedVideoPreview.statistics?.viewCount ?? 0,
+                                  )}{" "}
+                                  views •
+                                  {abbreviateNumber(
+                                    uploadedVideoPreview.statistics?.likeCount ?? 0,
+                                  )}{" "}
+                                  likes •
+                                  {abbreviateNumber(
+                                    uploadedVideoPreview.statistics?.commentCount ?? 0,
+                                  )}{" "}
+                                  comments
                                 </p>
                               </div>
                             </div>
@@ -643,11 +748,227 @@ export function UploadMaterialModal({
                     </DialogContent>
                   </Dialog>
                 </TabsContent>
-                <TabsContent value="files">
-                  Change your password here.
+                <TabsContent value="files" className="mx-auto">
+                  {selectedWorkspace &&
+                  selectedWorkspace?.workspace?.files?.pdfFiles?.length > 0 ? (
+                    <div className="flex justify-center items-center flex-wrap gap-2 mx-auto max-h-[500px] overflow-y-scroll mb-5">
+                      {selectedWorkspace?.workspace.files.pdfFiles.map(
+                        (file: {
+                          id: string;
+                          filePath: string;
+                          fileName: string;
+                          size: string;
+                        }) => (
+                          <div
+                            key={file.id}
+                            className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
+                            onClick={() => window.open(file.filePath, "_blank")}
+                          >
+                            <div
+                              className="rounded-2xl p-0 flex flex-col items-center justify-center relative"
+                              style={{ minHeight: 96 }}
+                            >
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  requestDeleteFile(
+                                    file.filePath,
+                                    file.fileName,
+                                  );
+                                }}
+                                disabled={deletingFileUrl === file.filePath}
+                                className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
+                                aria-label={`Delete ${file.fileName}`}
+                              >
+                                {deletingFileUrl === file.filePath ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                )}
+                              </button>
+                              {/* File icon - no background, no border */}
+                              <div className="flex justify-center mb-2 mt-4">
+                                <Image
+                                  src="/assets/fileIcon.png"
+                                  alt="File icon"
+                                  width={56}
+                                  height={56}
+                                  className="w-14 h-14 bg-transparent"
+                                  style={{ background: "none" }}
+                                />
+                              </div>
+                              <div className="text-center max-w-[130px] w-[130px] h-[50px]">
+                                <p className="dark:text-gray-300  text-[#737373] text-xs font-medium leading-tight break-words">
+                                  {file.fileName}
+                                  <br />
+                                  {file.size}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ),
+                      )}
+                      
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-start justify-start mb-8">
+                      <div
+                        className="rounded-2xl p-0 w-24 h-28 flex flex-col items-center justify-center relative"
+                        style={{ minHeight: 96 }}
+                      >
+                        <div className="flex justify-center mb-2 mt-4">
+                          <Image
+                            src="/assets/fileIcon.png"
+                            alt="File icon"
+                            width={56}
+                            height={56}
+                            className="w-14 h-14 bg-transparent"
+                            style={{ background: "none" }}
+                          />
+                        </div>
+
+                        <div className="text-left w-full pl-4">
+                          <p className="dark:text-gray-300 text-[#737373] text-xs font-medium leading-tight">
+                            Your Material
+                            <br />
+                            goes here
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {uploadedFile && (
+                    <div className="mt-4 p-4 bg-[#232323] rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-sm font-medium text-white">
+                            {uploadedFile.name}
+                          </h3>
+                          <p className="text-xs text-gray-400">
+                            {uploadedFile.size}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setUploadedFile(null);
+                            setUploadProgress(0);
+                          }}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  <UploadMaterial
+                    isMounted={isMounted}
+                    setIsCreatingMaterial={setIsCreatingMaterial}
+                    workspaceId={workspaceId}
+                    isCreatingMaterial={isCreatingMaterial}
+                    uploadedFile={uploadedFile}
+                    setUploadedFile={setUploadedFile}
+                    setUploadProgress={setUploadProgress}
+                    uploadProgress={uploadProgress}
+                  />
                 </TabsContent>
                 <TabsContent value="scans">
-                  Change your password here.
+                  {selectedWorkspace?.workspace.files.imageFiles.map(
+                        (file: {
+                          id: string;
+                          filePath: string;
+                          fileName: string;
+                          size: string;
+                        }) => (
+                          <div
+                            key={file.id}
+                            className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
+                            onClick={() => window.open(file.filePath, "_blank")}
+                          >
+                            <div
+                              className="rounded-2xl p-0 flex flex-col items-center justify-center relative"
+                              style={{ minHeight: 96 }}
+                            >
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  requestDeleteFile(
+                                    file.filePath,
+                                    file.fileName,
+                                  );
+                                }}
+                                disabled={deletingFileUrl === file.filePath}
+                                className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
+                                aria-label={`Delete ${file.fileName}`}
+                              >
+                                {deletingFileUrl === file.filePath ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                )}
+                              </button>
+
+                              <div className="flex justify-center mb-2 mt-4">
+                                <Image
+                                  src="/assets/fileIcon.png"
+                                  alt="File icon"
+                                  width={56}
+                                  height={56}
+                                  className="w-14 h-14 bg-transparent"
+                                  style={{ background: "none" }}
+                                />
+                              </div>
+                              <div className="text-center max-w-[130px] w-[130px] h-[50px]">
+                                <p className="text-gray-300 text-xs font-medium leading-tight break-words">
+                                  {file.fileName}
+                                  <br />
+                                  {file.size}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ),
+                      )}
+
+                      {uploadedFile && (
+                    <div className="mt-4 p-4 bg-[#232323] rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-sm font-medium text-white">
+                            {uploadedFile.name}
+                          </h3>
+                          <p className="text-xs text-gray-400">
+                            {uploadedFile.size}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setUploadedFile(null);
+                            setUploadProgress(0);
+                          }}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  <UploadMaterial
+                    isMounted={isMounted}
+                    setIsCreatingMaterial={setIsCreatingMaterial}
+                    workspaceId={workspaceId}
+                    isCreatingMaterial={isCreatingMaterial}
+                    uploadedFile={uploadedFile}
+                    setUploadedFile={setUploadedFile}
+                    setUploadProgress={setUploadProgress}
+                    uploadProgress={uploadProgress}
+                  />
                 </TabsContent>
               </Tabs>
             </>

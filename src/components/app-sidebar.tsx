@@ -39,6 +39,15 @@ import { useChatStore } from "@/store/chat.store";
 import { WorkspaceCreationModal } from "./home/workspace-creation-modal";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { ProfileModal } from "./profile-modal";
+import workspaceService from "@/services/workspace.service";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const LatestChat = () => {
   const { chats } = useChatStore();
@@ -196,8 +205,9 @@ export const LatestWorkspace = () => {
 
 interface SidebarItem {
   title: string;
-  url: string;
+  url?: string;
   icon: React.ComponentType<{ className?: string }>;
+  onClick?: () => void;
 }
 
 interface SidebarGroupCustomProps {
@@ -217,7 +227,7 @@ const SidebarGroupCustom = ({ items, label }: SidebarGroupCustomProps) => {
             <SidebarMenuItem
               key={item.title}
               className={`transition-all duration-200 rounded-[5px] ${
-                pathname === item.url
+                item.url && pathname === item.url
                   ? "bg-[#F0F0EF] dark:bg-[#404040]"
                   : "bg-[#F8F8F7] dark:bg-[#2C2C2C]"
               }`}
@@ -225,33 +235,46 @@ const SidebarGroupCustom = ({ items, label }: SidebarGroupCustomProps) => {
               <SidebarMenuButton
                 asChild
                 tooltip={item.title}
-                isActive={pathname === item.url}
+                isActive={!!item.url && pathname === item.url}
               >
-                <Link
-                  href={item.url}
-                  className={`pl-5 transition-colors duration-200 rounded-[5px] ${
-                    pathname === item.url
-                      ? "bg-[#F0F0EF] dark:bg-[#404040]"
-                      : "hover:bg-[#F0F0EF] dark:hover:bg-[#404040]"
-                  }`}
-                >
-                  <item.icon
-                    className={`transition-colors duration-200 ${
-                      pathname === item.url
-                        ? "text-orange-500 dark:text-orange-400"
-                        : "text-[#525252] dark:text-[#D4D4D4]"
-                    }`}
-                  />
-                  <span
-                    className={`transition-colors duration-200 ${
-                      pathname === item.url
-                        ? "text-orange-500 dark:text-orange-400"
-                        : "text-[#525252] dark:text-[#D4D4D4]"
+                {item.onClick ? (
+                  <button
+                    type="button"
+                    onClick={item.onClick}
+                    className="pl-5 transition-colors duration-200 rounded-[5px] hover:bg-[#F0F0EF] dark:hover:bg-[#404040]"
+                  >
+                    <item.icon className="transition-colors duration-200 text-[#525252] dark:text-[#D4D4D4]" />
+                    <span className="transition-colors duration-200 text-[#525252] dark:text-[#D4D4D4]">
+                      {item.title}
+                    </span>
+                  </button>
+                ) : (
+                  <Link
+                    href={item.url || "#"}
+                    className={`pl-5 transition-colors duration-200 rounded-[5px] ${
+                      item.url && pathname === item.url
+                        ? "bg-[#F0F0EF] dark:bg-[#404040]"
+                        : "hover:bg-[#F0F0EF] dark:hover:bg-[#404040]"
                     }`}
                   >
-                    {item.title}
-                  </span>
-                </Link>
+                    <item.icon
+                      className={`transition-colors duration-200 ${
+                        item.url && pathname === item.url
+                          ? "text-orange-500 dark:text-orange-400"
+                          : "text-[#525252] dark:text-[#D4D4D4]"
+                      }`}
+                    />
+                    <span
+                      className={`transition-colors duration-200 ${
+                        item.url && pathname === item.url
+                          ? "text-orange-500 dark:text-orange-400"
+                          : "text-[#525252] dark:text-[#D4D4D4]"
+                      }`}
+                    >
+                      {item.title}
+                    </span>
+                  </Link>
+                )}
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
@@ -264,9 +287,41 @@ const SidebarGroupCustom = ({ items, label }: SidebarGroupCustomProps) => {
 export function AppSidebar() {
   const pathname = usePathname();
   const isWorkspaceDetailPage = pathname?.startsWith("/workspaces/");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [results, setResults] = useState<any | null>(null);
+
+  const workspaceResults = Array.isArray(results?.WorkspaceResult)
+    ? results.WorkspaceResult
+    : [];
+  const chatResults = Array.isArray(results?.chatResult)
+    ? results.chatResult
+    : [];
+  const pdfResults = Array.isArray(results?.pdfResult) ? results.pdfResult : [];
+  const imageResults = Array.isArray(results?.imageFilesResult)
+    ? results.imageFilesResult
+    : [];
+
+  const handleSearch = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!query.trim()) return;
+    setSearchError(null);
+    setSearchLoading(true);
+    try {
+      const resp = await workspaceService.search({ s: query });
+      setResults(resp);
+    } catch (error) {
+      console.error(error);
+      setSearchError("Search failed. Try again.");
+    } finally {
+      setSearchLoading(false);
+    }
+  };
 
   const items = [
-    { title: "Search", url: "/search", icon: Search },
+    { title: "Search", icon: Search, onClick: () => setIsSearchOpen(true) },
     { title: "Home", url: "/home", icon: Home },
     { title: "Chat", url: "/chat", icon: Inbox },
     { title: "Workspaces", url: "/workspaces", icon: Globe },
@@ -284,91 +339,322 @@ export function AppSidebar() {
     : "Free";
 
   return (
-    <Sidebar
-      className="dark:bg-[#2c2c2c] bg-[#F8F8F7] transition-none"
-      collapsible="icon"
-      variant="sidebar"
-    >
-      <SidebarHeader>
-        <SidebarGroup>
-          <SidebarGroupContent className="flex items-center justify-between">
-            <div className="flex items-center gap-[10px] group-data-[collapsible=icon]:justify-center">
-              <Image
-                src={
-                  user?.image_url && user.image_url !== ""
-                    ? user.image_url
-                    : "/assets/orange.png"
-                }
-                alt="user avatar"
-                width={24}
-                height={24}
-                className="rounded-full w-[24px] h-[24px]"
-              />
+    <>
+      <Sidebar
+        className="dark:bg-[#2c2c2c] bg-[#F8F8F7] transition-none"
+        collapsible="icon"
+        variant="sidebar"
+      >
+        <SidebarHeader>
+          <SidebarGroup>
+            <SidebarGroupContent className="flex items-center justify-between">
+              <div className="flex items-center gap-[10px] group-data-[collapsible=icon]:justify-center">
+                <Image
+                  src={
+                    user?.image_url && user.image_url !== ""
+                      ? user.image_url
+                      : "/assets/orange.png"
+                  }
+                  alt="user avatar"
+                  width={24}
+                  height={24}
+                  className="rounded-full w-[24px] h-[24px]"
+                />
 
-              <p className="text-[14px] font-bold group-data-[collapsible=icon]:hidden">
-                {user?.name || "User"}
-              </p>
-            </div>
-            <div className="flex items-center gap-1 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2">
-              <SidebarTrigger />
-              <Link
-                href="/chat"
-                className="group-data-[collapsible=icon]:hidden"
-              >
-                <Edit width={20} height={20} />
-              </Link>
-            </div>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarHeader>
+                <p className="text-[14px] font-bold group-data-[collapsible=icon]:hidden">
+                  {user?.name || "User"}
+                </p>
+              </div>
+              <div className="flex items-center gap-1 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2">
+                <SidebarTrigger />
+                <Link
+                  href="/chat"
+                  className="group-data-[collapsible=icon]:hidden"
+                >
+                  <Edit width={20} height={20} />
+                </Link>
+              </div>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarHeader>
 
-      <SidebarContent className="[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overflow-y-auto">
-        <SidebarGroupCustom items={items} />
-        <SidebarGroup className="mx-auto">
-          <LatestChat />
-        </SidebarGroup>
-        <SidebarGroup className="mx-auto">
-          <LatestWorkspace />
-        </SidebarGroup>
-        {/* <SidebarGroupCustom items={workspaceItems} label="Workspace Hub" /> */}
-      </SidebarContent>
+        <SidebarContent className="[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] overflow-y-auto">
+          <SidebarGroupCustom items={items} />
+          <SidebarGroup className="mx-auto">
+            <LatestChat />
+          </SidebarGroup>
+          <SidebarGroup className="mx-auto">
+            <LatestWorkspace />
+          </SidebarGroup>
+          {/* <SidebarGroupCustom items={workspaceItems} label="Workspace Hub" /> */}
+        </SidebarContent>
 
-      <SidebarFooter className="flex items-center justify-between">
-        <div className="flex items-center gap-[10px] group-data-[collapsible=icon]:justify-center">
-          <Image
-            src={
-              user?.image_url && user.image_url !== ""
-                ? user.image_url
-                : "/assets/orange.png"
-            }
-            alt="user avatar"
-            width={24}
-            height={24}
-            className="rounded-full w-[24px] h-[24px]"
-          />
+        <SidebarFooter className="flex items-center justify-between">
+          <div className="flex items-center gap-[10px] group-data-[collapsible=icon]:hidden">
+            <Image
+              src={
+                user?.image_url && user.image_url !== ""
+                  ? user.image_url
+                  : "/assets/orange.png"
+              }
+              alt="user avatar"
+              width={24}
+              height={24}
+              className="rounded-full w-[24px] h-[24px]"
+            />
 
-          <p className="text-[14px] font-bold group-data-[collapsible=icon]:hidden">
-            {`${user?.name && user.name.length > 7 ? user.name.slice(0, 7) + "..." : user?.name || "User"}`}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="bg-[#292929] text-white rounded-[4px] px-2 py-1 text-[12px] font-semibold group-data-[collapsible=icon]:hidden">
-            {planName}
+            <p className="text-[14px] font-bold group-data-[collapsible=icon]:hidden">
+              {`${user?.name && user.name.length > 7 ? user.name.slice(0, 7) + "..." : user?.name || "User"}`}
+            </p>
           </div>
-          <ProfileModal>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="rounded-full text-[#525252] dark:text-[#D4D4D4] hover:bg-[#F0F0EF] dark:hover:bg-[#404040]"
-            >
-              <CircleUserRound className="h-5 w-5" />
-            </Button>
-          </ProfileModal>
-        </div>
-      </SidebarFooter>
 
-      <SidebarRail />
-    </Sidebar>
+          <div className="flex items-center gap-2">
+            <div className="bg-[#292929] text-white rounded-[4px] px-2 py-1 text-[12px] font-semibold group-data-[collapsible=icon]:hidden">
+              {planName}
+            </div>
+            <ProfileModal>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="rounded-full text-[#525252] dark:text-[#D4D4D4] hover:bg-[#F0F0EF] dark:hover:bg-[#404040]"
+              >
+                <CircleUserRound className="h-5 w-5" />
+              </Button>
+            </ProfileModal>
+          </div>
+        </SidebarFooter>
+
+        <SidebarRail />
+      </Sidebar>
+
+      <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Search</DialogTitle>
+            <DialogDescription>
+              Search workspaces, files, chats, and more.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSearch} className="flex gap-2">
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search workspaces, files, chats..."
+              className="flex-1 px-3 py-2 rounded border bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-700"
+            />
+            <button
+              type="submit"
+              className="px-4 py-2 bg-[#FF3D00] text-white rounded"
+              disabled={searchLoading}
+            >
+              {searchLoading ? "Searching..." : "Search"}
+            </button>
+          </form>
+
+          {searchError && <div className="text-red-500">{searchError}</div>}
+
+          {!results && (
+            <div className="text-sm text-gray-500">
+              Enter a query to search.
+            </div>
+          )}
+
+          {results && (
+            <Tabs defaultValue="all" className="w-full">
+              <TabsList className="w-full justify-start overflow-x-auto">
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="workspaces">
+                  Workspaces ({workspaceResults.length})
+                </TabsTrigger>
+                <TabsTrigger value="chats">
+                  Chats ({chatResults.length})
+                </TabsTrigger>
+                <TabsTrigger value="pdfs">
+                  PDFs ({pdfResults.length})
+                </TabsTrigger>
+                <TabsTrigger value="images">
+                  Images ({imageResults.length})
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="all">
+                <div className="h-[420px] overflow-y-auto pr-1 space-y-6">
+                  <div>
+                    <h2 className="text-lg font-medium mb-2">Workspaces</h2>
+                    {workspaceResults.length === 0 ? (
+                      <p className="text-sm text-gray-500">
+                        No workspace results.
+                      </p>
+                    ) : (
+                      <ul className="space-y-2">
+                        {workspaceResults.map((w: any) => (
+                          <li key={w.enc_id} className="p-3 border rounded">
+                            <Link
+                              href={`/workspaces/${w.enc_id}`}
+                              className="text-blue-600"
+                              onClick={() => setIsSearchOpen(false)}
+                            >
+                              {w.name}
+                            </Link>
+                            {w.description && (
+                              <div className="text-sm text-gray-600">
+                                {w.description}
+                              </div>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  <div>
+                    <h2 className="text-lg font-medium mb-2">Chats</h2>
+                    {chatResults.length === 0 ? (
+                      <p className="text-sm text-gray-500">No chat results.</p>
+                    ) : (
+                      <ul className="space-y-2">
+                        {chatResults.map((c: any) => (
+                          <li key={c.id} className="p-3 border rounded">
+                            <Link
+                              href={`/chat/${c.id}`}
+                              className="text-blue-600"
+                              onClick={() => setIsSearchOpen(false)}
+                            >
+                              {c.name}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  <div>
+                    <h2 className="text-lg font-medium mb-2">PDFs</h2>
+                    {pdfResults.length === 0 ? (
+                      <p className="text-sm text-gray-500">No PDF results.</p>
+                    ) : (
+                      <ul className="space-y-2">
+                        {pdfResults.map((p: any, i: number) => (
+                          <li key={i} className="p-3 border rounded">
+                            <div className="text-sm">
+                              {p.fileName || p.name || "PDF"}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  <div>
+                    <h2 className="text-lg font-medium mb-2">Images</h2>
+                    {imageResults.length === 0 ? (
+                      <p className="text-sm text-gray-500">No image results.</p>
+                    ) : (
+                      <ul className="space-y-2">
+                        {imageResults.map((img: any, i: number) => (
+                          <li key={i} className="p-3 border rounded">
+                            <div className="text-sm">
+                              {img.fileName || img.name || "Image"}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="workspaces">
+                <div className="h-[420px] overflow-y-auto pr-1">
+                  {workspaceResults.length === 0 ? (
+                    <p className="text-sm text-gray-500">
+                      No workspace results.
+                    </p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {workspaceResults.map((w: any) => (
+                        <li key={w.enc_id} className="p-3 border rounded">
+                          <Link
+                            href={`/workspaces/${w.enc_id}`}
+                            className="text-blue-600"
+                            onClick={() => setIsSearchOpen(false)}
+                          >
+                            {w.name}
+                          </Link>
+                          {w.description && (
+                            <div className="text-sm text-gray-600">
+                              {w.description}
+                            </div>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="chats">
+                <div className="h-[420px] overflow-y-auto pr-1">
+                  {chatResults.length === 0 ? (
+                    <p className="text-sm text-gray-500">No chat results.</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {chatResults.map((c: any) => (
+                        <li key={c.id} className="p-3 border rounded">
+                          <Link
+                            href={`/chat/${c.id}`}
+                            className="text-blue-600"
+                            onClick={() => setIsSearchOpen(false)}
+                          >
+                            {c.name}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="pdfs">
+                <div className="h-[420px] overflow-y-auto pr-1">
+                  {pdfResults.length === 0 ? (
+                    <p className="text-sm text-gray-500">No PDF results.</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {pdfResults.map((p: any, i: number) => (
+                        <li key={i} className="p-3 border rounded">
+                          <div className="text-sm">
+                            {p.fileName || p.name || "PDF"}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="images">
+                <div className="h-[420px] overflow-y-auto pr-1">
+                  {imageResults.length === 0 ? (
+                    <p className="text-sm text-gray-500">No image results.</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {imageResults.map((img: any, i: number) => (
+                        <li key={i} className="p-3 border rounded">
+                          <div className="text-sm">
+                            {img.fileName || img.name || "Image"}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

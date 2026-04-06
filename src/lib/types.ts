@@ -55,6 +55,12 @@ export interface ChatResponse {
   chat: ChatInfo;
 }
 
+export interface ChatSendResponse {
+  answer: string;
+  chat_id: string;
+  chat_title?: string;
+}
+
 export interface Chat {
   id: string;
   title: string;

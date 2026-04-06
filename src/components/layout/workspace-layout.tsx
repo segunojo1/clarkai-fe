@@ -76,14 +76,12 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
     console.log(workspaces);
   }, []);
 
-  // Coordinate with main sidebar: when workspace opens, collapse main to icon-only
   useEffect(() => {
     if (workspaceOpen) {
       setMainSidebarOpen(false);
     }
   }, [workspaceOpen, setMainSidebarOpen]);
 
-  // If main sidebar gets expanded, close workspace sidebar
   useEffect(() => {
     if (mainSidebarState === "expanded") {
       setWorkspaceOpen(false);
@@ -92,7 +90,6 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
 
   return (
     <div className={`flex h-screen w-full transition-all duration-300`}>
-      {/* Workspace Sidebar - rendered as a normal flex child so it pushes/resizes content */}
       {workspaceOpen && (
         <div className="flex-shrink-0 w-[235px] bg-gray-100 dark:bg-[#2c2c2c] pt-6 p-4 h-screen overflow-y-auto">
           <div className="flex items-center justify-between mb-[18px]">

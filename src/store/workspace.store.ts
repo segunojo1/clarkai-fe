@@ -123,7 +123,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   selectedFlashcards: [],
   isFlashcardModalOpen: false,
   selectedFlashcardId: null,
-  askSource: "materials",
+  askSource: "ai",
   isQuizPanelOpen: false,
   suggestedQuestions: [],
   setSuggestedQuestions: (questions: string[]) => {

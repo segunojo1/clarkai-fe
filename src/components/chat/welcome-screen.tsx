@@ -1,11 +1,9 @@
 "use client";
 
 import { useUserStore } from "@/store/user.store";
-import { useWorkspaceStore } from "@/store/workspace.store";
 import UserAvatar from "../user-avatar";
-import { SuggestedQuestion } from "./suggested-question";
 import { getTimeBasedGreeting } from "@/lib/utils";
-import { useEffect } from "react";
+import { SuggestedQuestion } from "./suggested-question";
 
 export function WelcomeScreen({
   onSend,
@@ -15,19 +13,9 @@ export function WelcomeScreen({
   workspaceId?: string;
 }) {
   const { user } = useUserStore();
-  const { suggestedQuestions, fetchSuggestedQuestions } = useWorkspaceStore();
 
-  useEffect(() => {
-    if (workspaceId) {
-      fetchSuggestedQuestions(workspaceId);
-    }
-  }, [workspaceId, fetchSuggestedQuestions]);
 
-  // Fallback suggested questions if API doesn't return any
-  const displayQuestions =
-    suggestedQuestions.length > 0
-      ? suggestedQuestions.map((text) => ({ text, type: "default" }))
-      : [
+  const displayQuestions = [
           {
             text: "Explain Quantum Mechanics like I'm five.",
             type: "physics",

@@ -499,7 +499,7 @@ export default function WorkspacePage() {
   };
 
   const suggestedPromptMessage: ChatMessage | null =
-    messages.length > 0 && suggestedQuestions.length > 0
+    messages.length > 0 && suggestedQuestions.length > 0 && !isLoading
       ? {
           id: "suggested-questions-prompt",
           role: "assistant",

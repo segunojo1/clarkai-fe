@@ -255,7 +255,7 @@ class WorkspaceService {
       throw error;
     }
   }
-
+//this tests if the youtube video exists and sends back a preview
   public async testYoutubeVideo(video_id: string) {
     try {
       const response = await this.api.get(`/youtube/${video_id}`, {});

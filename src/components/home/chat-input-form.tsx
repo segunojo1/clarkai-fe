@@ -36,7 +36,7 @@ import {
 } from "../ui/command";
 import { PopoverClose } from "@radix-ui/react-popover";
 import { useWorkspaceStore } from "@/store/workspace.store";
-
+import { usePathname } from "next/navigation";
 declare global {
   interface SpeechRecognitionErrorEvent extends Event {
     error: string;
@@ -92,6 +92,7 @@ declare global {
   }
 }
 
+
 const TAGS = [
   { value: "flashcard", label: "flashcard" },
   { value: "material", label: "material" },
@@ -119,14 +120,12 @@ const ChatInputForm = ({
     Array<{ file: File; previewUrl: string }>
   >([]);
   const { askSource, setAskSource, selectedWorkspace } = useWorkspaceStore();
-  // const [isCLoading, setIsCLoading] = useState(false)
+  
   const [mode, setMode] = useState<"ask" | "create" | "research">("ask");
-  // const [caretPosition, setCaretPosition] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isSpeechSupported, setIsSpeechSupported] = useState<boolean>(false);
   const [isListening, setIsListening] = useState<boolean>(false);
   const [volume, setVolume] = useState<number>(0);
-  // const [interimTranscript, setInterimTranscript] = useState<string>('')
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const [showTagSuggestions, setShowTagSuggestions] = useState(false);
   const [tagSearch, setTagSearch] = useState("");
@@ -137,7 +136,9 @@ const ChatInputForm = ({
   });
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Filter tags based on search input
+  const pathname = usePathname();
+const isNormalChatPage = pathname.startsWith("/chat");
+
   const filteredTags = TAGS.filter((tag) =>
     tag.label.toLowerCase().includes(tagSearch.toLowerCase()),
   );
@@ -636,7 +637,7 @@ const ChatInputForm = ({
                                 >
                                   <div className="flex items-center px-4 py-4">
                                     <span>
-                                      Ask{" "}
+                                      Ask
                                       {askSource === "ai" ? "AI" : "Materials"}
                                     </span>
                                     <ChevronDown className="ml-1 h-4 w-4" />
@@ -746,6 +747,8 @@ const ChatInputForm = ({
                             />
                           </div>
 
+                          {
+                            !isNormalChatPage && (
                           <Popover
                             open={isTagPopoverOpen}
                             onOpenChange={setIsTagPopoverOpen}
@@ -865,6 +868,9 @@ const ChatInputForm = ({
                               </div>
                             </PopoverContent>
                           </Popover>
+                            )
+                          }
+
                           <button
                             type="button"
                             onClick={toggleListening}

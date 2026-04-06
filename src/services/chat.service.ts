@@ -33,15 +33,15 @@ class ChatService {
     return ChatService.instance;
   }
 
-  public async sendMessage(chatId: string, message: string) {
-    try {
-      const response = await this.api.post(`/chats/${chatId}/messages`, { message });
-      return response.data;
-    } catch (error) {
-      console.error("Failed to send message:", error);
-      throw error;
-    }
-  }
+  // public async sendMessage(chatId: string, message: string) {
+  //   try {
+  //     const response = await this.api.post(`/chats/${chatId}/messages`, { message });
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("Failed to send message:", error);
+  //     throw error;
+  //   }
+  // }
 
   public async createChat() {
     try {
