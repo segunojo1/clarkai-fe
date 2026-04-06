@@ -1,9 +1,9 @@
-import workspaceService from '@/services/workspace.service';
-import { StaticImport } from 'next/dist/shared/lib/get-img-props';
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import workspaceService from "@/services/workspace.service";
+import { StaticImport } from "next/dist/shared/lib/get-img-props";
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
-export type SubscriptionPlan = 'free' | 'premium' | 'enterprise';
+export type SubscriptionPlan = "free" | "premium" | "enterprise";
 
 type User = {
   id: string;
@@ -12,7 +12,7 @@ type User = {
   image_url?: string;
   subscription?: {
     plan: SubscriptionPlan;
-    status: 'active' | 'canceled' | 'expired' | 'inactive';
+    status: "active" | "canceled" | "expired" | "inactive";
     expiresAt?: string;
   };
 };
@@ -26,7 +26,13 @@ type UserStore = {
   clearUser: () => void;
   setGoogleDriveConnected: (connected: boolean) => void;
   setGoogleCalendarConnected: (connected: boolean) => void;
-  updateUserDetails: (userDetails: { fullName?: string; nickname?: string; username?: string; school?: string; major?: string }) => Promise<void>;
+  updateUserDetails: (userDetails: {
+    fullName?: string;
+    nickname?: string;
+    username?: string;
+    school?: string;
+    major?: string;
+  }) => Promise<void>;
 };
 
 export const useUserStore = create<UserStore>()(
@@ -48,17 +54,23 @@ export const useUserStore = create<UserStore>()(
         set({ googleDriveConnected: connected }),
       setGoogleCalendarConnected: (connected) =>
         set({ googleCalendarConnected: connected }),
-      updateUserDetails: async (userDetails: { fullName?: string; nickname?: string; username?: string; school?: string; major?: string }) => {
-          try {
-            await workspaceService.updateUserDetails(userDetails);
-          } catch (error) {
-            console.error("Error updating user details:", error);
-          }
-        },
+      updateUserDetails: async (userDetails: {
+        fullName?: string;
+        nickname?: string;
+        username?: string;
+        school?: string;
+        major?: string;
+      }) => {
+        try {
+          await workspaceService.updateUserDetails(userDetails);
+        } catch (error) {
+          console.error("Error updating user details:", error);
+        }
+      },
     }),
     {
-      name: 'user-storage', // name of the item in the storage (must be unique)
+      name: "user-storage", // name of the item in the storage (must be unique)
       storage: createJSONStorage(() => localStorage), // (optional) use localStorage for persistence
-    }
-  )
+    },
+  ),
 );

@@ -401,14 +401,16 @@ export function UploadMaterialModal({
                     <FileText className="w-5 h-5" />
                     <span>
                       {selectedWorkspace?.workspace?.files?.pdfFiles?.length ||
-                        0} Docs
+                        0}{" "}
+                      Docs
                     </span>
                   </TabsTrigger>
                   <TabsTrigger value="scans">
                     <Scan className="w-5 h-5" />
                     <span>
                       {selectedWorkspace?.workspace?.files?.imageFiles
-                        ?.length || 0} Scans
+                        ?.length || 0}{" "}
+                      Scans
                     </span>
                   </TabsTrigger>
                 </TabsList>
@@ -475,59 +477,62 @@ export function UploadMaterialModal({
                         ),
                       )}
                       {selectedWorkspace?.workspace.files.imageFiles.map(
-                    (file: {
-                      id: string;
-                      filePath: string;
-                      fileName: string;
-                      size: string;
-                    }) => (
-                      <div
-                        key={file.id}
-                        className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
-                        onClick={() => window.open(file.filePath, "_blank")}
-                      >
-                        <div
-                          className="rounded-2xl p-0 flex flex-col items-center justify-center relative"
-                          style={{ minHeight: 96 }}
-                        >
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              requestDeleteFile(file.filePath, file.fileName);
-                            }}
-                            disabled={deletingFileUrl === file.filePath}
-                            className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
-                            aria-label={`Delete ${file.fileName}`}
+                        (file: {
+                          id: string;
+                          filePath: string;
+                          fileName: string;
+                          size: string;
+                        }) => (
+                          <div
+                            key={file.id}
+                            className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
+                            onClick={() => window.open(file.filePath, "_blank")}
                           >
-                            {deletingFileUrl === file.filePath ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-3.5 w-3.5" />
-                            )}
-                          </button>
+                            <div
+                              className="rounded-2xl p-0 flex flex-col items-center justify-center relative"
+                              style={{ minHeight: 96 }}
+                            >
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  requestDeleteFile(
+                                    file.filePath,
+                                    file.fileName,
+                                  );
+                                }}
+                                disabled={deletingFileUrl === file.filePath}
+                                className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
+                                aria-label={`Delete ${file.fileName}`}
+                              >
+                                {deletingFileUrl === file.filePath ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                )}
+                              </button>
 
-                          <div className="flex justify-center mb-2 mt-4">
-                            <Image
-                              src="/assets/fileIcon.png"
-                              alt="File icon"
-                              width={56}
-                              height={56}
-                              className="w-14 h-14 bg-transparent"
-                              style={{ background: "none" }}
-                            />
+                              <div className="flex justify-center mb-2 mt-4">
+                                <Image
+                                  src="/assets/fileIcon.png"
+                                  alt="File icon"
+                                  width={56}
+                                  height={56}
+                                  className="w-14 h-14 bg-transparent"
+                                  style={{ background: "none" }}
+                                />
+                              </div>
+                              <div className="text-center max-w-[130px] w-[130px] h-[50px]">
+                                <p className="text-gray-300 text-xs font-medium leading-tight break-words">
+                                  {file.fileName}
+                                  <br />
+                                  {file.size}
+                                </p>
+                              </div>
+                            </div>
                           </div>
-                          <div className="text-center max-w-[130px] w-[130px] h-[50px]">
-                            <p className="text-gray-300 text-xs font-medium leading-tight break-words">
-                              {file.fileName}
-                              <br />
-                              {file.size}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ),
-                  )}
+                        ),
+                      )}
                     </div>
                   ) : (
                     <div className="flex flex-col items-start justify-start mb-8">

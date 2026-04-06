@@ -513,7 +513,9 @@ export function ProfileModal({ children }: ProfileModalProps) {
                         onClick={handleConnectGoogleCalendar}
                         disabled={isConnectingGoogleCalendar}
                       >
-                        {isConnectingGoogleCalendar ? "Connecting..." : "Connect"}
+                        {isConnectingGoogleCalendar
+                          ? "Connecting..."
+                          : "Connect"}
                       </Button>
                     )}
                   </div>
