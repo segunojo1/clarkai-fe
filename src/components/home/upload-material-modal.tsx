@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useWorkspaceStore } from "@/store/workspace.store";
+import { useUserStore } from "@/store/user.store";
 import { toast } from "sonner";
 import workspaceServiceInstance from "@/services/workspace.service";
 import Link from "next/link";
@@ -364,16 +365,6 @@ export function UploadMaterialModal({
           >
             Materials
             <ChevronDown className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setActiveTab("Canvas")}
-            className={`font-medium text-base transition-colors px-4 py-2 rounded-lg ${
-              activeTab === "Canvas"
-                ? "bg-[#232323] text-white"
-                : "text-gray-400 dark:hover:text-white"
-            }`}
-          >
-            Canvas
           </button>
           <button
             onClick={() => setActiveTab("Quizzes")}
@@ -1161,6 +1152,7 @@ export function FileUploadButton({ workspaceId }: { workspaceId: string }) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
+  const { googleDriveConnected } = useUserStore();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -1202,6 +1194,11 @@ export function FileUploadButton({ workspaceId }: { workspaceId: string }) {
   };
   const openGooglePicker = async () => {
     setShowDropdown(false);
+
+    if (!googleDriveConnected) {
+      toast.error("Connect Google Drive in Integrations first.");
+      return;
+    }
 
     try {
       if (!GOOGLE_CLIENT_ID) {
@@ -1346,10 +1343,13 @@ export function FileUploadButton({ workspaceId }: { workspaceId: string }) {
           </button>
           <button
             onClick={openGooglePicker}
+            disabled={!googleDriveConnected}
             className="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors border-t border-gray-100"
           >
             <FolderOpen className="w-4 h-4 text-[#4285F4]" />
-            Import from Google Drive
+            {googleDriveConnected
+              ? "Import from Google Drive"
+              : "Connect Google Drive in Integrations"}
           </button>
         </div>
       )}

@@ -27,6 +27,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useUserStore } from "@/store/user.store";
 import { logout } from "@/utils/logout";
+import { useRouter } from "next/navigation";
 
 type SettingsTab =
   | "profile"
@@ -75,10 +76,37 @@ const toTitle = (value?: string) => {
   return value.charAt(0).toUpperCase() + value.slice(1);
 };
 
+const GOOGLE_CLIENT_ID =
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+  process.env.NEXT_PUBLIC_GOOGLE_DRIVE_CLIENT_ID;
+
+const loadGoogleScript = (src: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) {
+      resolve();
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = src;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load Google script"));
+    document.body.appendChild(script);
+  });
+};
+
 export function ProfileModal({ children }: ProfileModalProps) {
-  const { user } = useUserStore();
+  const {
+    user,
+    googleDriveConnected,
+    googleCalendarConnected,
+    setGoogleDriveConnected,
+    setGoogleCalendarConnected,
+  } = useUserStore();
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const [newEmail, setNewEmail] = useState("");
+  const [isConnectingGoogleDrive, setIsConnectingGoogleDrive] = useState(false);
+  const [isConnectingGoogleCalendar, setIsConnectingGoogleCalendar] =
+    useState(false);
   const [profileForm, setProfileForm] = useState({
     fullName: "",
     nickname: "",
@@ -87,7 +115,7 @@ export function ProfileModal({ children }: ProfileModalProps) {
     major: "",
   });
   const { updateUserDetails } = useUserStore();
-
+  const route = useRouter();
 
   useEffect(() => {
     setProfileForm((prev) => ({
@@ -120,6 +148,103 @@ export function ProfileModal({ children }: ProfileModalProps) {
 
   const handleSignOut = async () => {
     await logout();
+    route.push("/auth/login");
+  };
+
+  const handleConnectGoogleDrive = async () => {
+    if (!GOOGLE_CLIENT_ID) {
+      toast.error(
+        "Missing Google Client ID. Set NEXT_PUBLIC_GOOGLE_CLIENT_ID and restart the dev server.",
+      );
+      return;
+    }
+
+    try {
+      setIsConnectingGoogleDrive(true);
+      await loadGoogleScript("https://accounts.google.com/gsi/client");
+
+      await new Promise<void>((resolve, reject) => {
+        const googleRef = (window as any).google;
+        if (!googleRef?.accounts?.oauth2) {
+          reject(new Error("Google OAuth client not available"));
+          return;
+        }
+
+        const client = googleRef.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID,
+          scope: "https://www.googleapis.com/auth/drive.readonly",
+          callback: (response: { access_token?: string; error?: string }) => {
+            if (response?.error) {
+              reject(new Error(response.error));
+              return;
+            }
+            if (!response?.access_token) {
+              reject(new Error("No access token received"));
+              return;
+            }
+            resolve();
+          },
+        });
+
+        client.requestAccessToken();
+      });
+
+      setGoogleDriveConnected(true);
+      toast.success("Google Drive connected. You can now import in Upload.");
+    } catch (error) {
+      console.error("Failed to connect Google Drive:", error);
+      toast.error("Failed to connect Google Drive");
+    } finally {
+      setIsConnectingGoogleDrive(false);
+    }
+  };
+
+  const handleConnectGoogleCalendar = async () => {
+    if (!GOOGLE_CLIENT_ID) {
+      toast.error(
+        "Missing Google Client ID. Set NEXT_PUBLIC_GOOGLE_CLIENT_ID and restart the dev server.",
+      );
+      return;
+    }
+
+    try {
+      setIsConnectingGoogleCalendar(true);
+      await loadGoogleScript("https://accounts.google.com/gsi/client");
+
+      await new Promise<void>((resolve, reject) => {
+        const googleRef = (window as any).google;
+        if (!googleRef?.accounts?.oauth2) {
+          reject(new Error("Google OAuth client not available"));
+          return;
+        }
+
+        const client = googleRef.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID,
+          scope: "https://www.googleapis.com/auth/calendar.events",
+          callback: (response: { access_token?: string; error?: string }) => {
+            if (response?.error) {
+              reject(new Error(response.error));
+              return;
+            }
+            if (!response?.access_token) {
+              reject(new Error("No access token received"));
+              return;
+            }
+            resolve();
+          },
+        });
+
+        client.requestAccessToken();
+      });
+
+      setGoogleCalendarConnected(true);
+      toast.success("Google Calendar connected. You can now sync deadlines.");
+    } catch (error) {
+      console.error("Failed to connect Google Calendar:", error);
+      toast.error("Failed to connect Google Calendar");
+    } finally {
+      setIsConnectingGoogleCalendar(false);
+    }
   };
 
   return (
@@ -329,23 +454,82 @@ export function ProfileModal({ children }: ProfileModalProps) {
                   study material.
                 </p>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                  {["Google Drive", "Notion"].map((item) => (
-                    <div
-                      key={item}
-                      className="flex items-center justify-between rounded-lg border border-[#2c2c2c] bg-[#23262b] px-4 py-3"
-                    >
-                      <p className="font-medium">{item}</p>
+                  <div className="flex items-center justify-between rounded-lg border border-[#2c2c2c] bg-[#23262b] px-4 py-3">
+                    <div>
+                      <p className="font-medium">Google Drive</p>
+                      <p className="text-xs text-[#9b9b9b]">
+                        {googleDriveConnected
+                          ? "Connected"
+                          : "Connect to import files in Upload"}
+                      </p>
+                    </div>
+                    {googleDriveConnected ? (
                       <Button
                         variant="secondary"
                         className="h-8 bg-[#2d3036] text-[#f2f2f2] hover:bg-[#393d45]"
-                        onClick={() =>
-                          toast.info(`${item} connection coming soon.`)
-                        }
+                        onClick={() => {
+                          setGoogleDriveConnected(false);
+                          toast.success("Google Drive disconnected");
+                        }}
                       >
-                        Connect
+                        Disconnect
                       </Button>
+                    ) : (
+                      <Button
+                        variant="secondary"
+                        className="h-8 bg-[#2d3036] text-[#f2f2f2] hover:bg-[#393d45]"
+                        onClick={handleConnectGoogleDrive}
+                        disabled={isConnectingGoogleDrive}
+                      >
+                        {isConnectingGoogleDrive ? "Connecting..." : "Connect"}
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between rounded-lg border border-[#2c2c2c] bg-[#23262b] px-4 py-3">
+                    <div>
+                      <p className="font-medium">Google Calendar</p>
+                      <p className="text-xs text-[#9b9b9b]">
+                        {googleCalendarConnected
+                          ? "Connected"
+                          : "Connect to sync study tasks and deadlines"}
+                      </p>
                     </div>
-                  ))}
+                    {googleCalendarConnected ? (
+                      <Button
+                        variant="secondary"
+                        className="h-8 bg-[#2d3036] text-[#f2f2f2] hover:bg-[#393d45]"
+                        onClick={() => {
+                          setGoogleCalendarConnected(false);
+                          toast.success("Google Calendar disconnected");
+                        }}
+                      >
+                        Disconnect
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="secondary"
+                        className="h-8 bg-[#2d3036] text-[#f2f2f2] hover:bg-[#393d45]"
+                        onClick={handleConnectGoogleCalendar}
+                        disabled={isConnectingGoogleCalendar}
+                      >
+                        {isConnectingGoogleCalendar ? "Connecting..." : "Connect"}
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between rounded-lg border border-[#2c2c2c] bg-[#23262b] px-4 py-3">
+                    <p className="font-medium">Notion</p>
+                    <Button
+                      variant="secondary"
+                      className="h-8 bg-[#2d3036] text-[#f2f2f2] hover:bg-[#393d45]"
+                      onClick={() =>
+                        toast.info("Notion connection coming soon.")
+                      }
+                    >
+                      Connect
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}

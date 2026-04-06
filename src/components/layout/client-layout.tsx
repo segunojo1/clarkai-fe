@@ -43,7 +43,6 @@ export default function ClientLayout({
   useEffect(() => {
     // Auth guard: redirect to login if missing token
     const token = Cookies.get("token");
-    console.log("client layout");
     // if (token) {
     //     setIsAuth(true)
     //     console.log("client layout");

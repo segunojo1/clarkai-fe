@@ -23,7 +23,7 @@ const HomePageContent = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const searchParams = useSearchParams();
   const skipOnboarding = searchParams.get('skipOnboarding') === 'true';
-  const { isLoading, setIsLoading, sendMessage } = useChatStore();
+  const { isLoading, setIsLoading, sendMessage, setCurrentChatId, setChats, chats } = useChatStore();
   const router = useRouter()
 
   useEffect(() => {
@@ -36,18 +36,32 @@ const HomePageContent = () => {
   const { user } = useUserStore()
 
   const handleSend = async (text: string, files?: File[]) => {
-    setIsLoading(true)
-    if (!text.trim()) return
-    const { id } = await chatService.createChat();
-    toast('Please wait while we create your chat')
-    router.push(`/chat/${id}`)
-    if (id) {
-      await sendMessage(text, [], false, files, id)
+    if (!text.trim()) return;
+    const response = await sendMessage(text, [], false, files);
+
+    if (!response?.chat_id) return;
+
+    setCurrentChatId(response.chat_id);
+
+    if (response.chat_title) {
+      const nextChat = {
+        id: response.chat_id,
+        name: response.chat_title,
+        workspaceId: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      setChats([
+        nextChat,
+        ...chats.filter((chat) => chat.id !== response.chat_id),
+      ]);
     }
-    // await sendMessage(message) 
+
+    router.push(`/chat/${response.chat_id}`);
   }
   return (
-    <div className='w-full flex flex-col h-full items-center bg-[#FAFAFA] dark:bg-[#262626]'>
+    <div className='w-full flex flex-col h-full overflow-scroll items-center bg-[#FAFAFA] dark:bg-[#262626]'>
       <Image src='/assets/logo.svg' alt='' width={103} height={90} className='mx-auto mb-[55px]' />
       <div className='flex items-center gap-5 mb-[51px]'>
         {theme === 'dark' ? (

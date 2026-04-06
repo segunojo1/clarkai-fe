@@ -20,8 +20,12 @@ type User = {
 type UserStore = {
   user: User | null;
   isAuthenticated: boolean;
+  googleDriveConnected: boolean;
+  googleCalendarConnected: boolean;
   setUser: (user: User | null) => void;
   clearUser: () => void;
+  setGoogleDriveConnected: (connected: boolean) => void;
+  setGoogleCalendarConnected: (connected: boolean) => void;
   updateUserDetails: (userDetails: { fullName?: string; nickname?: string; username?: string; school?: string; major?: string }) => Promise<void>;
 };
 
@@ -30,8 +34,20 @@ export const useUserStore = create<UserStore>()(
     (set) => ({
       user: null,
       isAuthenticated: false,
+      googleDriveConnected: false,
+      googleCalendarConnected: false,
       setUser: (user) => set({ user, isAuthenticated: !!user }),
-      clearUser: () => set({ user: null, isAuthenticated: false }),
+      clearUser: () =>
+        set({
+          user: null,
+          isAuthenticated: false,
+          googleDriveConnected: false,
+          googleCalendarConnected: false,
+        }),
+      setGoogleDriveConnected: (connected) =>
+        set({ googleDriveConnected: connected }),
+      setGoogleCalendarConnected: (connected) =>
+        set({ googleCalendarConnected: connected }),
       updateUserDetails: async (userDetails: { fullName?: string; nickname?: string; username?: string; school?: string; major?: string }) => {
           try {
             await workspaceService.updateUserDetails(userDetails);
