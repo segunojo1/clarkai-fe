@@ -93,6 +93,16 @@ class ChatService {
       throw error;
     }
   }
+
+  public async deleteChat(id: string) {
+    try {
+      const response = await this.api.delete(`/chat/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Failed to delete chat:", error);
+      throw error;
+    }
+  }
   // public async getObjectUrlFromLink(link: string) {
   //   try {
   //     const response = await axios.get(link)

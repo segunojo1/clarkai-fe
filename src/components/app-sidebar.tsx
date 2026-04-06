@@ -29,11 +29,14 @@ import {
   Inbox,
   PlusIcon,
   Search,
+  Trash2,
+  Loader2,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "./ui/button";
+import { toast } from "sonner";
 import { useUserStore } from "@/store/user.store";
 import { useChatStore } from "@/store/chat.store";
 import { WorkspaceCreationModal } from "./home/workspace-creation-modal";
@@ -46,15 +49,52 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import chatService from "@/services/chat.service";
+import { PDFViewer } from "./chat/pdf-viewer";
 
 export const LatestChat = () => {
-  const { chats } = useChatStore();
+  const { chats, currentChatId, removeChat, setCurrentChatId, clearMessages } =
+    useChatStore();
   const { state } = useSidebar();
+  const router = useRouter();
   const [showAllChats, setShowAllChats] = useState(false);
+  const [deletingChatId, setDeletingChatId] = useState<string | null>(null);
+  const [confirmDeleteChatId, setConfirmDeleteChatId] = useState<string | null>(
+    null,
+  );
 
   const visibleChats = showAllChats ? chats : chats.slice(0, 4);
+
+  const selectedChatToDelete = chats.find(
+    (chat) => chat.id === confirmDeleteChatId,
+  );
+
+  const handleDeleteChat = async (chatId: string) => {
+    try {
+      setDeletingChatId(chatId);
+      const response = await chatService.deleteChat(chatId);
+
+      if (response && response.success === false) {
+        throw new Error(response.message || "Failed to delete chat");
+      }
+
+      removeChat(chatId);
+
+      if (currentChatId === chatId) {
+        clearMessages();
+        setCurrentChatId(null);
+        router.push("/chat");
+      }
+    } catch (error) {
+      console.error("Failed to delete chat:", error);
+    } finally {
+      setDeletingChatId(null);
+      setConfirmDeleteChatId(null);
+    }
+  };
 
   // Show collapsed version when sidebar is collapsed
   if (state === "collapsed") {
@@ -95,14 +135,77 @@ export const LatestChat = () => {
             className={`${showAllChats ? "max-h-[220px]" : "max-h-[120px]"} overflow-y-scroll`}
           >
             {visibleChats.map((chat) => (
-              <Link
+              <div
                 key={chat.id}
-                href={`/chat/${chat.id}`}
-                className="p-1 w-full dark:hover:bg-gray-800 hover:bg-gray-300 flex px-[11px]"
+                className="group flex w-full items-center justify-between gap-2 px-[11px] py-1 dark:hover:bg-gray-800 hover:bg-gray-300"
               >
-                <p className="text-[14px] font-medium">{chat.name}</p>
-              </Link>
+                <Link href={`/chat/${chat.id}`} className="min-w-0 flex-1">
+                  <p className="truncate text-[14px] font-medium">{chat.name}</p>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setConfirmDeleteChatId(chat.id)}
+                  disabled={deletingChatId === chat.id}
+                  className="rounded p-1 text-[#737373] opacity-0 transition-opacity hover:bg-[#2f2f2f] hover:text-[#ff6a3d] group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  aria-label={`Delete ${chat.name}`}
+                >
+                  {deletingChatId === chat.id ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-3.5 w-3.5" />
+                  )}
+                </button>
+              </div>
             ))}
+
+            <Dialog
+              open={!!confirmDeleteChatId}
+              onOpenChange={(open) => {
+                if (!open) setConfirmDeleteChatId(null);
+              }}
+            >
+              <DialogContent className="sm:max-w-[440px] bg-[#2A2A2A] border-[#444] text-white">
+                <DialogHeader>
+                  <DialogTitle>Delete chat?</DialogTitle>
+                  <DialogDescription className="text-gray-300">
+                    This will permanently remove{" "}
+                    <span className="font-medium text-white">
+                      {selectedChatToDelete?.name || "this chat"}
+                    </span>{" "}
+                    from your recent chats.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="border-gray-600 text-white hover:bg-gray-700"
+                    disabled={!!deletingChatId}
+                    onClick={() => setConfirmDeleteChatId(null)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    className="bg-[#FF3D00] text-white hover:bg-[#FF3D00]/90"
+                    disabled={!confirmDeleteChatId || !!deletingChatId}
+                    onClick={async () => {
+                      if (!confirmDeleteChatId) return;
+                      await handleDeleteChat(confirmDeleteChatId);
+                    }}
+                  >
+                    {deletingChatId === confirmDeleteChatId ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Deleting...
+                      </span>
+                    ) : (
+                      "Delete"
+                    )}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
           {chats.length > 4 && (
             <Button
@@ -288,6 +391,9 @@ export function AppSidebar() {
   const pathname = usePathname();
   const isWorkspaceDetailPage = pathname?.startsWith("/workspaces/");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isPdfCanvasOpen, setIsPdfCanvasOpen] = useState(false);
+  const [selectedPdfFile, setSelectedPdfFile] = useState<string | null>(null);
+  const [selectedPdfName, setSelectedPdfName] = useState<string>("PDF");
   const [query, setQuery] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
@@ -318,6 +424,20 @@ export function AppSidebar() {
     } finally {
       setSearchLoading(false);
     }
+  };
+
+  const openPdfInCanvas = (pdfResult: any) => {
+    const filePath =
+      pdfResult?.filePath || pdfResult?.url || pdfResult?.file_url || "";
+    if (!filePath) {
+      toast.error("Unable to open this PDF in canvas");
+      return;
+    }
+
+    setSelectedPdfFile(filePath);
+    setSelectedPdfName(pdfResult?.fileName || pdfResult?.name || "PDF");
+    setIsSearchOpen(false);
+    setIsPdfCanvasOpen(true);
   };
 
   const items = [
@@ -536,10 +656,28 @@ export function AppSidebar() {
                     ) : (
                       <ul className="space-y-2">
                         {pdfResults.map((p: any, i: number) => (
-                          <li key={i} className="p-3 border rounded">
-                            <div className="text-sm">
-                              {p.fileName || p.name || "PDF"}
+                          <li
+                            key={i}
+                            className="flex items-center justify-between gap-3 p-3 border rounded"
+                          >
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium truncate">
+                                {p.fileName || p.name || "PDF"}
+                              </div>
+                              {p.workspaceName && (
+                                <div className="text-xs text-gray-500 truncate">
+                                  {p.workspaceName}
+                                </div>
+                              )}
                             </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="shrink-0"
+                              onClick={() => openPdfInCanvas(p)}
+                            >
+                              Open in Canvas
+                            </Button>
                           </li>
                         ))}
                       </ul>
@@ -623,10 +761,25 @@ export function AppSidebar() {
                   ) : (
                     <ul className="space-y-2">
                       {pdfResults.map((p: any, i: number) => (
-                        <li key={i} className="p-3 border rounded">
-                          <div className="text-sm">
-                            {p.fileName || p.name || "PDF"}
+                        <li key={i} className="flex items-center justify-between gap-3 p-3 border rounded">
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium truncate">
+                              {p.fileName || p.name || "PDF"}
+                            </div>
+                            {p.workspaceName && (
+                              <div className="text-xs text-gray-500 truncate">
+                                {p.workspaceName}
+                              </div>
+                            )}
                           </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="shrink-0"
+                            onClick={() => openPdfInCanvas(p)}
+                          >
+                            Open in Canvas
+                          </Button>
                         </li>
                       ))}
                     </ul>
@@ -655,6 +808,17 @@ export function AppSidebar() {
           )}
         </DialogContent>
       </Dialog>
+
+      {isPdfCanvasOpen && selectedPdfFile && (
+        <PDFViewer
+          file={selectedPdfFile}
+          onClose={() => {
+            setIsPdfCanvasOpen(false);
+            setSelectedPdfFile(null);
+            setSelectedPdfName("PDF");
+          }}
+        />
+      )}
     </>
   );
 }

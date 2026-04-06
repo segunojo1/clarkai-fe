@@ -128,12 +128,12 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
               </Button>
             </div>
           </div>
-          <div className="border-y-[2px] mb-[11px]">
+          {/* <div className="border-y-[2px] mb-[11px]">
             <Input
               placeholder="Search"
               className="border-0 dark:bg-[#2c2c2c] bg-[#F0F0EF]"
             />
-          </div>
+          </div> */}
           <Tabs defaultValue="folders" className="w-full">
             <TabsList className="w-full">
               <TabsTrigger value="folders">Folders</TabsTrigger>

@@ -396,15 +396,12 @@ export function UploadMaterialModal({
         <div className="flex flex-col items-start justify-start px-4 pb-8 pt-4 w-full h-full">
           {activeTab === "Materials" && (
             <>
-              <Tabs defaultValue="files" className="w-[400px] mx-auto">
+              <Tabs defaultValue="materials" className="w-[400px] mx-auto">
                 <TabsList>
-                  <span className="text-gray-400 dark:text-gray-500 px-2">
+                  <TabsTrigger value="materials">
                     {materialLength ?? 0} mat{materialLength === 1 ? "" : "s"}.
                     Uploaded
-                  </span>
-                  {/* <TabsTrigger value="materials">
-                    
-                  </TabsTrigger> */}
+                  </TabsTrigger>
                   <TabsTrigger value="links">
                     <LinkIcon className="w-5 h-5" />
                     <span>{youtubeVideos.length} links</span>
@@ -413,19 +410,198 @@ export function UploadMaterialModal({
                     <FileText className="w-5 h-5" />
                     <span>
                       {selectedWorkspace?.workspace?.files?.pdfFiles?.length ||
-                        0}{" "}
-                      Docs
+                        0} Docs
                     </span>
                   </TabsTrigger>
                   <TabsTrigger value="scans">
                     <Scan className="w-5 h-5" />
                     <span>
                       {selectedWorkspace?.workspace?.files?.imageFiles
-                        ?.length || 0}{" "}
-                      Scans
+                        ?.length || 0} Scans
                     </span>
                   </TabsTrigger>
                 </TabsList>
+
+                <TabsContent value="materials" className="mx-auto">
+                  {selectedWorkspace &&
+                  selectedWorkspace?.workspace?.files?.pdfFiles?.length > 0 ? (
+                    <div className="flex justify-center items-center flex-wrap gap-2 mx-auto max-h-[500px] overflow-y-scroll mb-5">
+                      {selectedWorkspace?.workspace.files.pdfFiles.map(
+                        (file: {
+                          id: string;
+                          filePath: string;
+                          fileName: string;
+                          size: string;
+                        }) => (
+                          <div
+                            key={file.id}
+                            className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
+                            onClick={() => window.open(file.filePath, "_blank")}
+                          >
+                            <div
+                              className="rounded-2xl p-0 flex flex-col items-center justify-center relative"
+                              style={{ minHeight: 96 }}
+                            >
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  requestDeleteFile(
+                                    file.filePath,
+                                    file.fileName,
+                                  );
+                                }}
+                                disabled={deletingFileUrl === file.filePath}
+                                className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
+                                aria-label={`Delete ${file.fileName}`}
+                              >
+                                {deletingFileUrl === file.filePath ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                )}
+                              </button>
+                              {/* File icon - no background, no border */}
+                              <div className="flex justify-center mb-2 mt-4">
+                                <Image
+                                  src="/assets/fileIcon.png"
+                                  alt="File icon"
+                                  width={56}
+                                  height={56}
+                                  className="w-14 h-14 bg-transparent"
+                                  style={{ background: "none" }}
+                                />
+                              </div>
+                              <div className="text-center max-w-[130px] w-[130px] h-[50px]">
+                                <p className="dark:text-gray-300  text-[#737373] text-xs font-medium leading-tight break-words">
+                                  {file.fileName}
+                                  <br />
+                                  {file.size}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ),
+                      )}
+                      {selectedWorkspace?.workspace.files.imageFiles.map(
+                    (file: {
+                      id: string;
+                      filePath: string;
+                      fileName: string;
+                      size: string;
+                    }) => (
+                      <div
+                        key={file.id}
+                        className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
+                        onClick={() => window.open(file.filePath, "_blank")}
+                      >
+                        <div
+                          className="rounded-2xl p-0 flex flex-col items-center justify-center relative"
+                          style={{ minHeight: 96 }}
+                        >
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              requestDeleteFile(file.filePath, file.fileName);
+                            }}
+                            disabled={deletingFileUrl === file.filePath}
+                            className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
+                            aria-label={`Delete ${file.fileName}`}
+                          >
+                            {deletingFileUrl === file.filePath ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-3.5 w-3.5" />
+                            )}
+                          </button>
+
+                          <div className="flex justify-center mb-2 mt-4">
+                            <Image
+                              src="/assets/fileIcon.png"
+                              alt="File icon"
+                              width={56}
+                              height={56}
+                              className="w-14 h-14 bg-transparent"
+                              style={{ background: "none" }}
+                            />
+                          </div>
+                          <div className="text-center max-w-[130px] w-[130px] h-[50px]">
+                            <p className="text-gray-300 text-xs font-medium leading-tight break-words">
+                              {file.fileName}
+                              <br />
+                              {file.size}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ),
+                  )}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-start justify-start mb-8">
+                      <div
+                        className="rounded-2xl p-0 w-24 h-28 flex flex-col items-center justify-center relative"
+                        style={{ minHeight: 96 }}
+                      >
+                        <div className="flex justify-center mb-2 mt-4">
+                          <Image
+                            src="/assets/fileIcon.png"
+                            alt="File icon"
+                            width={56}
+                            height={56}
+                            className="w-14 h-14 bg-transparent"
+                            style={{ background: "none" }}
+                          />
+                        </div>
+
+                        <div className="text-left w-full pl-4">
+                          <p className="dark:text-gray-300 text-[#737373] text-xs font-medium leading-tight">
+                            Your Material
+                            <br />
+                            goes here
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {uploadedFile && (
+                    <div className="mt-4 p-4 bg-[#232323] rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-sm font-medium text-white">
+                            {uploadedFile.name}
+                          </h3>
+                          <p className="text-xs text-gray-400">
+                            {uploadedFile.size}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setUploadedFile(null);
+                            setUploadProgress(0);
+                          }}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  <UploadMaterial
+                    isMounted={isMounted}
+                    setIsCreatingMaterial={setIsCreatingMaterial}
+                    workspaceId={workspaceId}
+                    isCreatingMaterial={isCreatingMaterial}
+                    uploadedFile={uploadedFile}
+                    setUploadedFile={setUploadedFile}
+                    setUploadProgress={setUploadProgress}
+                    uploadProgress={uploadProgress}
+                  />
+                </TabsContent>
 
                 <TabsContent value="links">
                   {youtubeVideos.length > 0 ? (
@@ -752,42 +928,6 @@ export function UploadMaterialModal({
                       </div>
                     </div>
                   )}
-
-                  {uploadedFile && (
-                    <div className="mt-4 p-4 bg-[#232323] rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-sm font-medium text-white">
-                            {uploadedFile.name}
-                          </h3>
-                          <p className="text-xs text-gray-400">
-                            {uploadedFile.size}
-                          </p>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setUploadedFile(null);
-                            setUploadProgress(0);
-                          }}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  <UploadMaterial
-                    isMounted={isMounted}
-                    setIsCreatingMaterial={setIsCreatingMaterial}
-                    workspaceId={workspaceId}
-                    isCreatingMaterial={isCreatingMaterial}
-                    uploadedFile={uploadedFile}
-                    setUploadedFile={setUploadedFile}
-                    setUploadProgress={setUploadProgress}
-                    uploadProgress={uploadProgress}
-                  />
                 </TabsContent>
                 <TabsContent value="scans">
                   {selectedWorkspace?.workspace.files.imageFiles.map(
@@ -844,42 +984,6 @@ export function UploadMaterialModal({
                       </div>
                     ),
                   )}
-
-                  {uploadedFile && (
-                    <div className="mt-4 p-4 bg-[#232323] rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-sm font-medium text-white">
-                            {uploadedFile.name}
-                          </h3>
-                          <p className="text-xs text-gray-400">
-                            {uploadedFile.size}
-                          </p>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setUploadedFile(null);
-                            setUploadProgress(0);
-                          }}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  <UploadMaterial
-                    isMounted={isMounted}
-                    setIsCreatingMaterial={setIsCreatingMaterial}
-                    workspaceId={workspaceId}
-                    isCreatingMaterial={isCreatingMaterial}
-                    uploadedFile={uploadedFile}
-                    setUploadedFile={setUploadedFile}
-                    setUploadProgress={setUploadProgress}
-                    uploadProgress={uploadProgress}
-                  />
                 </TabsContent>
               </Tabs>
             </>

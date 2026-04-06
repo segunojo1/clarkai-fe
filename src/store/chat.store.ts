@@ -30,6 +30,7 @@ interface ChatStore {
   setChatDetails: (chatDetails: ChatResponse) => void;
   getAllChats: (page: number) => Promise<ChatBox[]>;
   setChats: (chats: ChatBox[]) => void;
+  removeChat: (chatId: string) => void;
 }
 
 export const useChatStore = create<ChatStore>((set, get) => ({
@@ -61,6 +62,12 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
   setChats: (chats: ChatBox[]) => {
     set({ chats });
+  },
+
+  removeChat: (chatId: string) => {
+    set((state) => ({
+      chats: state.chats.filter((chat) => chat.id !== chatId),
+    }));
   },
 
   setCurrentChatId: (chatId: string | null) => {

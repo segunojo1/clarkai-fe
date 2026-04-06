@@ -22,13 +22,21 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
         ul: ({ children }) => <ul className="list-disc pl-6 mb-2">{children}</ul>,
         ol: ({ children }) => <ol className="list-decimal pl-6 mb-2">{children}</ol>,
         table: ({ children }) => (
-          <table className="table-auto border-collapse border border-gray-300">{children}</table>
+          <div className="my-3 overflow-x-auto">
+            <table className="table-auto border-collapse border border-gray-300 dark:border-gray-700">
+              {children}
+            </table>
+          </div>
         ),
         th: ({ children }) => (
-          <th className="border border-gray-300 px-2 py-1 bg-gray-100">{children}</th>
+          <th className="border border-gray-300 px-2 py-1 font-semibold text-gray-900 dark:border-gray-700 dark:bg-[#2f2f2f] dark:text-gray-100">
+            {children}
+          </th>
         ),
         td: ({ children }) => (
-          <td className="border border-gray-300 px-2 py-1">{children}</td>
+          <td className="border border-gray-300 px-2 py-1 text-gray-900 dark:border-gray-700 dark:text-gray-100">
+            {children}
+          </td>
         ),
       }}
     >
