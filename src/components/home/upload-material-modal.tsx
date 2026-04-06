@@ -175,8 +175,8 @@ export function UploadMaterialModal({
       setDeletingFileUrl(videoId);
       const response =
         await workspaceServiceInstance.deleteYtVideoFromWorkspace({
-          video_id: videoId,
           workspace_id: workspaceId,
+          video_id: videoId,
         });
 
       if (!response?.success) {
@@ -196,10 +196,6 @@ export function UploadMaterialModal({
       setDeletingFileUrl(null);
     }
   };
-
-  // console.log(selectedWorkspace);
-
-  // const { workspace } = selectedWorkspace
 
   const youtubeRegex =
     /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)[\w-]{11}(\S*)?$/;
