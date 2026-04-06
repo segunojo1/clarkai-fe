@@ -173,18 +173,22 @@ export function UploadMaterialModal({
 
     try {
       setDeletingFileUrl(videoId);
-      const response = await workspaceServiceInstance.deleteYtVideoFromWorkspace({
-        video_id: videoId,
-        workspace_id: workspaceId,
-      });
+      const response =
+        await workspaceServiceInstance.deleteYtVideoFromWorkspace({
+          video_id: videoId,
+          workspace_id: workspaceId,
+        });
 
       if (!response?.success) {
         throw new Error(response?.message || "Failed to delete YouTube link");
       }
 
-      const workspace = await workspaceServiceInstance.getWorkspaces(workspaceId);
+      const workspace =
+        await workspaceServiceInstance.getWorkspaces(workspaceId);
       selectWorkspace(workspace);
-      toast.success(videoTitle ? `Deleted ${videoTitle}` : "YouTube link deleted");
+      toast.success(
+        videoTitle ? `Deleted ${videoTitle}` : "YouTube link deleted",
+      );
     } catch (error) {
       console.error("Failed to delete YouTube link:", error);
       toast.error("Failed to delete YouTube link");
@@ -426,22 +430,29 @@ export function UploadMaterialModal({
                     </span>
                   </TabsTrigger>
                 </TabsList>
-                
+
                 <TabsContent value="links">
                   {youtubeVideos.length > 0 ? (
                     <div className="flex justify-center items-center flex-wrap gap-2 mx-auto max-h-[500px] overflow-y-scroll mb-5">
                       {youtubeVideos.map(
-                        (file: {
-                          videoId?: string;
-                          title?: string;
-                          thumbnailUrl?: string;
-                          filePath?: string;
-                          fileName?: string;
-                        }, index) => {
+                        (
+                          file: {
+                            videoId?: string;
+                            title?: string;
+                            thumbnailUrl?: string;
+                            filePath?: string;
+                            fileName?: string;
+                          },
+                          index,
+                        ) => {
                           const resolvedVideoId =
-                            file.videoId || extractYoutubeVideoId(file.filePath || "");
+                            file.videoId ||
+                            extractYoutubeVideoId(file.filePath || "");
                           const itemKey =
-                            file.videoId || file.filePath || file.fileName || `yt-${index}`;
+                            file.videoId ||
+                            file.filePath ||
+                            file.fileName ||
+                            `yt-${index}`;
 
                           return (
                             <div
@@ -471,11 +482,14 @@ export function UploadMaterialModal({
                                         file.title || file.fileName,
                                       );
                                     } else {
-                                      toast.error("Could not determine YouTube video ID");
+                                      toast.error(
+                                        "Could not determine YouTube video ID",
+                                      );
                                     }
                                   }}
                                   disabled={
-                                    !resolvedVideoId || deletingFileUrl === resolvedVideoId
+                                    !resolvedVideoId ||
+                                    deletingFileUrl === resolvedVideoId
                                   }
                                   className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
                                   aria-label={`Delete ${file.title || file.fileName || "YouTube link"}`}
@@ -505,7 +519,9 @@ export function UploadMaterialModal({
                                 </div>
                                 <div className="text-center max-w-[130px] w-[130px] h-[50px]">
                                   <p className="dark:text-gray-300 text-[#737373] text-xs font-medium leading-tight break-words">
-                                    {file.title || file.fileName || "YouTube Video"}
+                                    {file.title ||
+                                      file.fileName ||
+                                      "YouTube Video"}
                                   </p>
                                 </div>
                               </div>
