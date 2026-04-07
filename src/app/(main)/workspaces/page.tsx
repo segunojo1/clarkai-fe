@@ -93,7 +93,7 @@ const WorkspacesPage = () => {
       <div className="flex items-center justify-between px-6 py-3">
         <div className="flex items-center gap-2">
           <X className="w-5 h-5 text-gray-400" />
-          <button className="flex items-center gap-2 text-white font-medium">
+          <button className="flex items-center gap-2 dark:text-white text-black font-medium">
             Workspaces
             <ChevronDown className="w-4 h-4" />
           </button>

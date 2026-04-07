@@ -308,17 +308,17 @@ export function UploadMaterialModal({
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent
-        className="dark:bg-[#18191A] bg-[#F8F8F7] border border-[#333] text-white w-[500px] max-h-[80vh] p-0 rounded-2xl shadow-2xl overflow-y-auto"
+        className="dark:bg-[#18191A] dark:border-[#333] dark:text-white bg-white border-gray-200 text-black w-[500px] max-h-[80vh] p-0 rounded-2xl shadow-2xl overflow-y-auto"
         align="start"
         sideOffset={8}
       >
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-          <DialogContent className="sm:max-w-[440px] bg-[#2A2A2A] border-[#444] text-white">
+          <DialogContent className="sm:max-w-[440px] dark:bg-[#2A2A2A] dark:border-[#444] bg-white border-gray-200 dark:text-white text-black">
             <DialogHeader>
               <DialogTitle>Delete file?</DialogTitle>
-              <DialogDescription className="text-gray-300">
+              <DialogDescription className="dark:text-gray-300 text-gray-600">
                 This will remove{" "}
-                <span className="font-medium text-white">
+                <span className="font-medium dark:text-white text-black">
                   {pendingDeleteFile?.name}
                 </span>{" "}
                 from this workspace.
@@ -329,7 +329,7 @@ export function UploadMaterialModal({
                 <Button
                   type="button"
                   variant="outline"
-                  className="border-gray-600 text-white hover:bg-gray-700"
+                  className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700 border-gray-300 text-black hover:bg-gray-100"
                   disabled={!!deletingFileUrl}
                 >
                   Cancel
@@ -359,8 +359,8 @@ export function UploadMaterialModal({
             onClick={() => setActiveTab("Materials")}
             className={`font-medium text-base transition-colors flex items-center gap-1 px-4 py-2 rounded-lg ${
               activeTab === "Materials"
-                ? "bg-[#232323] text-white"
-                : "text-gray-400 dark:hover:text-white"
+                ? "dark:bg-[#232323] dark:text-white bg-gray-100 text-black"
+                : "text-gray-600 dark:text-gray-400 dark:hover:text-white hover:text-black"
             }`}
           >
             Materials
@@ -370,8 +370,8 @@ export function UploadMaterialModal({
             onClick={() => setActiveTab("Quizzes")}
             className={`font-medium text-base transition-colors px-4 py-2 rounded-lg ${
               activeTab === "Quizzes"
-                ? "bg-[#232323] text-white"
-                : "text-gray-400 dark:hover:text-white"
+                ? "dark:bg-[#232323] dark:text-white bg-gray-100 text-black"
+                : "text-gray-600 dark:text-gray-400 dark:hover:text-white hover:text-black"
             }`}
           >
             Quizzes
@@ -379,7 +379,7 @@ export function UploadMaterialModal({
         </div>
 
         <div
-          className={`flex items-center justify-start px-8 pb-2 text-[14px] text-black dark:text-gray-400 w-full ${
+          className={`flex items-center justify-start px-8 pb-2 text-[14px] dark:text-gray-400 text-gray-600 w-full ${
             activeTab === "Quizzes" ? "pt-0" : "pt-1"
           }`}
         ></div>
@@ -445,7 +445,7 @@ export function UploadMaterialModal({
                                   );
                                 }}
                                 disabled={deletingFileUrl === file.filePath}
-                                className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
+                                className="absolute right-0 top-0 rounded-full p-1 dark:text-[#a3a3a3] dark:hover:bg-[#2f2f2f] dark:hover:text-[#ff6a3d] text-gray-500 hover:bg-gray-200 hover:text-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
                                 aria-label={`Delete ${file.fileName}`}
                               >
                                 {deletingFileUrl === file.filePath ? (
@@ -466,7 +466,7 @@ export function UploadMaterialModal({
                                 />
                               </div>
                               <div className="text-center max-w-[130px] w-[130px] h-[50px]">
-                                <p className="dark:text-gray-300  text-[#737373] text-xs font-medium leading-tight break-words">
+                                <p className="dark:text-gray-300 text-gray-700 text-xs font-medium leading-tight break-words">
                                   {file.fileName}
                                   <br />
                                   {file.size}
@@ -485,8 +485,8 @@ export function UploadMaterialModal({
                         }) => (
                           <div
                             key={file.id}
-                            className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
-                            onClick={() => window.open(file.filePath, "_blank")}
+                            className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-gray-100 rounded-2xl p-2"
+                             onClick={() => window.open(file.filePath, "_blank")}
                           >
                             <div
                               className="rounded-2xl p-0 flex flex-col items-center justify-center relative"
@@ -502,7 +502,7 @@ export function UploadMaterialModal({
                                   );
                                 }}
                                 disabled={deletingFileUrl === file.filePath}
-                                className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
+                                 className="absolute right-0 top-0 rounded-full p-1 dark:text-[#a3a3a3] dark:hover:bg-[#2f2f2f] dark:hover:text-[#ff6a3d] text-gray-500 hover:bg-gray-200 hover:text-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
                                 aria-label={`Delete ${file.fileName}`}
                               >
                                 {deletingFileUrl === file.filePath ? (
@@ -523,7 +523,7 @@ export function UploadMaterialModal({
                                 />
                               </div>
                               <div className="text-center max-w-[130px] w-[130px] h-[50px]">
-                                <p className="text-gray-300 text-xs font-medium leading-tight break-words">
+                                 <p className="dark:text-gray-300 text-gray-700 text-xs font-medium leading-tight break-words">
                                   {file.fileName}
                                   <br />
                                   {file.size}
@@ -563,13 +563,13 @@ export function UploadMaterialModal({
                   )}
 
                   {uploadedFile && (
-                    <div className="mt-4 p-4 bg-[#232323] rounded-lg">
+                    <div className="mt-4 p-4 dark:bg-[#232323] bg-gray-100 rounded-lg">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-sm font-medium text-white">
+                          <h3 className="text-sm font-medium dark:text-white text-black">
                             {uploadedFile.name}
                           </h3>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs dark:text-gray-400 text-gray-600">
                             {uploadedFile.size}
                           </p>
                         </div>
@@ -625,7 +625,7 @@ export function UploadMaterialModal({
                           return (
                             <div
                               key={itemKey}
-                              className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
+                               className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-gray-100 rounded-2xl p-2"
                               onClick={() =>
                                 window.open(
                                   file.filePath ||
@@ -659,7 +659,7 @@ export function UploadMaterialModal({
                                     !resolvedVideoId ||
                                     deletingFileUrl === resolvedVideoId
                                   }
-                                  className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
+                                   className="absolute right-0 top-0 rounded-full p-1 dark:text-[#a3a3a3] dark:hover:bg-[#2f2f2f] dark:hover:text-[#ff6a3d] text-gray-500 hover:bg-gray-200 hover:text-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
                                   aria-label={`Delete ${file.title || file.fileName || "YouTube link"}`}
                                 >
                                   {deletingFileUrl === resolvedVideoId ? (
@@ -682,11 +682,11 @@ export function UploadMaterialModal({
                                       className="w-14 h-14 rounded-md object-cover"
                                     />
                                   ) : (
-                                    <Globe className="w-14 h-14 text-[#737373]" />
+                                     <Globe className="w-14 h-14 dark:text-[#737373] text-gray-400" />
                                   )}
                                 </div>
                                 <div className="text-center max-w-[130px] w-[130px] h-[50px]">
-                                  <p className="dark:text-gray-300 text-[#737373] text-xs font-medium leading-tight break-words">
+                                   <p className="dark:text-gray-300 text-gray-700 text-xs font-medium leading-tight break-words">
                                     {file.title ||
                                       file.fileName ||
                                       "YouTube Video"}
@@ -699,7 +699,7 @@ export function UploadMaterialModal({
                       )}
                     </div>
                   ) : (
-                    <div className="text-sm text-gray-400">No links yet.</div>
+                    <div className="text-sm dark:text-gray-400 text-gray-600">No links yet.</div>
                   )}
                   <Dialog
                     open={isYoutubeDialogOpen}
@@ -709,7 +709,7 @@ export function UploadMaterialModal({
                       <Button
                         type="button"
                         variant="outline"
-                        className="mt-2 border-gray-600 text-white hover:bg-gray-700"
+                        className="mt-2 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700 border-gray-300 text-black hover:bg-gray-100"
                       >
                         Upload new Youtube Video Link
                       </Button>
@@ -728,7 +728,7 @@ export function UploadMaterialModal({
                         />
 
                         {!showError && isFetchingYoutubePreview && (
-                          <div className="flex items-center gap-2 rounded-lg border border-[#3a3a3a] bg-[#232323] px-3 py-2 text-sm text-gray-300">
+                          <div className="flex items-center gap-2 rounded-lg dark:border-[#3a3a3a] dark:bg-[#232323] border-gray-200 bg-gray-100 px-3 py-2 text-sm dark:text-gray-300 text-gray-700">
                             <Loader2 className="h-4 w-4 animate-spin text-[#FF3D00]" />
                             Loading video preview...
                           </div>
@@ -772,8 +772,8 @@ export function UploadMaterialModal({
                         )}
 
                         {uploadedVideoPreview && (
-                          <div className="mt-4 rounded-lg border border-[#3a3a3a] p-3">
-                            <p className="mb-2 text-xs text-gray-400">
+                          <div className="mt-4 rounded-lg dark:border-[#3a3a3a] dark:bg-transparent border-gray-200 bg-gray-50 p-3">
+                            <p className="mb-2 text-xs dark:text-gray-400 text-gray-600">
                               Video preview
                             </p>
                             <div className="flex gap-3">
@@ -799,18 +799,18 @@ export function UploadMaterialModal({
                                   className="h-[68px] w-[120px] rounded-md object-cover"
                                 />
                               ) : (
-                                <div className="flex h-[68px] w-[120px] items-center justify-center rounded-md bg-[#232323]">
-                                  <Globe className="h-6 w-6 text-[#737373]" />
+                                <div className="flex h-[68px] w-[120px] items-center justify-center rounded-md dark:bg-[#232323] bg-gray-200">
+                                  <Globe className="h-6 w-6 dark:text-[#737373] text-gray-400" />
                                 </div>
                               )}
                               <div className="min-w-0 flex-1">
-                                <p className="line-clamp-2 text-sm font-medium text-white">
+                                <p className="line-clamp-2 text-sm font-medium dark:text-white text-black">
                                   {uploadedVideoPreview.snippet.title}
                                 </p>
-                                <p className="mt-1 text-xs text-gray-400">
+                                <p className="mt-1 text-xs dark:text-gray-400 text-gray-600">
                                   {uploadedVideoPreview.snippet.channelTitle}
                                 </p>
-                                <p className="mt-1 text-[11px] text-gray-500">
+                                <p className="mt-1 text-[11px] dark:text-gray-500 text-gray-500">
                                   {abbreviateNumber(
                                     uploadedVideoPreview.statistics
                                       ?.viewCount ?? 0,
@@ -848,7 +848,7 @@ export function UploadMaterialModal({
                         }) => (
                           <div
                             key={file.id}
-                            className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
+                             className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-gray-100 rounded-2xl p-2"
                             onClick={() => window.open(file.filePath, "_blank")}
                           >
                             <div
@@ -865,7 +865,7 @@ export function UploadMaterialModal({
                                   );
                                 }}
                                 disabled={deletingFileUrl === file.filePath}
-                                className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
+                                 className="absolute right-0 top-0 rounded-full p-1 dark:text-[#a3a3a3] dark:hover:bg-[#2f2f2f] dark:hover:text-[#ff6a3d] text-gray-500 hover:bg-gray-200 hover:text-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
                                 aria-label={`Delete ${file.fileName}`}
                               >
                                 {deletingFileUrl === file.filePath ? (
@@ -886,7 +886,7 @@ export function UploadMaterialModal({
                                 />
                               </div>
                               <div className="text-center max-w-[130px] w-[130px] h-[50px]">
-                                <p className="dark:text-gray-300  text-[#737373] text-xs font-medium leading-tight break-words">
+                                 <p className="dark:text-gray-300 text-gray-700 text-xs font-medium leading-tight break-words">
                                   {file.fileName}
                                   <br />
                                   {file.size}
@@ -933,9 +933,9 @@ export function UploadMaterialModal({
                       fileName: string;
                       size: string;
                     }) => (
-                      <div
-                        key={file.id}
-                        className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-white rounded-2xl p-2"
+                        <div
+                          key={file.id}
+                          className="flex flex-col items-center w-fit max-w-[130px] justify-between cursor-pointer dark:hover:bg-[#232323] hover:bg-gray-100 rounded-2xl p-2"
                         onClick={() => window.open(file.filePath, "_blank")}
                       >
                         <div
@@ -949,7 +949,7 @@ export function UploadMaterialModal({
                               requestDeleteFile(file.filePath, file.fileName);
                             }}
                             disabled={deletingFileUrl === file.filePath}
-                            className="absolute right-0 top-0 rounded-full p-1 text-[#a3a3a3] hover:bg-[#2f2f2f] hover:text-[#ff6a3d] disabled:cursor-not-allowed disabled:opacity-50"
+                             className="absolute right-0 top-0 rounded-full p-1 dark:text-[#a3a3a3] dark:hover:bg-[#2f2f2f] dark:hover:text-[#ff6a3d] text-gray-500 hover:bg-gray-200 hover:text-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
                             aria-label={`Delete ${file.fileName}`}
                           >
                             {deletingFileUrl === file.filePath ? (
@@ -970,7 +970,7 @@ export function UploadMaterialModal({
                             />
                           </div>
                           <div className="text-center max-w-[130px] w-[130px] h-[50px]">
-                            <p className="text-gray-300 text-xs font-medium leading-tight break-words">
+                             <p className="dark:text-gray-300 text-gray-700 text-xs font-medium leading-tight break-words">
                               {file.fileName}
                               <br />
                               {file.size}
@@ -986,25 +986,24 @@ export function UploadMaterialModal({
           )}
           {activeTab === "Quizzes" && (
             <>
-              {}
               {selectedWorkspace &&
               selectedWorkspace?.workspace?.quizzes?.length > 0 ? (
                 <div className="w-full space-y-4">
-                  <h3 className="text-lg font-medium text-white mb-4">
-                    Available Quizzes
-                  </h3>
+                   <h3 className="text-lg font-medium dark:text-white text-black mb-4">
+                      Available Quizzes
+                   </h3>
                   <div className="grid gap-4">
                     {selectedWorkspace.workspace.quizzes.map((quiz, index) => (
                       <div
                         key={quiz.id || index}
-                        className="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-primary transition-colors"
+                         className="dark:bg-gray-800 dark:border-gray-700 rounded-lg p-4 dark:border border-gray-300 bg-white hover:border-primary transition-colors"
                       >
                         <div className="flex justify-between items-start">
                           <div>
-                            <h4 className="text-white font-medium">
+                            <h4 className="dark:text-white text-black font-medium">
                               {quiz.name || "Untitled Quiz"}
                             </h4>
-                            <p className="text-sm text-gray-400 mt-1">
+                            <p className="text-sm dark:text-gray-400 text-gray-600 mt-1">
                               Created{" "}
                               {new Date(quiz.createdAt).toLocaleDateString()}
                             </p>
@@ -1017,7 +1016,7 @@ export function UploadMaterialModal({
                           </div>
                         </div>
                         {quiz.quizSource && (
-                          <p className="text-sm text-gray-300 mt-2 line-clamp-2">
+                           <p className="text-sm dark:text-gray-300 text-gray-700 mt-2 line-clamp-2">
                             {quiz.quizSource}
                           </p>
                         )}
@@ -1051,10 +1050,11 @@ export function UploadMaterialModal({
                         height="28"
                         viewBox="0 0 24 24"
                         fill="none"
-                        stroke="#A3A3A3"
+                         stroke="currentColor"
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
+                         className="dark:text-[#A3A3A3] text-gray-500"
                       >
                         <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
                         <path d="M9 14h6" />
@@ -1066,7 +1066,7 @@ export function UploadMaterialModal({
                   {selectedWorkspace?.workspace?.files?.pdfFiles?.length !==
                   0 ? (
                     <>
-                      <div className="space-y-6 dark:text-gray-300 text-black leading-relaxed mb-8 w-full max-w-xl text-left break-words">
+                      <div className="space-y-6 dark:text-gray-300 text-gray-700 leading-relaxed mb-8 w-full max-w-xl text-left break-words">
                         <p className="text-sm">
                           Create quizzes from your uploaded materials, notes, or
                           custom questions to start testing your knowledge.
@@ -1078,7 +1078,7 @@ export function UploadMaterialModal({
                           them, share with friends, or build streaks by taking
                           them daily.
                         </p>
-                        <div className="border-l-2 border-[#5A5A5A] pl-4">
+                        <div className="dark:border-[#5A5A5A] border-gray-300 border-l-2 pl-4">
                           <p className="break-words whitespace-normal text-sm">
                             Use the{" "}
                             <span className="bg-[#FF3D00] text-white px-2 py-1 rounded text-xs font-medium">
@@ -1107,7 +1107,7 @@ export function UploadMaterialModal({
                     </>
                   ) : (
                     <>
-                      <h1>
+                      <h1 className="dark:text-white text-black">
                         Ensure you upload a material before creating a quiz
                       </h1>
                     </>

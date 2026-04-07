@@ -528,7 +528,7 @@ export default function WorkspacePage() {
   return (
     <div className="flex flex-col h-screen w-full">
       <div className={`flex flex-col h-screen justify-between pb-12 w-full`}>
-        <div className="flex items-center h-fit p-4 justify-between w-full bg-[#1a1a1a] border-b border-gray-700">
+        <div className="flex items-center h-fit p-4 justify-between w-full dark:bg-[#1a1a1a] bg-[#f1f1f1] border-b border-gray-700">
           <div className="items-center gap-4 flex ">
             <UserAvatar />
             {isRenamingWorkspace ? (
@@ -562,7 +562,7 @@ export default function WorkspacePage() {
               </div>
             ) : (
               <div className="flex gap-2 items-center">
-                <h1 className="text-2xl font-bold text-white">
+                <h1 className="text-2xl font-bold dark:text-white text-black">
                   Workspace - {selectedWorkspace?.workspace?.name}
                 </h1>
                 <button
