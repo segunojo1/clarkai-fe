@@ -550,7 +550,7 @@ export function AppSidebar() {
       </Sidebar>
 
       <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
-        <DialogContent className="max-w-[950px] min-w-full">
+        <DialogContent className="!max-w-[950px] w-full">
           <DialogHeader>
             <DialogTitle>Search</DialogTitle>
             <DialogDescription>
