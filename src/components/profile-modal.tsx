@@ -176,9 +176,21 @@ export function ProfileModal({ children }: ProfileModalProps) {
     setProfileForm((prev) => ({
       ...prev,
       fullName: user?.name ?? "",
-      username: user?.name ? user.name.toLowerCase().replace(/\s+/g, "-") : "",
+      nickname: user?.nickname ?? "",
+      username:
+        user?.username ??
+        (user?.name ? user.name.toLowerCase().replace(/\s+/g, "-") : ""),
+      school: user?.school ?? "",
+      major: user?.major ?? user?.department ?? "",
     }));
-  }, [user?.name]);
+  }, [
+    user?.name,
+    user?.nickname,
+    user?.username,
+    user?.school,
+    user?.major,
+    user?.department,
+  ]);
 
   const planName = useMemo(
     () => toTitle(user?.subscription?.plan),

@@ -46,7 +46,6 @@ const handler = NextAuth({
           token.backendAccessToken = googleResponse.token;
           token.user = googleResponse.user;
           token.isOnboardingNeeded = !googleResponse.user.account_completed;
-          
         } catch (error) {
           console.error("Google login error in jwt callback:", error);
           throw error;
@@ -69,14 +68,12 @@ const handler = NextAuth({
       if (token.backendAccessToken) {
         session.user.backendAccessToken = token.backendAccessToken as string;
       }
-      
-      if (token.user) {
-        session.user.id = (token.user as any).id;
-        session.user.name = (token.user as any).name;
-        session.user.email = (token.user as any).email;
-        session.user.isOnboardingNeeded = token.isOnboardingNeeded as boolean;
-        
+
+      if (token.user && typeof token.user === "object") {
+        Object.assign(session.user, token.user as Record<string, unknown>);
       }
+
+      session.user.isOnboardingNeeded = token.isOnboardingNeeded as boolean;
 
       return session;
     },

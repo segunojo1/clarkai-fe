@@ -48,6 +48,7 @@ const LoginForm = () => {
           const oauthUser = session.user as (typeof session.user & {
             backendAccessToken?: string
             isOnboardingNeeded?: boolean
+            user?: string[]
           })
 
           if (oauthUser?.backendAccessToken) {

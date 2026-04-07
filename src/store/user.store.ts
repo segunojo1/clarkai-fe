@@ -8,6 +8,11 @@ type User = {
   id: string;
   email: string;
   name?: string;
+  nickname?: string;
+  username?: string;
+  school?: string;
+  major?: string;
+  department?: string;
   image_url?: string;
   image?: string;
   subscription?: {
@@ -62,7 +67,30 @@ export const useUserStore = create<UserStore>()(
         major?: string;
       }) => {
         try {
-          await workspaceService.updateUserDetails(userDetails);
+          const response =
+            await workspaceService.updateUserDetails(userDetails);
+
+          set((state) => {
+            if (!state.user) return state;
+
+            const responseUser =
+              response?.user || response?.data?.user || response?.data;
+
+            const mergedUser: User = {
+              ...state.user,
+              ...(responseUser && typeof responseUser === "object"
+                ? responseUser
+                : {}),
+              name: userDetails.fullName ?? state.user.name,
+              nickname: userDetails.nickname ?? state.user.nickname,
+              username: userDetails.username ?? state.user.username,
+              school: userDetails.school ?? state.user.school,
+              major:
+                userDetails.major ?? state.user.major ?? state.user.department,
+            };
+
+            return { user: mergedUser };
+          });
         } catch (error) {
           console.error("Error updating user details:", error);
         }
