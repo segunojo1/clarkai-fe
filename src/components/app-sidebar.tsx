@@ -456,9 +456,9 @@ export function AppSidebar() {
   ];
 
   const { user } = useUserStore();
-  const planName = user?.subscription?.plan
-    ? `${user.subscription.plan.charAt(0).toUpperCase()}${user.subscription.plan.slice(1)}`
-    : "Free";
+  const planName = user?.plan
+    ? `${user.plan.charAt(0).toUpperCase()}${user.plan.slice(1)}`
+    : "";
 
   return (
     <>

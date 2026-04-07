@@ -15,11 +15,7 @@ type User = {
   department?: string;
   image_url?: string;
   image?: string;
-  subscription?: {
-    plan: SubscriptionPlan;
-    status: "active" | "canceled" | "expired" | "inactive";
-    expiresAt?: string;
-  };
+  plan?: SubscriptionPlan;
 };
 
 type UserStore = {
