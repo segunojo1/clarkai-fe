@@ -71,7 +71,6 @@ export default function WorkspacePage() {
     }
   }, [id, fetchSuggestedQuestions]);
 
-
   useEffect(() => {
     if (!id) return;
 
@@ -94,7 +93,7 @@ export default function WorkspacePage() {
         }
 
         const response = await chatServiceInstance.getChat(1, chatId);
-        
+
         setChatDetails(response);
         if (response.messages) {
           setMessages(response.messages);
@@ -467,9 +466,8 @@ export default function WorkspacePage() {
             })
           : undefined;
         const resolvedFileId = matchedWorkspaceFile
-          ? ((matchedWorkspaceFile as { id?: string; videoId?: string }).id ||
-            (matchedWorkspaceFile as { id?: string; videoId?: string })
-              .videoId)
+          ? (matchedWorkspaceFile as { id?: string; videoId?: string }).id ||
+            (matchedWorkspaceFile as { id?: string; videoId?: string }).videoId
           : undefined;
 
         const legacyFileTagMatch = text.match(/@file\(([^)]+)\)/);
@@ -484,14 +482,7 @@ export default function WorkspacePage() {
 
         const resp = await useWorkspaceStore
           .getState()
-          .askQuestion(
-            id.toString(),
-            text,
-            true,
-            mode,
-            recentMessages,
-            fileId,
-          );
+          .askQuestion(id.toString(), text, true, mode, recentMessages, fileId);
         await fetchSuggestedQuestions(id.toString());
       } catch (error) {
         console.error("Error sending message:", error);

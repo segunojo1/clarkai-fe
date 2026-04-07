@@ -92,7 +92,6 @@ declare global {
   }
 }
 
-
 const TAGS = [
   { value: "flashcard", label: "flashcard" },
   { value: "material", label: "material" },
@@ -123,7 +122,7 @@ const ChatInputForm = ({
     Array<{ file: File; previewUrl: string }>
   >([]);
   const { askSource, setAskSource, selectedWorkspace } = useWorkspaceStore();
-  
+
   const [mode, setMode] = useState<"ask" | "create" | "research">("ask");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isSpeechSupported, setIsSpeechSupported] = useState<boolean>(false);
@@ -140,7 +139,7 @@ const ChatInputForm = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const pathname = usePathname();
-const isNormalChatPage = pathname.startsWith("/chat");
+  const isNormalChatPage = pathname.startsWith("/chat");
 
   const filteredTags = TAGS.filter((tag) =>
     tag.label.toLowerCase().includes(tagSearch.toLowerCase()),
@@ -503,7 +502,6 @@ const isNormalChatPage = pathname.startsWith("/chat");
     }
   };
 
-
   return (
     <div className="w-full max-w-3xl mx-auto px-4">
       <Form {...form}>
@@ -752,129 +750,140 @@ const isNormalChatPage = pathname.startsWith("/chat");
                             />
                           </div>
 
-                          {
-                            !isNormalChatPage && (
-                          <Popover
-                            open={isTagPopoverOpen}
-                            onOpenChange={setIsTagPopoverOpen}
-                          >
-                            <PopoverTrigger asChild>
-                              <Button type="button" variant="ghost" size="icon">
-                                <Image
-                                  src="/assets/at.svg"
-                                  alt="Mention tag"
-                                  width={21}
-                                  height={30}
-                                  className="text-gray-500"
-                                  aria-hidden="true"
-                                />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-64 p-0" align="start">
-                              <div className="grid gap-1 p-2">
-                                {TAGS.map((tag) => (
-                                  <Button
-                                    key={tag.value}
-                                    variant="ghost"
-                                    className="justify-start"
-                                    onClick={() => handleTagSelectt(tag.value)}
-                                  >
-                                    {tag.label}
-                                  </Button>
-                                ))}
-                              </div>
-                              <div className="px-2 pb-2">
-                                <div className="text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400 px-2 mb-1">
-                                  Files in workspace
+                          {!isNormalChatPage && (
+                            <Popover
+                              open={isTagPopoverOpen}
+                              onOpenChange={setIsTagPopoverOpen}
+                            >
+                              <PopoverTrigger asChild>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                >
+                                  <Image
+                                    src="/assets/at.svg"
+                                    alt="Mention tag"
+                                    width={21}
+                                    height={30}
+                                    className="text-gray-500"
+                                    aria-hidden="true"
+                                  />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-64 p-0"
+                                align="start"
+                              >
+                                <div className="grid gap-1 p-2">
+                                  {TAGS.map((tag) => (
+                                    <Button
+                                      key={tag.value}
+                                      variant="ghost"
+                                      className="justify-start"
+                                      onClick={() =>
+                                        handleTagSelectt(tag.value)
+                                      }
+                                    >
+                                      {tag.label}
+                                    </Button>
+                                  ))}
                                 </div>
-                                <div className="max-h-48 overflow-auto rounded-md border border-gray-200 dark:border-gray-800">
-                                  <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                                    {selectedWorkspace?.workspace?.files && (
-                                      <>
-                                        {selectedWorkspace.workspace.files.pdfFiles?.map(
-                                          (f) => (
-                                            <button
-                                              key={f.id}
-                                              type="button"
-                                              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
-                                              onClick={() =>
-                                                handleFileTagSelect(
-                                                  f.id,
-                                                  f.fileName,
-                                                )
-                                              }
-                                            >
-                                              <span className="inline-flex h-2 w-2 rounded-full bg-red-400" />
-                                              <span className="truncate">
-                                                {f.fileName}
-                                              </span>
-                                            </button>
-                                          ),
-                                        )}
-                                        {selectedWorkspace.workspace.files.imageFiles?.map(
-                                          (f) => (
-                                            <button
-                                              key={f.id}
-                                              type="button"
-                                              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
-                                              onClick={() =>
-                                                handleFileTagSelect(
-                                                  f.id,
-                                                  f.fileName,
-                                                )
-                                              }
-                                            >
-                                              <span className="inline-flex h-2 w-2 rounded-full bg-blue-400" />
-                                              <span className="truncate">
-                                                {f.fileName}
-                                              </span>
-                                            </button>
-                                          ),
-                                        )}
-                                        {selectedWorkspace.workspace.files.youtubeVideos?.map(
-                                          (f) => (
-                                            <button
-                                              key={
-                                                f.videoId ||
-                                                (f as { id?: string }).id
-                                              }
-                                              type="button"
-                                              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
-                                              onClick={() =>
-                                                handleFileTagSelect(
+                                <div className="px-2 pb-2">
+                                  <div className="text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400 px-2 mb-1">
+                                    Files in workspace
+                                  </div>
+                                  <div className="max-h-48 overflow-auto rounded-md border border-gray-200 dark:border-gray-800">
+                                    <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                                      {selectedWorkspace?.workspace?.files && (
+                                        <>
+                                          {selectedWorkspace.workspace.files.pdfFiles?.map(
+                                            (f) => (
+                                              <button
+                                                key={f.id}
+                                                type="button"
+                                                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+                                                onClick={() =>
+                                                  handleFileTagSelect(
+                                                    f.id,
+                                                    f.fileName,
+                                                  )
+                                                }
+                                              >
+                                                <span className="inline-flex h-2 w-2 rounded-full bg-red-400" />
+                                                <span className="truncate">
+                                                  {f.fileName}
+                                                </span>
+                                              </button>
+                                            ),
+                                          )}
+                                          {selectedWorkspace.workspace.files.imageFiles?.map(
+                                            (f) => (
+                                              <button
+                                                key={f.id}
+                                                type="button"
+                                                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+                                                onClick={() =>
+                                                  handleFileTagSelect(
+                                                    f.id,
+                                                    f.fileName,
+                                                  )
+                                                }
+                                              >
+                                                <span className="inline-flex h-2 w-2 rounded-full bg-blue-400" />
+                                                <span className="truncate">
+                                                  {f.fileName}
+                                                </span>
+                                              </button>
+                                            ),
+                                          )}
+                                          {selectedWorkspace.workspace.files.youtubeVideos?.map(
+                                            (f) => (
+                                              <button
+                                                key={
                                                   f.videoId ||
-                                                    (f as { id?: string }).id ||
-                                                    "",
-                                                  f.title ||
+                                                  (f as { id?: string }).id
+                                                }
+                                                type="button"
+                                                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+                                                onClick={() =>
+                                                  handleFileTagSelect(
+                                                    f.videoId ||
+                                                      (f as { id?: string })
+                                                        .id ||
+                                                      "",
+                                                    f.title ||
+                                                      (
+                                                        f as {
+                                                          fileName?: string;
+                                                        }
+                                                      ).fileName ||
+                                                      "Youtube Video",
+                                                  )
+                                                }
+                                              >
+                                                <span className="inline-flex h-2 w-2 rounded-full bg-green-400" />
+                                                <span className="truncate">
+                                                  {f.title ||
                                                     (f as { fileName?: string })
-                                                      .fileName ||
-                                                    "Youtube Video",
-                                                )
-                                              }
-                                            >
-                                              <span className="inline-flex h-2 w-2 rounded-full bg-green-400" />
-                                              <span className="truncate">
-                                                {f.title ||
-                                                  (f as { fileName?: string })
-                                                    .fileName}
-                                              </span>
-                                            </button>
-                                          ),
-                                        )}
-                                      </>
-                                    )}
-                                    {!selectedWorkspace?.workspace?.files && (
-                                      <div className="px-3 py-2 text-sm text-gray-500">
-                                        No files found
-                                      </div>
-                                    )}
+                                                      .fileName}
+                                                </span>
+                                              </button>
+                                            ),
+                                          )}
+                                        </>
+                                      )}
+                                      {!selectedWorkspace?.workspace?.files && (
+                                        <div className="px-3 py-2 text-sm text-gray-500">
+                                          No files found
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </PopoverContent>
-                          </Popover>
-                            )
-                          }
+                              </PopoverContent>
+                            </Popover>
+                          )}
 
                           <button
                             type="button"
