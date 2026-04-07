@@ -311,7 +311,7 @@ export function ProfileModal({ children }: ProfileModalProps) {
 
                 <div className="flex items-center gap-3 rounded-xl border border-[#252525] bg-[#17191d] p-4">
                   <Image
-                    src={user?.image || user?.image_url || "/assets/orange.png"}
+                    src={user?.image_url || "/assets/orange.png"}
                     alt="Profile photo"
                     width={56}
                     height={56}

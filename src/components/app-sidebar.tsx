@@ -473,9 +473,8 @@ export function AppSidebar() {
               <div className="flex items-center gap-[10px] group-data-[collapsible=icon]:justify-center">
                 <Image
                   src={
-                        user?.image && user.image !== ""
-                          ? user.image : user?.image_url ? user.image_url
-                          : "/assets/orange.png"
+                        user?.image_url && user.image_url !== ""
+                          ? user.image_url : "/assets/orange.png"
                       }
                   alt="user avatar"
                   width={24}

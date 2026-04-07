@@ -51,7 +51,7 @@ export default function ClientLayout({
   }, [route, getAllChats, getWorkspaces]);
 
   console.log(user);
-  
+
   return (
     <main className="w-full h-full relative flex-1">
       {
@@ -82,8 +82,8 @@ export default function ClientLayout({
                   >
                     <Image
                       src={
-                        user?.image && user.image !== ""
-                          ? user.image : user?.image_url ? user.image_url
+                        user?.image_url && user.image_url !== ""
+                          ? user.image_url
                           : "/assets/orange.png"
                       }
                       alt="user avatar"
