@@ -61,7 +61,7 @@ export function TaskFloatingWidget() {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <div className="fixed bottom-6 left-6 z-40">
+      <div className="fixed bottom-16 left-6 z-40">
         <DialogTrigger asChild>
           <Button
             className={`h-auto max-w-xs rounded-lg px-3 py-2 text-left shadow-lg transition-all ${

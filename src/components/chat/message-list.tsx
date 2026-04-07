@@ -379,6 +379,8 @@ export function ChatMessageList({
                                 onClick={() =>
                                   onSuggestedQuestionClick(suggestion)
                                 }
+                                title={suggestion}
+                                aria-label={suggestion}
                                 className="group w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-left text-xs font-medium text-gray-700 transition-all hover:-translate-y-[1px] hover:border-[#FF3D00] hover:text-[#FF3D00] hover:shadow-sm dark:border-gray-600 dark:bg-[#333] dark:text-gray-300 dark:hover:bg-[#3a3a3a]"
                               >
                                 <span className="line-clamp-2">

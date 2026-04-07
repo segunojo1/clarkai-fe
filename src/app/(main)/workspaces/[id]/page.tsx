@@ -447,12 +447,33 @@ export default function WorkspacePage() {
           messages.filter((msg) => msg.id !== "suggested-questions-prompt"),
         );
 
-        // Detect @file(<id>) tag and extract fileId....
-        const fileTagMatch = text.match(/@file\(([^)]+)\)/);
-        const fileId = fileTagMatch?.[1];
-        // Remove the file tag from the text sent to the API
-        const cleanedText = text.replace(/@file\(([^)]+)\)/g, "").trim();
+        // Detect @file[filename] tag and resolve fileId from workspace files (fallback to legacy @file(id))
+        const fileLabelMatch = text.match(/@file\[([^\]]+)\]/);
+        const fileLabel = fileLabelMatch?.[1]?.trim();
+        const workspaceFiles = selectedWorkspace?.workspace?.files;
+        const allWorkspaceFiles = [
+          ...(workspaceFiles?.pdfFiles ?? []),
+          ...(workspaceFiles?.imageFiles ?? []),
+          ...(workspaceFiles?.youtubeVideos ?? []),
+        ];
+        const matchedWorkspaceFile = fileLabel
+          ? allWorkspaceFiles.find((f) => {
+              const file = f as {
+                fileName?: string;
+                title?: string;
+              };
+              const name = (file.fileName || file.title || "").trim();
+              return name.toLowerCase() === fileLabel.toLowerCase();
+            })
+          : undefined;
+        const resolvedFileId = matchedWorkspaceFile
+          ? ((matchedWorkspaceFile as { id?: string; videoId?: string }).id ||
+            (matchedWorkspaceFile as { id?: string; videoId?: string })
+              .videoId)
+          : undefined;
 
+        const legacyFileTagMatch = text.match(/@file\(([^)]+)\)/);
+        const fileId = resolvedFileId || legacyFileTagMatch?.[1];
         const recentMessages = messages.slice(-10);
 
         const mode: "workspace" | "file" | "internet" = fileId
@@ -463,7 +484,14 @@ export default function WorkspacePage() {
 
         const resp = await useWorkspaceStore
           .getState()
-          .askQuestion(id.toString(), text, true, mode, recentMessages, fileId);
+          .askQuestion(
+            id.toString(),
+            text,
+            true,
+            mode,
+            recentMessages,
+            fileId,
+          );
         await fetchSuggestedQuestions(id.toString());
       } catch (error) {
         console.error("Error sending message:", error);

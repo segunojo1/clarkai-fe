@@ -94,6 +94,61 @@ const loadGoogleScript = (src: string): Promise<void> => {
   });
 };
 
+const requestGoogleAccessToken = async (scope: string): Promise<string> => {
+  if (!GOOGLE_CLIENT_ID) {
+    throw new Error(
+      "Missing Google Client ID. Set NEXT_PUBLIC_GOOGLE_CLIENT_ID and restart the dev server.",
+    );
+  }
+
+  await loadGoogleScript("https://accounts.google.com/gsi/client");
+
+  return await new Promise<string>((resolve, reject) => {
+    const googleRef = (window as any).google;
+    if (!googleRef?.accounts?.oauth2) {
+      reject(new Error("Google OAuth client not available"));
+      return;
+    }
+
+    let settled = false;
+    const timeoutId = window.setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      reject(new Error("Google authentication was interrupted or timed out"));
+    }, 60000);
+
+    const finish = (fn: () => void) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeoutId);
+      fn();
+    };
+
+    const client = googleRef.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope,
+      callback: (response: { access_token?: string; error?: string }) => {
+        if (response?.error) {
+          finish(() => reject(new Error(response.error)));
+          return;
+        }
+        const accessToken = response?.access_token;
+        if (!accessToken) {
+          finish(() => reject(new Error("No access token received")));
+          return;
+        }
+        finish(() => resolve(accessToken));
+      },
+      error_callback: (error: { type?: string }) => {
+        const type = error?.type || "unknown_error";
+        finish(() => reject(new Error(type)));
+      },
+    });
+
+    client.requestAccessToken();
+  });
+};
+
 export function ProfileModal({ children }: ProfileModalProps) {
   const {
     user,
@@ -152,96 +207,50 @@ export function ProfileModal({ children }: ProfileModalProps) {
   };
 
   const handleConnectGoogleDrive = async () => {
-    if (!GOOGLE_CLIENT_ID) {
-      toast.error(
-        "Missing Google Client ID. Set NEXT_PUBLIC_GOOGLE_CLIENT_ID and restart the dev server.",
-      );
-      return;
-    }
-
     try {
       setIsConnectingGoogleDrive(true);
-      await loadGoogleScript("https://accounts.google.com/gsi/client");
-
-      await new Promise<void>((resolve, reject) => {
-        const googleRef = (window as any).google;
-        if (!googleRef?.accounts?.oauth2) {
-          reject(new Error("Google OAuth client not available"));
-          return;
-        }
-
-        const client = googleRef.accounts.oauth2.initTokenClient({
-          client_id: GOOGLE_CLIENT_ID,
-          scope: "https://www.googleapis.com/auth/drive.readonly",
-          callback: (response: { access_token?: string; error?: string }) => {
-            if (response?.error) {
-              reject(new Error(response.error));
-              return;
-            }
-            if (!response?.access_token) {
-              reject(new Error("No access token received"));
-              return;
-            }
-            resolve();
-          },
-        });
-
-        client.requestAccessToken();
-      });
+      await requestGoogleAccessToken(
+        "https://www.googleapis.com/auth/drive.readonly",
+      );
 
       setGoogleDriveConnected(true);
       toast.success("Google Drive connected. You can now import in Upload.");
     } catch (error) {
       console.error("Failed to connect Google Drive:", error);
-      toast.error("Failed to connect Google Drive");
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      if (errorMessage === "popup_closed" || errorMessage === "access_denied") {
+        toast.info("Google Drive connection cancelled.");
+      } else if (errorMessage.includes("Missing Google Client ID")) {
+        toast.error(errorMessage);
+      } else {
+        toast.error("Failed to connect Google Drive");
+      }
     } finally {
       setIsConnectingGoogleDrive(false);
     }
   };
 
   const handleConnectGoogleCalendar = async () => {
-    if (!GOOGLE_CLIENT_ID) {
-      toast.error(
-        "Missing Google Client ID. Set NEXT_PUBLIC_GOOGLE_CLIENT_ID and restart the dev server.",
-      );
-      return;
-    }
-
     try {
       setIsConnectingGoogleCalendar(true);
-      await loadGoogleScript("https://accounts.google.com/gsi/client");
-
-      await new Promise<void>((resolve, reject) => {
-        const googleRef = (window as any).google;
-        if (!googleRef?.accounts?.oauth2) {
-          reject(new Error("Google OAuth client not available"));
-          return;
-        }
-
-        const client = googleRef.accounts.oauth2.initTokenClient({
-          client_id: GOOGLE_CLIENT_ID,
-          scope: "https://www.googleapis.com/auth/calendar.events",
-          callback: (response: { access_token?: string; error?: string }) => {
-            if (response?.error) {
-              reject(new Error(response.error));
-              return;
-            }
-            if (!response?.access_token) {
-              reject(new Error("No access token received"));
-              return;
-            }
-            resolve();
-          },
-        });
-
-        client.requestAccessToken();
-      });
+      await requestGoogleAccessToken(
+        "https://www.googleapis.com/auth/calendar.events",
+      );
 
       setGoogleCalendarConnected(true);
       toast.success("Google Calendar connected. You can now sync deadlines.");
     } catch (error) {
       console.error("Failed to connect Google Calendar:", error);
-      toast.error("Failed to connect Google Calendar");
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      if (errorMessage === "popup_closed" || errorMessage === "access_denied") {
+        toast.info("Google Calendar connection cancelled.");
+      } else if (errorMessage.includes("Missing Google Client ID")) {
+        toast.error(errorMessage);
+      } else {
+        toast.error("Failed to connect Google Calendar");
+      }
     } finally {
       setIsConnectingGoogleCalendar(false);
     }
@@ -290,7 +299,7 @@ export function ProfileModal({ children }: ProfileModalProps) {
 
                 <div className="flex items-center gap-3 rounded-xl border border-[#252525] bg-[#17191d] p-4">
                   <Image
-                    src={user?.image_url || "/assets/orange.png"}
+                    src={user?.image || user?.image_url || "/assets/orange.png"}
                     alt="Profile photo"
                     width={56}
                     height={56}
@@ -387,7 +396,7 @@ export function ProfileModal({ children }: ProfileModalProps) {
                   </Button>
                 </div>
 
-                <div className="space-y-3">
+                {/* <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm font-medium">
                     Emails
                     <CircleAlert className="h-3.5 w-3.5 text-[#8a8a8a]" />
@@ -412,7 +421,7 @@ export function ProfileModal({ children }: ProfileModalProps) {
                       <Plus className="h-4 w-4" /> Add Email
                     </Button>
                   </div>
-                </div>
+                </div> */}
               </div>
             )}
 
@@ -456,7 +465,16 @@ export function ProfileModal({ children }: ProfileModalProps) {
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <div className="flex items-center justify-between rounded-lg border border-[#2c2c2c] bg-[#23262b] px-4 py-3">
                     <div>
-                      <p className="font-medium">Google Drive</p>
+                      <div className="flex items-center gap-2">
+                        <Image
+                          src="/assets/integrations/drive.png"
+                          alt="Google Drive"
+                          width={20}
+                          height={20}
+                          className="h-5 w-5"
+                        />
+                        <p className="font-medium">Google Drive</p>
+                      </div>
                       <p className="text-xs text-[#9b9b9b]">
                         {googleDriveConnected
                           ? "Connected"
@@ -488,7 +506,16 @@ export function ProfileModal({ children }: ProfileModalProps) {
 
                   <div className="flex items-center justify-between rounded-lg border border-[#2c2c2c] bg-[#23262b] px-4 py-3">
                     <div>
-                      <p className="font-medium">Google Calendar</p>
+                      <div className="flex items-center gap-2">
+                        <Image
+                          src="/assets/integrations/calendar.png"
+                          alt="Google Calendar"
+                          width={20}
+                          height={20}
+                          className="h-5 w-5"
+                        />
+                        <p className="font-medium">Google Calendar</p>
+                      </div>
                       <p className="text-xs text-[#9b9b9b]">
                         {googleCalendarConnected
                           ? "Connected"
@@ -521,7 +548,16 @@ export function ProfileModal({ children }: ProfileModalProps) {
                   </div>
 
                   <div className="flex items-center justify-between rounded-lg border border-[#2c2c2c] bg-[#23262b] px-4 py-3">
-                    <p className="font-medium">Notion</p>
+                    <div className="flex items-center gap-2">
+                      <Image
+                        src="/assets/integrations/notion.png"
+                        alt="Notion"
+                        width={20}
+                        height={20}
+                        className="h-5 w-5"
+                      />
+                      <p className="font-medium">Notion</p>
+                    </div>
                     <Button
                       variant="secondary"
                       className="h-8 bg-[#2d3036] text-[#f2f2f2] hover:bg-[#393d45]"

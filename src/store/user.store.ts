@@ -1,5 +1,4 @@
 import workspaceService from "@/services/workspace.service";
-import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
@@ -10,6 +9,7 @@ type User = {
   email: string;
   name?: string;
   image_url?: string;
+  image?: string;
   subscription?: {
     plan: SubscriptionPlan;
     status: "active" | "canceled" | "expired" | "inactive";

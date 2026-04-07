@@ -213,7 +213,10 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     if (!question.trim()) return;
     const { setIsLoading } = get();
 
-    const cleanedText = question.replace(/@file\(([^)]+)\)/g, "").trim();
+    const cleanedText = question
+      .replace(/@file\[[^\]]+\]/g, "")
+      .replace(/@file\(([^)]+)\)/g, "")
+      .trim();
     // Add user message
     const userMessage: ChatMessage = {
       role: "user",

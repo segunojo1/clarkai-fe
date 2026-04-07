@@ -99,6 +99,9 @@ const TAGS = [
   { value: "quiz", label: "quiz" },
 ];
 
+const escapeFileLabel = (value: string) =>
+  value.replace(/[\[\]\(\)]/g, "").trim();
+
 interface ChatInputFormProps {
   onSend: (message: string, files?: File[]) => void;
   disabled?: boolean;
@@ -197,7 +200,7 @@ const isNormalChatPage = pathname.startsWith("/chat");
     setShowTagSuggestions(false);
   };
 
-  const handleInlineFileTagSelect = (fileId: string, fileName?: string) => {
+  const handleInlineFileTagSelect = (_fileId: string, fileName?: string) => {
     setTagPosition((prev) => ({ ...prev, show: false }));
     if (!textareaRef.current) return;
 
@@ -208,7 +211,8 @@ const isNormalChatPage = pathname.startsWith("/chat");
     const lastAtPos = textBeforeCursor.lastIndexOf("@");
 
     if (lastAtPos >= 0) {
-      const label = fileName ? `@file(${fileId})` : `@file(${fileId})`;
+      const safeName = escapeFileLabel(fileName || "Untitled file");
+      const label = `@file[${safeName}]`;
       let newText = text.substring(0, lastAtPos) + label;
       newText += " ";
       newText += text.substring(startPos);
@@ -386,9 +390,10 @@ const isNormalChatPage = pathname.startsWith("/chat");
     setIsTagPopoverOpen(false);
   };
 
-  const handleFileTagSelect = (fileId: string, fileName?: string) => {
+  const handleFileTagSelect = (_fileId: string, fileName?: string) => {
     const currentValue = form.getValues("chat") || "";
-    const label = fileName ? `@file(${fileId})` : `@file(${fileId}) `;
+    const safeName = escapeFileLabel(fileName || "Untitled file");
+    const label = `@file[${safeName}]`;
     form.setValue("chat", `${currentValue} ${label}`);
     setIsTagPopoverOpen(false);
   };
@@ -482,7 +487,7 @@ const isNormalChatPage = pathname.startsWith("/chat");
         }
         if (filteredFiles.length > 0) {
           const f = filteredFiles[0];
-          handleFileTagSelect((f as any).id, (f as any).fileName);
+          handleInlineFileTagSelect(f.id, f.name);
           return;
         }
         return;
