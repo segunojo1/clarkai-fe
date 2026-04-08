@@ -193,8 +193,8 @@ export function ProfileModal({ children }: ProfileModalProps) {
   ]);
 
   const planName = useMemo(
-    () => toTitle(user?.subscription?.plan),
-    [user?.subscription?.plan],
+    () => toTitle(user?.plan),
+    [user?.plan],
   );
 
   const primaryEmail = user?.email || "No email attached";
