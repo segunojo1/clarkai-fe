@@ -76,7 +76,7 @@ export function SubscriptionStatus() {
     checkPaymentStatus();
   }, []);
 
-  const isPremium = user.plan === 'premium' || user.plan === 'enterprise';
+  const isPremium = user?.plan === 'premium' || user?.plan === 'enterprise';
 
   if (!user) return null;
 
