@@ -14,16 +14,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { hasCompletedOnboarding, setOnboardingCompleted } from '@/lib/cookies';
 import { useUserStore } from '@/store/user.store';
-import chatService from '@/services/chat.service';
 import { useChatStore } from '@/store/chat.store';
 import { getTimeBasedGreeting } from '@/lib/utils';
-import { toast } from 'sonner';
 
 const HomePageContent = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const searchParams = useSearchParams();
   const skipOnboarding = searchParams.get('skipOnboarding') === 'true';
-  const { isLoading, setIsLoading, sendMessage, setCurrentChatId, setChats, chats } = useChatStore();
+  const { isLoading, sendMessage, setCurrentChatId, setChats, chats } = useChatStore();
   const router = useRouter()
 
   useEffect(() => {
