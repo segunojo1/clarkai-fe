@@ -21,9 +21,17 @@ Clark AI is your personal study sidekick. Upload PDFs, chat with AI, make quizze
 3. **Set up environment variables**:
 Create a `.env.local` file in the root directory and add the following:
 ```env
-NEXT_PUBLIC_API_URL=your_api_url_here
+NEXT_PUBLIC_API_BASE_URL=your_api_base_url_here
+NEXT_PUBLIC_API_BASE_URL_TWO=your_second_api_base_url_here
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
-# Add other environment variables as needed
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+NEXTAUTH_URL=http://localhost:3000
+NEXT_PUBLIC_GOOGLE_API_KEY=your_google_api_key
+
+# Optional, if your setup uses it
+NEXT_PUBLIC_ACCESS_TOKEN=your_access_token
+
+# Keep secrets in .env.local and never commit real values
 ```
 
 4. **Run the development server**:
