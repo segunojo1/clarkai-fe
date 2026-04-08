@@ -5,6 +5,7 @@ Clark AI is your personal study sidekick. Upload PDFs, chat with AI, make quizze
 ## Features
 
 ### Smart Study Materials
+
 - PDF to Interactive Content
 - Summarize PDFs
 - Generate PDFS
@@ -13,13 +14,14 @@ Clark AI is your personal study sidekick. Upload PDFs, chat with AI, make quizze
 - Use tags to access all features
 
 ### Prerequisites
+
 - Node.js (v18 or later recommended)
 - npm (v9 or later) or yarn (v1.22 or later)
 - Git (for version control)
 
-
 3. **Set up environment variables**:
-Create a `.env.local` file in the root directory and add the following:
+   Create a `.env.local` file in the root directory and add the following:
+
 ```env
 NEXT_PUBLIC_API_BASE_URL=your_api_base_url_here
 NEXT_PUBLIC_API_BASE_URL_TWO=your_second_api_base_url_here
@@ -35,6 +37,7 @@ NEXT_PUBLIC_ACCESS_TOKEN=your_access_token
 ```
 
 4. **Run the development server**:
+
 ```bash
 npm run dev
 # or
@@ -42,11 +45,12 @@ yarn dev
 ```
 
 5. **Open your browser**:
-Visit [http://localhost:3000](http://localhost:3000) to see the application in action.
+   Visit [http://localhost:3000](http://localhost:3000) to see the application in action.
 
 ## Tech Stack
 
 ### Frontend
+
 - Next.js 15
 - TypeScript
 - Tailwind CSS
@@ -87,13 +91,17 @@ clarkai-fe/
 ## 🧪 Testing
 
 Run the test suite with:
+
 ```bash
 npm test
 # or
 yarn test
 ```
+
 ### Production Build
+
 Create an optimized production build:
+
 ```bash
 npm run build
 # or
