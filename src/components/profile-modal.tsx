@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { useUserStore } from "@/store/user.store";
 import { logout } from "@/utils/logout";
 import { useRouter } from "next/navigation";
+import paymentService from "@/services/payment.service";
 
 type SettingsTab =
   | "profile"
@@ -156,12 +157,15 @@ export function ProfileModal({ children }: ProfileModalProps) {
     googleCalendarConnected,
     setGoogleDriveConnected,
     setGoogleCalendarConnected,
+    setUser,
   } = useUserStore();
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const [newEmail, setNewEmail] = useState("");
   const [isConnectingGoogleDrive, setIsConnectingGoogleDrive] = useState(false);
   const [isConnectingGoogleCalendar, setIsConnectingGoogleCalendar] =
     useState(false);
+  const [isUpgradingPro, setIsUpgradingPro] = useState(false);
+  const [isUpgradingTeams, setIsUpgradingTeams] = useState(false);
   const [profileForm, setProfileForm] = useState({
     fullName: "",
     nickname: "",
@@ -267,6 +271,82 @@ export function ProfileModal({ children }: ProfileModalProps) {
       setIsConnectingGoogleCalendar(false);
     }
   };
+
+  const handleUpgrade = async (planType: "pro" | "teams") => {
+    const setLoading =
+      planType === "pro" ? setIsUpgradingPro : setIsUpgradingTeams;
+
+    try {
+      setLoading(true);
+      const response = await paymentService.initializePayment(planType);
+
+      if (response?.success && response?.authorizationUrl) {
+        if (response.reference) {
+          localStorage.setItem(
+            "paymentReference",
+            response.reference,
+          );
+        }
+
+        const checkoutUrl = new URL(response.authorizationUrl);
+        window.location.assign(checkoutUrl.toString());
+        return;
+      }
+
+      toast.error("Failed to initialize payment. Please try again.");
+    } catch (error) {
+      console.error(`Failed to initialize ${planType} upgrade:`, error);
+      toast.error("Failed to initialize payment. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const verifyReturnedPayment = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const referenceFromUrl =
+        params.get("reference") || params.get("trxref") || params.get("payment_reference");
+      const referenceFromStorage = localStorage.getItem("paymentReference");
+      const reference = referenceFromUrl || referenceFromStorage;
+
+      if (!reference) {
+        return;
+      }
+
+      try {
+        const result = await paymentService.verifyPayment(reference);
+        if (result?.success) {
+          const resolvedUser =
+            (result.user as Record<string, unknown> | undefined) ||
+            (result.data?.user as Record<string, unknown> | undefined);
+
+          if (resolvedUser && user) {
+            setUser({ ...user, ...resolvedUser } as typeof user);
+          }
+
+          toast.success("Payment successful. Your plan has been upgraded.");
+        } else {
+          toast.error("Payment verification failed. Please contact support.");
+        }
+      } catch (error) {
+        console.error("Error verifying payment:", error);
+        toast.error("Could not verify payment. Please contact support if charged.");
+      } finally {
+        localStorage.removeItem("paymentReference");
+
+        if (referenceFromUrl) {
+          const newUrl = new URL(window.location.href);
+          newUrl.searchParams.delete("reference");
+          newUrl.searchParams.delete("trxref");
+          newUrl.searchParams.delete("payment_reference");
+          window.history.replaceState({}, "", newUrl.toString());
+        }
+      }
+    };
+
+    verifyReturnedPayment();
+  }, [setUser, user]);
 
   return (
     <Dialog>
@@ -667,13 +747,10 @@ export function ProfileModal({ children }: ProfileModalProps) {
                     </ul>
                     <Button
                       className="mt-4 w-full bg-[#ff6a3d] text-white hover:bg-[#f25a2a]"
-                      onClick={() =>
-                        toast.info(
-                          "Upgrade flow can be connected to payment initialization.",
-                        )
-                      }
+                      onClick={() => handleUpgrade("pro")}
+                      disabled={isUpgradingPro || isUpgradingTeams}
                     >
-                      Upgrade
+                      {isUpgradingPro ? "Processing..." : "Upgrade"}
                     </Button>
                   </div>
                   <div className="flex h-full flex-col rounded-xl border border-[#7a3f24] bg-[#17191d] p-4">
@@ -697,13 +774,10 @@ export function ProfileModal({ children }: ProfileModalProps) {
                     </ul>
                     <Button
                       className="mt-4 w-full bg-[#ffb089] text-[#3a1508] hover:bg-[#ffa074]"
-                      onClick={() =>
-                        toast.info(
-                          "Scholar checkout can be wired to your payment provider.",
-                        )
-                      }
+                      onClick={() => handleUpgrade("teams")}
+                      disabled={isUpgradingPro || isUpgradingTeams}
                     >
-                      Upgrade
+                      {isUpgradingTeams ? "Processing..." : "Upgrade"}
                     </Button>
                   </div>
                 </div>

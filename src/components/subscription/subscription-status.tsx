@@ -17,17 +17,15 @@ export function SubscriptionStatus() {
   const handleUpgrade = async () => {
     try {
       setIsLoading(true);
-      const response = await paymentService.initializePayment();
-      if (response?.success && response?.authorizationUrl?.authorizationUrl) {
+      const response = await paymentService.initializePayment("pro");
+      if (response?.success && response?.authorizationUrl) {
         // Save the payment reference to localStorage
-        if (response.authorizationUrl.reference) {
-          localStorage.setItem('paymentReference', response.authorizationUrl.reference);
+        if (response.reference) {
+          localStorage.setItem('paymentReference', response.reference);
         }
-        
-        // Add the reference to the success URL as a query parameter
-        const successUrl = new URL(response.authorizationUrl.authorizationUrl);
-        successUrl.searchParams.set('payment_reference', response.authorizationUrl.reference || '');
-        
+
+        const successUrl = new URL(response.authorizationUrl);
+
         // Redirect to Paystack checkout with the updated URL
         router.push(successUrl.toString())
       }

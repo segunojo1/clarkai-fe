@@ -1,6 +1,31 @@
 import axios, { AxiosInstance } from "axios";
 import Cookies from "js-cookie";
 
+export type PaymentPlanType = "pro" | "teams";
+
+export type InitializePaymentResponse = {
+    success: boolean;
+    authorizationUrl?: string;
+    reference?: string;
+};
+
+export type VerifyPaymentResponse = {
+    success: boolean;
+    message?: string;
+    user?: {
+        plan?: "free" | "premium" | "enterprise";
+        [key: string]: unknown;
+    };
+    data?: {
+        user?: {
+            plan?: "free" | "premium" | "enterprise";
+            [key: string]: unknown;
+        };
+        [key: string]: unknown;
+    };
+    [key: string]: unknown;
+};
+
 class PaymentService {
     private static instance: PaymentService;
     private api: AxiosInstance;
@@ -32,9 +57,9 @@ class PaymentService {
         return PaymentService.instance;
     }
 
-    public async initializePayment() {
+    public async initializePayment(planType: PaymentPlanType = "pro"): Promise<InitializePaymentResponse> {
         try {
-            const response = await this.api.post(`/api/payment/initialize`);
+            const response = await this.api.post<InitializePaymentResponse>(`/api/payment/initialize/${planType}`);
             return response.data;
         } catch (error) {
             console.error("Failed to initialize payment:", error);
@@ -42,15 +67,26 @@ class PaymentService {
         }
     }
 
-    public async verifyPayment(reference: string) {
+    public async verifyPayment(reference: string): Promise<VerifyPaymentResponse> {
         try {
-            const response = await this.api.get(`/api/payment/verify/${reference}`);
+            const response = await this.api.get<VerifyPaymentResponse>(`/api/payment/verify/${reference}`);
             return response.data;
         } catch (error) {
             console.error("Failed to verify payment:", error);
             throw error;
         }
     }
+
+    public async getPaymentPlans() {
+        try {
+            const response = await this.api.get(`/api/payment/plans`);
+            return response.data;
+        } catch (error) {
+            console.error("Failed to fetch payment plans:", error);
+            throw error;
+        }
+    }
+
     public async cancelPayment() {
         try {
             const response = await this.api.post(`/api/payment/cancel`);

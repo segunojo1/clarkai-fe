@@ -29,6 +29,7 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const signupData = useAuthStore(state => state.signupData);
   const resetSignup = useAuthStore(state => state.resetSignup);
@@ -64,6 +65,7 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
 
     try {
       setIsLoading(true);
+      setIsRedirecting(false);
       
       const { currentStep: _, confirmPassword: __, otp: ___, emailVerified: ____, ...signupDataWithoutStep } = signupData;      
       
@@ -99,6 +101,9 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
       
       // Clean up OAuth session storage after successful registration
       sessionStorage.removeItem("is_oauth_signup");
+
+      // Show a blocking loader while navigating to heavy home page
+      setIsRedirecting(true);
       
       // Call the success callback which should handle navigation
       onSuccess();
@@ -106,6 +111,7 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
       router.push('/home');
       toast.success('Account created successfully!');
     } catch (error: unknown) {
+      setIsRedirecting(false);
       const errorMessage = error instanceof Error ? error.message : 'Failed to create account'
       toast.error(errorMessage)
       console.error('Signup failed:', error);
@@ -119,6 +125,7 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
   };
 
   return (
+    <>
     <section className="max-w-[341px] flex flex-col items-center w-full">
       <h1 className="text-[#737373] text-[29px] font-semibold text-center">Add a profile photo</h1>
       <p className="mt-6 text-[16px] font-medium text-center">
@@ -169,9 +176,9 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
           type="button" 
           className="bg-[#FF3D00] w-full py-3 h-12 text-base font-medium"
           onClick={handleSubmit}
-          disabled={isLoading || !previewUrl}
+          disabled={isLoading || isRedirecting || !previewUrl}
         >
-          {isLoading ? 'Creating account...' : 'Continue'}
+          {isLoading ? 'Creating account...' : isRedirecting ? 'Redirecting...' : 'Continue'}
         </Button>
         
         <Button 
@@ -179,12 +186,23 @@ const AddProfile = ({ onSuccess }: AddProfileProps) => {
           variant="outline" 
           className="w-full py-3 h-12 text-base font-medium text-gray-700 border-gray-300"
           onClick={handleSubmit}
-          disabled={isLoading}
+          disabled={isLoading || isRedirecting}
         >
           Skip for now
         </Button>
       </div>
     </section>
+
+    {isRedirecting && (
+      <div className="fixed inset-0 z-[100] bg-white/85 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
+        <svg className="h-8 w-8 animate-spin text-[#FF3D00]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
+          <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="opacity-100" />
+        </svg>
+        <p className="text-sm text-[#525252]">Setting up your account and taking you home...</p>
+      </div>
+    )}
+    </>
   );
 };
 

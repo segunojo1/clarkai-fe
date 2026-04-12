@@ -302,6 +302,8 @@ class AuthService {
       else if (error instanceof Error) {
         errorMessage = error.message || errorMessage;
       }
+
+      throw new Error(errorMessage);
     }
   }
 
@@ -383,15 +385,23 @@ class AuthService {
   }: {
     email: string;
     name: string;
-    image_url: string;
+    image_url?: string;
   }): Promise<{ user: any; token: string }> {
     try {
+      console.log("Google login request:", { email, name, image_url });
+      
+      // Build payload - only include image_url if it exists
+      const payload: Record<string, string> = { email, name };
+      if (image_url) {
+        payload.image_url = image_url;
+      }
+
       // Backend is expected to return an auth token and user object
       const response = await this.api.post<{ user: any; token: string }>(
         "/googleLogin",
-        { email, name, image_url },
+        payload,
       );
-
+      console.log("Google login response:", response.data);
       if (response.data.token) {
         const existingUserCookie = Cookies.get("user");
         let mergedUser = response.data.user;
@@ -420,16 +430,34 @@ class AuthService {
 
       if (typeof error === "object" && error !== null && "response" in error) {
         const axiosError = error as {
-          response?: { data?: { message?: string } };
+          response?: {
+            status?: number;
+            statusText?: string;
+            data?: { message?: string; error?: string; detail?: string };
+          };
         };
-        errorMessage = axiosError.response?.data?.message || errorMessage;
+        const data = axiosError.response?.data;
+        const status = axiosError.response?.status;
+
+        // Try multiple error field names that backends often use
+        if (data?.message) {
+          errorMessage = data.message;
+        } else if (data?.error) {
+          errorMessage = data.error;
+        } else if (data?.detail) {
+          errorMessage = data.detail;
+        } else if (typeof data === "string") {
+          errorMessage = data;
+        } else if (status) {
+          errorMessage = `Google login failed (HTTP ${status}: ${axiosError.response?.statusText || "error"})`;
+        }
       }
       // Handle standard Error
       else if (error instanceof Error) {
         errorMessage = error.message || errorMessage;
       }
 
-      console.error("Google login failed:", errorMessage);
+      console.error("Google login error details:", { error, errorMessage });
       throw new Error(errorMessage);
     }
   }
