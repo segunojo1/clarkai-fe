@@ -21,13 +21,13 @@ export function SubscriptionStatus() {
       if (response?.success && response?.authorizationUrl) {
         // Save the payment reference to localStorage
         if (response.reference) {
-          localStorage.setItem('paymentReference', response.reference);
+          localStorage.setItem("paymentReference", response.reference);
         }
 
         const successUrl = new URL(response.authorizationUrl);
 
         // Redirect to Paystack checkout with the updated URL
-        router.push(successUrl.toString())
+        router.push(successUrl.toString());
       }
     } catch (error) {
       console.error("Failed to initialize payment:", error);
@@ -42,31 +42,36 @@ export function SubscriptionStatus() {
     const checkPaymentStatus = async () => {
       // Check for reference in URL first (from Paystack redirect)
       const params = new URLSearchParams(window.location.search);
-      const referenceFromUrl = params.get('reference') || params.get('trxref');
-      
+      const referenceFromUrl = params.get("reference") || params.get("trxref");
+
       // Fall back to localStorage if not in URL
-      const reference = referenceFromUrl || localStorage.getItem('paymentReference');
-      
+      const reference =
+        referenceFromUrl || localStorage.getItem("paymentReference");
+
       if (reference) {
         try {
           // Remove the reference from URL to prevent duplicate checks
           if (referenceFromUrl) {
             const newUrl = new URL(window.location.href);
-            newUrl.searchParams.delete('reference');
-            newUrl.searchParams.delete('trxref');
-            window.history.replaceState({}, '', newUrl.toString());
+            newUrl.searchParams.delete("reference");
+            newUrl.searchParams.delete("trxref");
+            window.history.replaceState({}, "", newUrl.toString());
           }
-          
+
           // Verify payment with your backend
           const { success } = await paymentService.verifyPayment(reference);
           if (success) {
-            toast.success('Payment successful! Your subscription has been upgraded.');
+            toast.success(
+              "Payment successful! Your subscription has been upgraded.",
+            );
           }
         } catch (error) {
-          console.error('Error verifying payment:', error);
-          toast.error('Failed to verify payment. Please contact support if you were charged.');
+          console.error("Error verifying payment:", error);
+          toast.error(
+            "Failed to verify payment. Please contact support if you were charged.",
+          );
         } finally {
-          localStorage.removeItem('paymentReference');
+          localStorage.removeItem("paymentReference");
         }
       }
     };
@@ -74,21 +79,21 @@ export function SubscriptionStatus() {
     checkPaymentStatus();
   }, []);
 
-  const isPremium = user?.plan === 'premium' || user?.plan === 'enterprise';
+  const isPremium = user?.plan === "premium" || user?.plan === "enterprise";
 
   if (!user) return null;
 
   return (
     <div className="flex items-center gap-2">
-      <Badge 
+      <Badge
         variant={isPremium ? "default" : "outline"}
         className={isPremium ? "bg-green-600 hover:bg-green-700" : ""}
       >
         {isPremium ? "Premium" : "Free"}
       </Badge>
-      
+
       {!isPremium && (
-        <Button 
+        <Button
           onClick={handleUpgrade}
           size="sm"
           variant="outline"

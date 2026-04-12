@@ -389,7 +389,7 @@ class AuthService {
   }): Promise<{ user: any; token: string }> {
     try {
       console.log("Google login request:", { email, name, image_url });
-      
+
       // Build payload - only include image_url if it exists
       const payload: Record<string, string> = { email, name };
       if (image_url) {

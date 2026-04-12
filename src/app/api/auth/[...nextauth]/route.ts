@@ -48,7 +48,7 @@ const handler = NextAuth({
           // Validate required fields from Google profile
           if (!email || !name) {
             throw new Error(
-              `Missing required Google profile fields: email=${!!email}, name=${!!name}`
+              `Missing required Google profile fields: email=${!!email}, name=${!!name}`,
             );
           }
 
@@ -73,7 +73,10 @@ const handler = NextAuth({
                 }
               }
             } catch (avatarError) {
-              console.warn("Failed to fetch Google userinfo avatar:", avatarError);
+              console.warn(
+                "Failed to fetch Google userinfo avatar:",
+                avatarError,
+              );
             }
           }
 
@@ -92,11 +95,17 @@ const handler = NextAuth({
           let googleResponse;
           try {
             googleResponse = await authService.googleLogin(
-              loginPayload as { email: string; name: string; image_url?: string }
+              loginPayload as {
+                email: string;
+                name: string;
+                image_url?: string;
+              },
             );
           } catch (loginError) {
             const message =
-              loginError instanceof Error ? loginError.message.toLowerCase() : "";
+              loginError instanceof Error
+                ? loginError.message.toLowerCase()
+                : "";
             console.log("Google login first attempt failed:", {
               message,
               error: loginError,
@@ -114,7 +123,10 @@ const handler = NextAuth({
 
             if (!shouldProvisionOauthUser) {
               // This is a different error (network, auth, etc.), rethrow it
-              console.error("Google login error (not a missing user):", message);
+              console.error(
+                "Google login error (not a missing user):",
+                message,
+              );
               throw loginError;
             }
 
@@ -131,7 +143,11 @@ const handler = NextAuth({
             // Retry login with same payload
             console.log("Retrying Google login after signup");
             googleResponse = await authService.googleLogin(
-              loginPayload as { email: string; name: string; image_url?: string }
+              loginPayload as {
+                email: string;
+                name: string;
+                image_url?: string;
+              },
             );
           }
 
@@ -140,7 +156,6 @@ const handler = NextAuth({
           token.user = googleResponse.user;
           token.isOnboardingNeeded = !googleResponse.user.account_completed;
           console.log(googleResponse);
-          
         } catch (error) {
           console.error("Google login error in jwt callback:", error);
           throw error;

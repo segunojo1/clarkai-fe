@@ -196,10 +196,7 @@ export function ProfileModal({ children }: ProfileModalProps) {
     user?.department,
   ]);
 
-  const planName = useMemo(
-    () => toTitle(user?.plan),
-    [user?.plan],
-  );
+  const planName = useMemo(() => toTitle(user?.plan), [user?.plan]);
 
   const primaryEmail = user?.email || "No email attached";
 
@@ -282,10 +279,7 @@ export function ProfileModal({ children }: ProfileModalProps) {
 
       if (response?.success && response?.authorizationUrl) {
         if (response.reference) {
-          localStorage.setItem(
-            "paymentReference",
-            response.reference,
-          );
+          localStorage.setItem("paymentReference", response.reference);
         }
 
         const checkoutUrl = new URL(response.authorizationUrl);
@@ -306,7 +300,9 @@ export function ProfileModal({ children }: ProfileModalProps) {
     const verifyReturnedPayment = async () => {
       const params = new URLSearchParams(window.location.search);
       const referenceFromUrl =
-        params.get("reference") || params.get("trxref") || params.get("payment_reference");
+        params.get("reference") ||
+        params.get("trxref") ||
+        params.get("payment_reference");
       const referenceFromStorage = localStorage.getItem("paymentReference");
       const reference = referenceFromUrl || referenceFromStorage;
 
@@ -331,7 +327,9 @@ export function ProfileModal({ children }: ProfileModalProps) {
         }
       } catch (error) {
         console.error("Error verifying payment:", error);
-        toast.error("Could not verify payment. Please contact support if charged.");
+        toast.error(
+          "Could not verify payment. Please contact support if charged.",
+        );
       } finally {
         localStorage.removeItem("paymentReference");
 
