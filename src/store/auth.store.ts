@@ -1,7 +1,10 @@
-import { create } from 'zustand';
-import { User, SignupPayload } from '@/services/auth.service';
+import { create } from "zustand";
+import { User, SignupPayload } from "@/services/auth.service";
 
-export interface SignupState extends Omit<SignupPayload, 'password' | 'confirmPassword'> {
+export interface SignupState extends Omit<
+  SignupPayload,
+  "password" | "confirmPassword"
+> {
   password?: string;
   confirmPassword?: string;
   currentStep: number;
@@ -30,12 +33,12 @@ const useAuthStore = create<AuthStore>((set) => ({
     currentStep: 0,
     emailVerified: false,
     interests: "",
-    study_vibe: []
+    study_vibe: [],
   },
   setUser: (user) => set({ user }),
   updateSignupData: (data) =>
     set((state) => ({
-      signupData: { ...state.signupData, ...data }
+      signupData: { ...state.signupData, ...data },
     })),
   nextStep: () =>
     set((state) => {
@@ -43,8 +46,8 @@ const useAuthStore = create<AuthStore>((set) => ({
       return {
         signupData: {
           ...state.signupData,
-          currentStep: Math.min(currentStep + 1, 5)
-        }
+          currentStep: Math.min(currentStep + 1, 5),
+        },
       };
     }),
   prevStep: () =>
@@ -53,8 +56,8 @@ const useAuthStore = create<AuthStore>((set) => ({
       return {
         signupData: {
           ...state.signupData,
-          currentStep: Math.max(currentStep - 1, 0)
-        }
+          currentStep: Math.max(currentStep - 1, 0),
+        },
       };
     }),
   resetSignup: () =>
@@ -63,9 +66,9 @@ const useAuthStore = create<AuthStore>((set) => ({
         currentStep: 0,
         emailVerified: false,
         interests: "",
-        study_vibe: []
-      }
-    })
+        study_vibe: [],
+      },
+    }),
 }));
 
 export default useAuthStore;

@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/form"
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { toast } from "sonner";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import authService from '@/services/auth.service';
 import useAuthStore from '@/store/auth.store';
 
@@ -42,11 +42,15 @@ const VerifyEmail = ({ email, onSuccess }: VerifyEmailProps) => {
     });
 
     const handleResendOtp = async () => {
+        if (resendCooldown > 0) return;
+
         try {
             setIsLoading(true);
-            const userData = useAuthStore.getState().signupData as { fullName?: string };
-            await authService.sendOtp(email, userData.fullName || '');
+            const userData = useAuthStore.getState().signupData as { name?: string };
+            await authService.sendOtp(email, userData.name || '');
             toast.success('OTP resent successfully');
+
+            setResendCooldown(30);
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to resend OTP'
             toast.error(errorMessage);
@@ -75,6 +79,24 @@ const VerifyEmail = ({ email, onSuccess }: VerifyEmailProps) => {
             setIsLoading(false);
         }
     };
+    const [resendCooldown, setResendCooldown] = useState(0);
+
+    useEffect(() => {
+        if (resendCooldown <= 0) return;
+
+        const timer = setInterval(() => {
+            setResendCooldown((prev) => {
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    return 0;
+                }
+                return prev - 1;
+            })
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [resendCooldown]);
+
     return (
         <section>
             <h2 className="text-[29px]/[auto] text-[#737373] font-semibold mb-6">Verify your email</h2>
@@ -121,17 +143,17 @@ const VerifyEmail = ({ email, onSuccess }: VerifyEmailProps) => {
                     className="w-full flex items-center justify-center gap-2 p-4 border-[#D4D4D4] rounded-[5px] border-[1px] h-[52px] text-[16px] font-normal"
                     type="button"
                     onClick={handleResendOtp}
-                    disabled={isLoading}
+                    disabled={isLoading || resendCooldown > 0}
                 >
-                    {isLoading ? 'Sending...' : 'Resend OTP'}
-                </Button>
-                <Button
+                    {isLoading ? 'Sending...' : resendCooldown > 0 ? `Resend OTP in (${resendCooldown})` : 'Resend OTP'}
+             </Button>
+                {/* <Button
                     variant="outline"
                     className="w-full flex items-center justify-center gap-2 p-4  border-[#D4D4D4] rounded-[5px] border-[1px] h-[52px] text-[16px] font-normal"
                     type="button"
                 >
                     Change email
-                </Button>
+                </Button> */}
             </div>
         </section>
     );
