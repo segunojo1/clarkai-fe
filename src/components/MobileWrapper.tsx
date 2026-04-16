@@ -1,12 +1,24 @@
-import { useIsMobile } from '@/hooks/use-mobile';
-import React from 'react'
+"use client";
+
+import React, { useState, useEffect } from 'react'
 import MobileView from './mobile-view';
 
-export default function MobileWrapper({ children}: {children: React.ReactNode}) {
-    const isMobile = useIsMobile();
+const MOBILE_BREAKPOINT = 768;
 
-    console.log(isMobile);
-    
+export default function MobileWrapper({ children}: {children: React.ReactNode}) {
+    const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined);
+
+    useEffect(() => {
+        // Check screen size only once on mount
+        const initialIsMobile = window.innerWidth < MOBILE_BREAKPOINT;
+        setIsMobile(initialIsMobile);
+        // Don't listen to resize events - keep the initial state
+    }, []);
+
+    // Show nothing while hydrating to avoid hydration mismatch
+    if (isMobile === undefined) {
+        return null;
+    }
 
     if (isMobile) {
         return <MobileView />

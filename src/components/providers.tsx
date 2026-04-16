@@ -1,26 +1,26 @@
-"use client"
+"use client";
 
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/sonner"
-import { SessionProvider } from "next-auth/react"
-import NextTopLoader from "nextjs-toploader"
-import MobileWrapper from "./MobileWrapper"
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
+import { SessionProvider } from "next-auth/react";
+import NextTopLoader from "nextjs-toploader";
+import MobileWrapper from "./MobileWrapper";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <MobileWrapper>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        {children}
-        <NextTopLoader color="#F14E07"/>
-        <Toaster />
-      </ThemeProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <NextTopLoader color="#F14E07" />
+          <Toaster />
+        </ThemeProvider>
       </MobileWrapper>
     </SessionProvider>
-  )
+  );
 }
