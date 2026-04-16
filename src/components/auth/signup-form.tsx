@@ -105,6 +105,7 @@ const SignUpForm = ({ form, onSubmit }: SignUpFormProps) => {
       await authService.sendOtp(values.email, values.name);
       updateSignupData({
         ...values,
+        otpSentAt: Date.now(),
         currentStep: 1,
       });
       onSubmit(values);

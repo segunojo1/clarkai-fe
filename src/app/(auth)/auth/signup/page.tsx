@@ -166,6 +166,7 @@ const SignUpPage = () => {
         <VerifyEmail
           key="verify-email"
           email={signupData.email || ""}
+          otpSentAt={signupData.otpSentAt}
           onSuccess={handleVerificationSuccess}
         />
       ),

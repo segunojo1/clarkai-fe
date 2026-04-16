@@ -10,6 +10,7 @@ export interface SignupState extends Omit<
   currentStep: number;
   emailVerified: boolean;
   otp?: string;
+  otpSentAt?: number;
   role?: string;
   school?: string;
   department?: string;
@@ -65,6 +66,7 @@ const useAuthStore = create<AuthStore>((set) => ({
       signupData: {
         currentStep: 0,
         emailVerified: false,
+        otpSentAt: undefined,
         interests: "",
         study_vibe: [],
       },

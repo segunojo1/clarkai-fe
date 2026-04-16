@@ -22,16 +22,19 @@ import useAuthStore from '@/store/auth.store';
 
 interface VerifyEmailProps {
     email: string;
+    otpSentAt?: number;
     onSuccess: () => void
 }
+const RESEND_COOLDOWN_SECONDS = 30;
 const FormSchema = z.object({
     pin: z.string().min(4, {
         message: "Your one-time password must be 4 characters.",
     }),
 })
 
-const VerifyEmail = ({ email, onSuccess }: VerifyEmailProps) => {
+const VerifyEmail = ({ email, otpSentAt, onSuccess }: VerifyEmailProps) => {
     const [isLoading, setIsLoading] = useState(false);
+    const [resendCooldown, setResendCooldown] = useState(0);
     const updateSignupData = useAuthStore(state => state.updateSignupData);
 
     const form = useForm<z.infer<typeof FormSchema>>({
@@ -40,6 +43,34 @@ const VerifyEmail = ({ email, onSuccess }: VerifyEmailProps) => {
             pin: "",
         },
     });
+
+    useEffect(() => {
+        if (!otpSentAt) {
+            setResendCooldown(0);
+            return;
+        }
+
+        const elapsedSeconds = Math.floor((Date.now() - otpSentAt) / 1000);
+        const initialRemaining = Math.max(RESEND_COOLDOWN_SECONDS - elapsedSeconds, 0);
+        setResendCooldown(initialRemaining);
+
+        if (initialRemaining === 0) {
+            return;
+        }
+
+        const timer = window.setInterval(() => {
+            setResendCooldown((prev) => {
+                if (prev <= 1) {
+                    window.clearInterval(timer);
+                    return 0;
+                }
+
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => window.clearInterval(timer);
+    }, [otpSentAt]);
 
     const handleResendOtp = async () => {
         if (resendCooldown > 0) return;
@@ -50,7 +81,9 @@ const VerifyEmail = ({ email, onSuccess }: VerifyEmailProps) => {
             await authService.sendOtp(email, userData.name || '');
             toast.success('OTP resent successfully');
 
-            setResendCooldown(30);
+            const now = Date.now();
+            setResendCooldown(RESEND_COOLDOWN_SECONDS);
+            updateSignupData({ otpSentAt: now });
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to resend OTP'
             toast.error(errorMessage);
@@ -79,24 +112,6 @@ const VerifyEmail = ({ email, onSuccess }: VerifyEmailProps) => {
             setIsLoading(false);
         }
     };
-    const [resendCooldown, setResendCooldown] = useState(0);
-
-    useEffect(() => {
-        if (resendCooldown <= 0) return;
-
-        const timer = setInterval(() => {
-            setResendCooldown((prev) => {
-                if (prev <= 1) {
-                    clearInterval(timer);
-                    return 0;
-                }
-                return prev - 1;
-            })
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, [resendCooldown]);
-
     return (
         <section>
             <h2 className="text-[29px]/[auto] text-[#737373] font-semibold mb-6">Verify your email</h2>
@@ -145,7 +160,7 @@ const VerifyEmail = ({ email, onSuccess }: VerifyEmailProps) => {
                     onClick={handleResendOtp}
                     disabled={isLoading || resendCooldown > 0}
                 >
-                    {isLoading ? 'Sending...' : resendCooldown > 0 ? `Resend OTP in (${resendCooldown})` : 'Resend OTP'}
+                    {isLoading ? 'Sending...' : resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : 'Resend OTP'}
              </Button>
                 {/* <Button
                     variant="outline"
