@@ -702,18 +702,18 @@ const ChatInputForm = ({
                                 </div>
                               </PopoverContent>
                             </Popover>
-                            <TabsTrigger
+                            {/* <TabsTrigger
                               value="research"
                               className="data-[state=active]:bg-white border-none data-[state=active]:shadow-none rounded-md px-4 py-4 h-full text-sm font-medium text-gray-600 data-[state=active]:text-[#FF3D00]"
                             >
                               Research
-                            </TabsTrigger>
-                            <TabsTrigger
+                            </TabsTrigger> */}
+                            {/* <TabsTrigger
                               value="create"
                               className="data-[state=active]:bg-white border-none data-[state=active]:shadow-none rounded-md px-4 py-4 h-full text-sm font-medium text-gray-600 data-[state=active]:text-[#FF3D00]"
                             >
                               Create
-                            </TabsTrigger>
+                            </TabsTrigger> */}
                           </TabsList>
                         </Tabs>
                         <div className="flex items-center gap-2">
