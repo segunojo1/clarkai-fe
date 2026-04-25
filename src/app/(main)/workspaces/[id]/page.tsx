@@ -42,7 +42,28 @@ export default function WorkspacePage() {
   // const searchParams = useSearchParams()
   // const [isQuizPanelOpen, setIsQuizPanelOpen] = useState(false)
   const [askSource, setAskSource] = useState<"ai" | "materials">("materials");
+  const [showUploadGuide, setShowUploadGuide] = useState(false);
+  const uploadButtonRef = useRef<HTMLButtonElement>(null);
   const fetchedWorkspaceRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const storageKey = `workspace-upload-guide-seen:${id}`;
+    const hasSeenGuide =
+      typeof window !== "undefined" && window.localStorage.getItem(storageKey);
+
+    if (!hasSeenGuide) {
+      setShowUploadGuide(true);
+    }
+  }, [id]);
+
+  const dismissUploadGuide = () => {
+    if (!id || typeof window === "undefined") return;
+
+    window.localStorage.setItem(`workspace-upload-guide-seen:${id}`, "true");
+    setShowUploadGuide(false);
+  };
 
   useEffect(() => {
     const handleQuizPanelEvent = (event: Event) => {
@@ -581,7 +602,11 @@ export default function WorkspacePage() {
             )}
           </div>
           <UploadMaterialModal workspaceId={id.toString()}>
-            <button className="p-1 border-2 rounded-full border-[#ffffff] transition-colors">
+            <button
+              ref={uploadButtonRef}
+              className="p-1 border-2 rounded-full border-[#ffffff] transition-colors"
+              onClick={dismissUploadGuide}
+            >
               <Image
                 src="/globe.svg"
                 alt="Globe"
@@ -591,6 +616,45 @@ export default function WorkspacePage() {
               />
             </button>
           </UploadMaterialModal>
+
+          {showUploadGuide && uploadButtonRef.current && (
+            <div className="fixed inset-0 z-[100] pointer-events-none">
+              <div
+                className="absolute rounded-full ring-4 ring-[#FF3D00]/30 animate-pulse"
+                style={{
+                  top: uploadButtonRef.current.getBoundingClientRect().top - 12,
+                  left: uploadButtonRef.current.getBoundingClientRect().left - 12,
+                  width: uploadButtonRef.current.getBoundingClientRect().width + 24,
+                  height:
+                    uploadButtonRef.current.getBoundingClientRect().height + 24,
+                }}
+              />
+              <div
+                className="absolute max-w-[260px] rounded-xl border border-[#FFD1C2] bg-white px-4 py-3 text-sm shadow-2xl"
+                style={{
+                  top:
+                    uploadButtonRef.current.getBoundingClientRect().top + 38,
+                  left:
+                    Math.max(
+                      16,
+                      uploadButtonRef.current.getBoundingClientRect().left - 220,
+                    ),
+                }}
+              >
+                <div className="font-semibold text-[#FF3D00]">Upload materials here</div>
+                <p className="mt-1 text-gray-600">
+                  Drop in PDFs, images, or links to build this workspace before you chat.
+                </p>
+                <button
+                  type="button"
+                  className="pointer-events-auto mt-3 rounded-md bg-[#FF3D00] px-3 py-1.5 text-white"
+                  onClick={dismissUploadGuide}
+                >
+                  Got it
+                </button>
+              </div>
+            </div>
+          )}
         </div>
         {loadChats ? (
           <div className="flex-1 flex items-center justify-center">

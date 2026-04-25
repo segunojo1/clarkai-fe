@@ -139,7 +139,9 @@ const ChatInputForm = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const pathname = usePathname();
-  const isNormalChatPage = pathname.startsWith("/chat");
+  const normalizedPathname = pathname?.replace(/\/$/, "") ?? "";
+  const isChatRoute =
+    normalizedPathname === "/chat" || normalizedPathname.startsWith("/chat/");
 
   const filteredTags = TAGS.filter((tag) =>
     tag.label.toLowerCase().includes(tagSearch.toLowerCase()),
@@ -717,6 +719,8 @@ const ChatInputForm = ({
                           </TabsList>
                         </Tabs>
                         <div className="flex items-center gap-2">
+                          {
+                            isChatRoute && (
                           <div>
                             <button
                               type="button"
@@ -749,8 +753,10 @@ const ChatInputForm = ({
                               aria-label="File input"
                             />
                           </div>
+                            )
+                          }
 
-                          {!isNormalChatPage && (
+                          {!isChatRoute && (
                             <Popover
                               open={isTagPopoverOpen}
                               onOpenChange={setIsTagPopoverOpen}
