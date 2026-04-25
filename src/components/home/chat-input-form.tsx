@@ -719,42 +719,40 @@ const ChatInputForm = ({
                           </TabsList>
                         </Tabs>
                         <div className="flex items-center gap-2">
-                          {
-                            isChatRoute && (
-                          <div>
-                            <button
-                              type="button"
-                              onClick={triggerFileInput}
-                              className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-                              aria-label="Attach file"
-                            >
-                              <Image
-                                src="/assets/file.svg"
-                                alt=""
-                                width={20}
-                                height={20}
-                                className="h-5 w-5 dark:text-gray-500 text-black hover:text-gray-700 dark:block hidden"
+                          {isChatRoute && (
+                            <div>
+                              <button
+                                type="button"
+                                onClick={triggerFileInput}
+                                className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                                aria-label="Attach file"
+                              >
+                                <Image
+                                  src="/assets/file.svg"
+                                  alt=""
+                                  width={20}
+                                  height={20}
+                                  className="h-5 w-5 dark:text-gray-500 text-black hover:text-gray-700 dark:block hidden"
+                                />
+                                <Image
+                                  src="/assets/file-light.svg"
+                                  alt=""
+                                  width={20}
+                                  height={20}
+                                  className="h-5 w-5 dark:text-gray-500 text-black hover:text-gray-700 dark:hidden block"
+                                />
+                              </button>
+                              <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                accept="image/*,.pdf"
+                                multiple
+                                className="hidden"
+                                aria-label="File input"
                               />
-                              <Image
-                                src="/assets/file-light.svg"
-                                alt=""
-                                width={20}
-                                height={20}
-                                className="h-5 w-5 dark:text-gray-500 text-black hover:text-gray-700 dark:hidden block"
-                              />
-                            </button>
-                            <input
-                              type="file"
-                              ref={fileInputRef}
-                              onChange={handleFileChange}
-                              accept="image/*,.pdf"
-                              multiple
-                              className="hidden"
-                              aria-label="File input"
-                            />
-                          </div>
-                            )
-                          }
+                            </div>
+                          )}
 
                           {!isChatRoute && (
                             <Popover

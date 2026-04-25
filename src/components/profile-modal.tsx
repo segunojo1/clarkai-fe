@@ -745,10 +745,11 @@ export function ProfileModal({ children }: ProfileModalProps) {
                     </ul>
                     <Button
                       className="mt-4 w-full bg-[#ff6a3d] text-white hover:bg-[#f25a2a]"
-                      onClick={() => handleUpgrade("pro")}
-                      disabled={isUpgradingPro || isUpgradingTeams}
+                      onClick={() =>
+                        toast.info("Pro and Teams upgrades are coming soon.")
+                      }
                     >
-                      {isUpgradingPro ? "Processing..." : "Upgrade"}
+                      Coming soon
                     </Button>
                   </div>
                   <div className="flex h-full flex-col rounded-xl border border-[#7a3f24] bg-[#17191d] p-4">
@@ -772,10 +773,11 @@ export function ProfileModal({ children }: ProfileModalProps) {
                     </ul>
                     <Button
                       className="mt-4 w-full bg-[#ffb089] text-[#3a1508] hover:bg-[#ffa074]"
-                      onClick={() => handleUpgrade("teams")}
-                      disabled={isUpgradingPro || isUpgradingTeams}
+                      onClick={() =>
+                        toast.info("Pro and Teams upgrades are coming soon.")
+                      }
                     >
-                      {isUpgradingTeams ? "Processing..." : "Upgrade"}
+                      Coming soon
                     </Button>
                   </div>
                 </div>

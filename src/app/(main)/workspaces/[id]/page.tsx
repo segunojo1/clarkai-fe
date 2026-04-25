@@ -623,8 +623,10 @@ export default function WorkspacePage() {
                 className="absolute rounded-full ring-4 ring-[#FF3D00]/30 animate-pulse"
                 style={{
                   top: uploadButtonRef.current.getBoundingClientRect().top - 12,
-                  left: uploadButtonRef.current.getBoundingClientRect().left - 12,
-                  width: uploadButtonRef.current.getBoundingClientRect().width + 24,
+                  left:
+                    uploadButtonRef.current.getBoundingClientRect().left - 12,
+                  width:
+                    uploadButtonRef.current.getBoundingClientRect().width + 24,
                   height:
                     uploadButtonRef.current.getBoundingClientRect().height + 24,
                 }}
@@ -632,18 +634,19 @@ export default function WorkspacePage() {
               <div
                 className="absolute max-w-[260px] rounded-xl border border-[#FFD1C2] bg-white px-4 py-3 text-sm shadow-2xl"
                 style={{
-                  top:
-                    uploadButtonRef.current.getBoundingClientRect().top + 38,
-                  left:
-                    Math.max(
-                      16,
-                      uploadButtonRef.current.getBoundingClientRect().left - 220,
-                    ),
+                  top: uploadButtonRef.current.getBoundingClientRect().top + 38,
+                  left: Math.max(
+                    16,
+                    uploadButtonRef.current.getBoundingClientRect().left - 220,
+                  ),
                 }}
               >
-                <div className="font-semibold text-[#FF3D00]">Upload materials here</div>
+                <div className="font-semibold text-[#FF3D00]">
+                  Upload materials here
+                </div>
                 <p className="mt-1 text-gray-600">
-                  Drop in PDFs, images, or links to build this workspace before you chat.
+                  Drop in PDFs, images, or links to build this workspace before
+                  you chat.
                 </p>
                 <button
                   type="button"
